@@ -1,0 +1,1018 @@
+<title>일본어 단어 시험</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+
+<style>
+:root{
+  --paper:#FBFAF6; --card:#FFFFFF;
+  --ink:#1B2021; --ink-soft:#4A524F; --ink-faint:#8A918D;
+  --rule:#4F8378; --rule-soft:#4F837826; --rule-line:#4F837840;
+  --shu:#C8452B; --shu-soft:#C8452B1A;
+  --edge:#1B20211F; --edge-soft:#1B202110;
+  --shadow:0 1px 2px #1B20210A, 0 8px 24px -12px #1B202126;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#14181A; --card:#1C2124;
+  --ink:#EBE9E2; --ink-soft:#A9B2AE; --ink-faint:#6D7874;
+  --rule:#77B0A3; --rule-soft:#77B0A31F; --rule-line:#77B0A345;
+  --shu:#EE7457; --shu-soft:#EE745722;
+  --edge:#EBE9E224; --edge-soft:#EBE9E212;
+  --shadow:0 1px 2px #00000040, 0 8px 24px -12px #00000070;
+}}
+:root[data-theme="dark"]{
+  --paper:#14181A; --card:#1C2124;
+  --ink:#EBE9E2; --ink-soft:#A9B2AE; --ink-faint:#6D7874;
+  --rule:#77B0A3; --rule-soft:#77B0A31F; --rule-line:#77B0A345;
+  --shu:#EE7457; --shu-soft:#EE745722;
+  --edge:#EBE9E224; --edge-soft:#EBE9E212;
+  --shadow:0 1px 2px #00000040, 0 8px 24px -12px #00000070;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  font-size:15px; line-height:1.65; -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:660px;margin:0 auto;padding-inline:18px;padding-block:24px 72px;
+      display:flex;flex-direction:column;gap:24px}
+.ja{font-family:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif}
+.mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+
+h1{margin:0;font-size:26px;line-height:1.25;font-weight:700;letter-spacing:-.015em}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--rule);font-weight:600}
+h2.sec{margin:0 0 11px;font-size:12px;font-weight:600;letter-spacing:.1em;
+       text-transform:uppercase;color:var(--ink-faint)}
+p{margin:0}
+
+.card{background:var(--card);border:1px solid var(--edge);border-radius:4px;
+      box-shadow:var(--shadow);overflow:hidden}
+.note{border:1px solid var(--edge);border-left:3px solid var(--shu);border-radius:3px;
+      background:var(--shu-soft);padding:11px 14px;font-size:13.5px;color:var(--ink-soft)}
+.note b{color:var(--ink)}
+
+.btn{font:inherit;font-size:13.5px;font-weight:500;border:1px solid var(--edge);
+     background:var(--card);color:var(--ink);border-radius:3px;padding:8px 15px;cursor:pointer}
+.btn:hover{border-color:var(--rule);color:var(--rule)}
+.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+.btn.pri{background:var(--rule);border-color:var(--rule);color:var(--card);font-weight:600}
+.btn.pri:hover{color:var(--card);filter:brightness(1.08)}
+.btn.big{font-size:15px;padding:12px 22px}
+.btn:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--rule);outline-offset:2px}
+
+/* ── 설정 ── */
+.opts{display:flex;flex-direction:column;gap:0;border-top:1px solid var(--edge)}
+.opt{display:flex;align-items:center;justify-content:space-between;gap:14px;
+     padding:11px 2px;border-bottom:1px solid var(--edge);flex-wrap:wrap}
+.opt-nm{font-size:14px;font-weight:500}
+.opt-nm span{display:block;font-size:12px;color:var(--ink-faint);font-weight:400}
+.seg{display:flex;gap:0;border:1px solid var(--edge);border-radius:3px;overflow:hidden}
+.seg button{font:inherit;font-size:12.5px;border:0;background:var(--card);color:var(--ink-soft);
+            padding:6px 12px;cursor:pointer;border-right:1px solid var(--edge)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--rule);color:var(--card);font-weight:600}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:inherit;font-size:13px;border:1px solid var(--edge);background:var(--card);
+      color:var(--ink-soft);border-radius:3px;padding:6px 12px;cursor:pointer;text-align:left}
+.chip[aria-pressed="true"]{border-color:var(--rule);background:var(--rule-soft);color:var(--rule);font-weight:600}
+.chip small{display:block;font-size:11px;opacity:.75;font-weight:400}
+
+/* ── 진도 ── */
+.prog{display:flex;gap:2px;height:8px;border-radius:2px;overflow:hidden;background:var(--edge-soft)}
+.prog i{display:block}
+.prog .new{background:var(--edge)}
+.prog .mid{background:var(--shu)}
+.prog .done{background:var(--rule)}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--ink-faint);flex-wrap:wrap}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px}
+
+/* ── 퀴즈 ── */
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;
+     font-size:12px;color:var(--ink-faint)}
+.bar-track{height:3px;background:var(--edge);border-radius:2px;overflow:hidden;flex:1;margin:0 12px}
+.bar-fill{height:100%;background:var(--rule);transition:width .25s}
+@media (prefers-reduced-motion:reduce){.bar-fill{transition:none}}
+
+.q-head{padding:14px 16px 0;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.q-kind{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--rule);font-weight:600}
+.q-unit{font-size:12px;color:var(--ink-faint)}
+.q-body{padding:10px 16px 16px;display:flex;flex-direction:column;gap:6px}
+.q-ask{font-size:13px;color:var(--ink-soft)}
+.q-main{font-size:40px;line-height:1.3;font-weight:500;letter-spacing:.04em;text-wrap:balance}
+.q-main.ko{font-size:30px;letter-spacing:0;font-weight:600}
+.q-sub{font-size:15px;color:var(--ink-faint)}
+.q-sent{font-size:26px;line-height:1.6;letter-spacing:.03em}
+.q-sent u{text-decoration:none;border-bottom:3px solid var(--shu);padding:0 .5em}
+
+/* 원고지 입력칸 */
+.cells{--cell:66px;--glyph:48px;--pad:16px;
+  border-top:1px solid var(--rule-line);border-bottom:1px solid var(--rule-line);
+  background-image:repeating-linear-gradient(to right,var(--rule-line) 0 1px,transparent 1px var(--cell));
+  background-position:var(--pad) 0;}
+#ans{display:block;width:100%;border:0;outline:0;background:transparent;color:var(--ink);
+  font-family:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;
+  font-size:var(--glyph);letter-spacing:calc(var(--cell) - var(--glyph));
+  height:calc(var(--cell) + 30px);line-height:calc(var(--cell) + 30px);
+  padding:0 var(--pad) 0 calc(var(--pad) + (var(--cell) - var(--glyph)) / 2);
+  caret-color:var(--shu)}
+#ans::placeholder{color:var(--ink-faint);opacity:.5;font-size:15px;letter-spacing:0}
+#ans:focus{background:var(--rule-soft)}
+
+.in-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;
+         padding:10px 16px;background:var(--edge-soft);border-top:1px solid var(--edge-soft);flex-wrap:wrap}
+.in-foot .l{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-faint)}
+.in-foot .r{display:flex;gap:7px;flex-wrap:wrap}
+
+/* 보기 */
+.choices{display:flex;flex-direction:column;gap:0;border-top:1px solid var(--edge-soft)}
+.choice{display:flex;align-items:baseline;gap:11px;width:100%;text-align:left;
+        font:inherit;font-size:15.5px;border:0;border-bottom:1px solid var(--edge-soft);
+        background:var(--card);color:var(--ink);padding:13px 16px;cursor:pointer}
+.choice:last-child{border-bottom:0}
+.choice:hover{background:var(--rule-soft)}
+.choice b{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-faint);
+          font-weight:500;flex:none;width:14px}
+.choice.ja-opt{font-family:"Zen Kaku Gothic New","Hiragino Sans",sans-serif;font-size:22px;letter-spacing:.05em}
+.choice[data-r="ok"]{background:var(--rule-soft);color:var(--rule);font-weight:600}
+.choice[data-r="ng"]{background:var(--shu-soft);color:var(--shu)}
+.choice:disabled{cursor:default}
+
+/* 판정 */
+.fb{padding:13px 16px;border-top:1px solid var(--edge-soft);display:flex;
+    flex-direction:column;gap:9px;font-size:14px}
+.fb-line{display:flex;align-items:center;gap:9px;font-size:15px}
+.fb-line .dot{width:9px;height:9px;border-radius:50%;flex:none}
+.fb.ok .fb-line{color:var(--rule)} .fb.ok .dot{background:var(--rule)}
+.fb.ng .fb-line{color:var(--shu)}  .fb.ng .dot{background:var(--shu)}
+.fb b{font-weight:600}
+.reveal{display:flex;flex-direction:column;gap:3px;padding:11px 13px;
+        background:var(--edge-soft);border-radius:3px}
+.reveal .big{font-size:32px;line-height:1.3;letter-spacing:.06em;font-weight:500}
+.reveal .sm{font-size:13.5px;color:var(--ink-soft)}
+.reveal .ex{font-size:15px;color:var(--ink-soft);margin-top:4px;line-height:1.55}
+.reveal .ex i{display:block;font-style:normal;font-size:12.5px;color:var(--ink-faint)}
+
+/* 되묻기 */
+.ask{padding:13px 16px;border-top:2px solid var(--shu);background:var(--shu-soft);
+     display:flex;flex-direction:column;gap:10px}
+.ask p{font-size:14px}
+.ask .row{display:flex;gap:8px;flex-wrap:wrap}
+.ask .pair{font-size:26px;letter-spacing:.1em}
+
+/* 결과 */
+.score{display:flex;align-items:baseline;gap:10px}
+.score .n{font-size:44px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.score .d{font-size:15px;color:var(--ink-faint)}
+.wrongs{display:flex;flex-direction:column;gap:0;border-top:1px solid var(--edge)}
+.wrong{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:11px 2px;
+       border-bottom:1px solid var(--edge)}
+.wrong .w{font-size:21px;letter-spacing:.04em}
+.wrong .m{font-size:13px;color:var(--ink-soft);grid-column:1/3}
+.wrong .t{font-size:12px;color:var(--shu);text-align:right;white-space:nowrap}
+.wrong .t.kana{color:var(--shu);font-weight:600}
+
+footer{border-top:1px solid var(--edge);padding-top:15px;font-size:12.5px;
+       color:var(--ink-faint);text-wrap:pretty}
+footer b{color:var(--ink-soft);font-weight:600}
+
+@media (max-width:430px){
+  .cells{--cell:50px;--glyph:36px;--pad:14px}
+  .q-main{font-size:32px} .q-main.ko{font-size:25px} .q-sent{font-size:21px}
+  .reveal .big{font-size:26px}
+}
+</style>
+
+<div class="wrap">
+
+<!-- ══ 홈 ══ -->
+<div id="home">
+  <div style="display:flex;flex-direction:column;gap:7px">
+    <span class="eyebrow">가나 표기 훈련</span>
+    <h1>일본어 단어 시험</h1>
+    <p style="color:var(--ink-soft)">뜻을 보고 <b>직접 써서</b> 확인합니다. 히라가나·가타카나 구분까지 채점합니다.</p>
+  </div>
+
+  <div class="note" id="sampleNote">
+    <b>지금 들어 있는 42단어는 샘플입니다.</b> 학습지를 받으면 <code>data/words.js</code>만
+    갈아 끼우면 되고, 앱은 그대로 씁니다.
+  </div>
+
+  <section>
+    <h2 class="sec">진도</h2>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div class="prog" id="progBar"></div>
+      <div class="legend">
+        <span><i class="done" style="background:var(--rule)"></i><span id="cDone">0</span> 숙달</span>
+        <span><i class="mid" style="background:var(--shu)"></i><span id="cMid">0</span> 학습 중</span>
+        <span><i class="new" style="background:var(--edge)"></i><span id="cNew">0</span> 미학습</span>
+      </div>
+      <p style="font-size:12.5px;color:var(--ink-faint)">숙달은 <b>쓰기(뜻→일본어)</b>를 연속 3회 맞힌 단어입니다.
+        뜻만 아는 단어는 숙달로 넘어가지 않습니다.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec">범위</h2>
+    <div class="chips" id="unitChips"></div>
+  </section>
+
+  <section>
+    <h2 class="sec">설정</h2>
+    <div class="opts">
+      <div class="opt">
+        <span class="opt-nm">문제 유형<span id="typeHint">셋 다</span></span>
+        <div class="chips" id="typeChips"></div>
+      </div>
+      <div class="opt">
+        <span class="opt-nm">문항 수</span>
+        <div class="seg" id="countSeg"></div>
+      </div>
+      <div class="opt">
+        <span class="opt-nm">입력 방식<span>쓰기 문제에서 답을 넣는 법</span></span>
+        <div class="seg" id="imeSeg"></div>
+      </div>
+    </div>
+  </section>
+
+  <button class="btn pri big" id="startBtn" type="button">시작</button>
+
+  <footer>
+    기록은 이 브라우저에만 저장됩니다(localStorage). <button class="btn" id="resetBtn" type="button"
+      style="font-size:12px;padding:3px 9px;margin-left:4px">기록 지우기</button><br>
+    <b>손글씨로 쓰셔도 됩니다</b> — 아이패드 일본어 키보드의 <span class="ja">手書き</span> 모드나
+    스크리블이 그대로 통합니다. 입력 방식을 <b>직접</b>으로 두세요.
+    닮은 글자가 잘못 인식되면(<span class="ja">コ</span>→<span class="ja">ユ</span>) 앱이 되물어 봅니다.
+  </footer>
+</div>
+
+<!-- ══ 퀴즈 ══ -->
+<div id="quiz" hidden>
+  <div class="bar">
+    <span class="mono" id="qNo">1 / 20</span>
+    <span class="bar-track"><span class="bar-fill" id="qFill" style="width:0%"></span></span>
+    <span class="mono" id="qScore">0점</span>
+  </div>
+
+  <div class="card">
+    <div class="q-head">
+      <span class="q-kind" id="qKind"></span>
+      <span class="q-unit" id="qUnit"></span>
+    </div>
+    <div class="q-body" id="qBody"></div>
+
+    <div id="inputArea" hidden>
+      <div class="cells">
+        <input id="ans" type="text" lang="ja" class="ja" autocomplete="off" autocorrect="off"
+               autocapitalize="off" spellcheck="false" placeholder="여기에 쓰세요"
+               aria-label="일본어 답 입력">
+      </div>
+      <div class="in-foot">
+        <div class="l"><span id="imeLabel">직접 입력</span></div>
+        <div class="r">
+          <button class="btn" id="hintBtn" type="button">힌트</button>
+          <button class="btn" id="skipBtn" type="button">모르겠어요</button>
+          <button class="btn pri" id="submitBtn" type="button">확인</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="choices" id="choices" hidden></div>
+    <div class="ask" id="askBox" hidden></div>
+    <div class="fb" id="fb" hidden></div>
+  </div>
+
+  <button class="btn" id="quitBtn" type="button" style="align-self:flex-start">그만두기</button>
+</div>
+
+<!-- ══ 결과 ══ -->
+<div id="result" hidden>
+  <div style="display:flex;flex-direction:column;gap:7px">
+    <span class="eyebrow">결과</span>
+    <div class="score"><span class="n" id="rScore">0</span><span class="d" id="rOf">/ 20</span></div>
+    <p id="rBreak" style="color:var(--ink-soft);font-size:14px"></p>
+  </div>
+  <section id="rWrongSec">
+    <h2 class="sec">틀린 단어</h2>
+    <div class="wrongs" id="rWrongs"></div>
+  </section>
+  <div style="display:flex;gap:9px;flex-wrap:wrap">
+    <button class="btn pri" id="againBtn" type="button">틀린 것만 다시</button>
+    <button class="btn" id="homeBtn" type="button">처음으로</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+/* 일본어 단어 시험 — 단어 데이터
+ *
+ * ⚠️ 지금 들어 있는 42항목은 학습지가 아니라 **샘플**입니다.
+ *    학습지를 받으면 이 파일만 통째로 갈아 끼우면 됩니다. 앱은 건드릴 것이 없습니다.
+ *
+ * 필수 필드: id · unit · word · kana · meaning
+ *   kana 는 한→일 유형의 정답 기준이므로 학습지 표기를 글자 하나까지 그대로 옮깁니다.
+ *   장음 ー, 촉음 っ, 탁점, 히라가나/가타카나 구분이 전부 채점에 쓰입니다.
+ */
+
+var UNITS = [
+  { code:"001", title:"1과 · 사람과 사물", pages:"샘플" },
+  { code:"002", title:"2과 · 가족",        pages:"샘플" },
+  { code:"003", title:"3과 · 음식",        pages:"샘플" },
+  { code:"004", title:"4과 · 장소와 생활",  pages:"샘플" }
+];
+
+var WORDS = [
+  /* ── 001 사람과 사물 ── */
+  { id:"w101", unit:"001", pos:"명사", word:"学生",   kana:"がくせい",  meaning:["학생"],
+    examples:[{ ja:"わたしは学生です。", ko:"저는 학생입니다.", form:"学生" }] },
+  { id:"w102", unit:"001", pos:"명사", word:"先生",   kana:"せんせい",  meaning:["선생님"] },
+  { id:"w103", unit:"001", pos:"명사", word:"友達",   kana:"ともだち",  meaning:["친구"],
+    examples:[{ ja:"友達と映画を見ます。", ko:"친구와 영화를 봅니다.", form:"友達" }] },
+  { id:"w104", unit:"001", pos:"명사", word:"名前",   kana:"なまえ",    meaning:["이름"] },
+  { id:"w105", unit:"001", pos:"명사", word:"本",     kana:"ほん",      meaning:["책"],
+    examples:[{ ja:"これは本です。", ko:"이것은 책입니다.", form:"本" }] },
+  { id:"w106", unit:"001", pos:"명사", word:"かばん", kana:"かばん",    meaning:["가방"] },
+  { id:"w107", unit:"001", pos:"명사", word:"時計",   kana:"とけい",    meaning:["시계"] },
+  { id:"w108", unit:"001", pos:"명사", word:"電話",   kana:"でんわ",    meaning:["전화"],
+    examples:[{ ja:"母に電話をかけます。", ko:"어머니께 전화를 겁니다.", form:"電話" }] },
+  { id:"w109", unit:"001", pos:"명사", word:"車",     kana:"くるま",    meaning:["자동차", "차"] },
+  { id:"w110", unit:"001", pos:"명사", word:"かさ",   kana:"かさ",      meaning:["우산"] },
+
+  /* ── 002 가족 ── */
+  { id:"w201", unit:"002", pos:"명사", word:"家族",   kana:"かぞく",    meaning:["가족"] },
+  { id:"w202", unit:"002", pos:"명사", word:"父",     kana:"ちち",      meaning:["아버지"], note:"자기 아버지를 남에게 말할 때" },
+  { id:"w203", unit:"002", pos:"명사", word:"母",     kana:"はは",      meaning:["어머니"], note:"자기 어머니를 남에게 말할 때" },
+  { id:"w204", unit:"002", pos:"명사", word:"兄",     kana:"あに",      meaning:["형", "오빠"] },
+  { id:"w205", unit:"002", pos:"명사", word:"姉",     kana:"あね",      meaning:["누나", "언니"] },
+  { id:"w206", unit:"002", pos:"명사", word:"弟",     kana:"おとうと",  meaning:["남동생"] },
+  { id:"w207", unit:"002", pos:"명사", word:"妹",     kana:"いもうと",  meaning:["여동생"] },
+  { id:"w208", unit:"002", pos:"명사", word:"子供",   kana:"こども",    meaning:["아이", "어린이"] },
+
+  /* ── 003 음식 ── */
+  { id:"w301", unit:"003", pos:"명사", word:"食べ物", kana:"たべもの",  meaning:["음식", "먹을 것"],
+    examples:[{ ja:"好きな食べ物は何ですか。", ko:"좋아하는 음식은 무엇입니까?", form:"食べ物" }] },
+  { id:"w302", unit:"003", pos:"명사", word:"飲み物", kana:"のみもの",  meaning:["음료", "마실 것"] },
+  { id:"w303", unit:"003", pos:"명사", word:"ご飯",   kana:"ごはん",    meaning:["밥"] },
+  { id:"w304", unit:"003", pos:"명사", word:"パン",   kana:"パン",      meaning:["빵"],
+    examples:[{ ja:"朝はパンを食べます。", ko:"아침에는 빵을 먹습니다.", form:"パン" }] },
+  { id:"w305", unit:"003", pos:"명사", word:"コーヒー", kana:"コーヒー", meaning:["커피"],
+    examples:[{ ja:"毎朝コーヒーを飲みます。", ko:"매일 아침 커피를 마십니다.", form:"コーヒー" }] },
+  { id:"w306", unit:"003", pos:"명사", word:"牛乳",   kana:"ぎゅうにゅう", meaning:["우유"],
+    examples:[{ ja:"牛乳を買いました。", ko:"우유를 샀습니다.", form:"牛乳" }] },
+  { id:"w307", unit:"003", pos:"명사", word:"卵",     kana:"たまご",    meaning:["달걀", "계란"] },
+  { id:"w308", unit:"003", pos:"명사", word:"野菜",   kana:"やさい",    meaning:["채소", "야채"],
+    examples:[{ ja:"野菜が好きです。", ko:"채소를 좋아합니다.", form:"野菜" }] },
+  { id:"w309", unit:"003", pos:"명사", word:"果物",   kana:"くだもの",  meaning:["과일"] },
+  { id:"w310", unit:"003", pos:"명사", word:"お茶",   kana:"おちゃ",    meaning:["차"] },
+  { id:"w311", unit:"003", pos:"명사", word:"ラーメン", kana:"ラーメン", meaning:["라면", "라멘"] },
+  { id:"w312", unit:"003", pos:"명사", word:"ケーキ", kana:"ケーキ",    meaning:["케이크"] },
+  { id:"w313", unit:"003", pos:"명사", word:"水",     kana:"みず",      meaning:["물"] },
+
+  /* ── 004 장소와 생활 ── */
+  { id:"w401", unit:"004", pos:"명사", word:"学校",   kana:"がっこう",  meaning:["학교"],
+    examples:[{ ja:"学校へ行きます。", ko:"학교에 갑니다.", form:"学校" }] },
+  { id:"w402", unit:"004", pos:"명사", word:"病院",   kana:"びょういん", meaning:["병원"] },
+  { id:"w403", unit:"004", pos:"명사", word:"駅",     kana:"えき",      meaning:["역"],
+    examples:[{ ja:"駅で友達に会いました。", ko:"역에서 친구를 만났습니다.", form:"駅" }] },
+  { id:"w404", unit:"004", pos:"명사", word:"店",     kana:"みせ",      meaning:["가게"] },
+  { id:"w405", unit:"004", pos:"명사", word:"部屋",   kana:"へや",      meaning:["방"],
+    examples:[{ ja:"部屋を掃除します。", ko:"방을 청소합니다.", form:"部屋" }] },
+  { id:"w406", unit:"004", pos:"명사", word:"窓",     kana:"まど",      meaning:["창문"] },
+  { id:"w407", unit:"004", pos:"명사", word:"切手",   kana:"きって",    meaning:["우표"],
+    examples:[{ ja:"切手を三枚ください。", ko:"우표를 세 장 주세요.", form:"切手" }] },
+  { id:"w408", unit:"004", pos:"명사", word:"手紙",   kana:"てがみ",    meaning:["편지"] },
+  { id:"w409", unit:"004", pos:"명사", word:"新聞",   kana:"しんぶん",  meaning:["신문"],
+    examples:[{ ja:"毎朝新聞を読みます。", ko:"매일 아침 신문을 읽습니다.", form:"新聞" }] },
+  { id:"w410", unit:"004", pos:"명사", word:"テレビ", kana:"テレビ",    meaning:["텔레비전", "티브이"],
+    examples:[{ ja:"毎晩テレビを見ます。", ko:"매일 밤 텔레비전을 봅니다.", form:"テレビ" }] },
+  { id:"w411", unit:"004", pos:"명사", word:"パソコン", kana:"パソコン", meaning:["컴퓨터"],
+    examples:[{ ja:"パソコンで仕事をします。", ko:"컴퓨터로 일을 합니다.", form:"パソコン" }] },
+  { id:"w412", unit:"004", pos:"명사", word:"傘",     kana:"かさ",      meaning:["우산"], skip:true }
+];
+
+/* w412 는 w110 과 같은 단어라 중복 — skip:true 인 항목은 출제에서 빠진다.
+   학습지에서 같은 단어가 두 과에 나올 때 쓰는 표시입니다. */
+
+</script>
+<script>
+(function(){
+"use strict";
+
+var $ = function(id){ return document.getElementById(id); };
+var POOL = WORDS.filter(function(w){ return !w.skip; });
+
+/* ══ 저장 ══ */
+var KEY = "jp-vocab-v1";
+var store = {};
+try { store = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ store = {}; }
+function stat(id){
+  if (!store[id]) store[id] = { ok:0, ng:0, kanaErr:0, last:0, s:{ A:0, B:0, C:0 } };
+  if (!store[id].s) store[id].s = { A:0, B:0, C:0 };
+  return store[id];
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(store)); } catch(e){} }
+
+/* ══ 가나 채점 — PRD §5.2 ══ */
+function norm(s){
+  return (s || "").normalize("NFKC").replace(/[\s　]/g, "").replace(/[。、・･!?！？.,]/g, "");
+}
+function toHira(s){
+  return s.replace(/[ァ-ヶ]/g, function(c){ return String.fromCharCode(c.charCodeAt(0) - 0x60); });
+}
+function toKata(s){
+  return s.replace(/[ぁ-ゖ]/g, function(c){ return String.fromCharCode(c.charCodeAt(0) + 0x60); });
+}
+function lev(a, b){
+  var m = a.length, n = b.length, prev = [], cur = [], i, j;
+  for (j = 0; j <= n; j++) prev[j] = j;
+  for (i = 1; i <= m; i++){
+    cur[0] = i;
+    for (j = 1; j <= n; j++)
+      cur[j] = Math.min(prev[j] + 1, cur[j-1] + 1, prev[j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+    prev = cur.slice();
+  }
+  return prev[n];
+}
+
+/* 자형이 닮아 OS 손글씨가 자주 뒤바꾸는 짝 (PRD §6.4.4) */
+var CONFUSE = ["ユコ","シツ","ソン","クタ","スヌ","ンリ","ノメ","ワク","チテ","ヲラ"];
+function confusablePair(a, b){
+  if (a.length !== b.length) return null;
+  var at = -1, i;
+  for (i = 0; i < a.length; i++){
+    if (a[i] === b[i]) continue;
+    if (at >= 0) return null;
+    at = i;
+  }
+  if (at < 0) return null;
+  var p = a[at] + b[at], q = b[at] + a[at], k;
+  for (k = 0; k < CONFUSE.length; k++)
+    if (CONFUSE[k] === p || CONFUSE[k] === q) return { typed:a[at], want:b[at] };
+  return null;
+}
+
+function judge(input, w){
+  var a = norm(input), keys = [w.kana].concat(w.jaAliases || []).concat([w.word]), i;
+  if (!a) return { code:"empty" };
+  for (i = 0; i < keys.length; i++) if (a === norm(keys[i])) return { code:"ok" };
+  var b = norm(w.kana);
+  if (toHira(a) === toHira(b)) return { code:"kana" };
+  var cp = confusablePair(a, b);
+  if (cp) return { code:"confuse", pair:cp };
+  if (lev(a, b) === 1) return { code:"near" };
+  return { code:"wrong" };
+}
+
+/* ══ 로마자 → 가나 ══ */
+var ROMA = {
+  a:"あ",i:"い",u:"う",e:"え",o:"お",
+  ka:"か",ki:"き",ku:"く",ke:"け",ko:"こ",
+  sa:"さ",si:"し",shi:"し",su:"す",se:"せ",so:"そ",
+  ta:"た",ti:"ち",chi:"ち",tu:"つ",tsu:"つ",te:"て",to:"と",
+  na:"な",ni:"に",nu:"ぬ",ne:"ね",no:"の",
+  ha:"は",hi:"ひ",hu:"ふ",fu:"ふ",he:"へ",ho:"ほ",
+  ma:"ま",mi:"み",mu:"む",me:"め",mo:"も",
+  ya:"や",yu:"ゆ",yo:"よ",
+  ra:"ら",ri:"り",ru:"る",re:"れ",ro:"ろ",
+  wa:"わ",wo:"を",nn:"ん",
+  ga:"が",gi:"ぎ",gu:"ぐ",ge:"げ",go:"ご",
+  za:"ざ",zi:"じ",ji:"じ",zu:"ず",ze:"ぜ",zo:"ぞ",
+  da:"だ",di:"ぢ",du:"づ",de:"で",do:"ど",
+  ba:"ば",bi:"び",bu:"ぶ",be:"べ",bo:"ぼ",
+  pa:"ぱ",pi:"ぴ",pu:"ぷ",pe:"ぺ",po:"ぽ",
+  kya:"きゃ",kyu:"きゅ",kyo:"きょ",gya:"ぎゃ",gyu:"ぎゅ",gyo:"ぎょ",
+  sha:"しゃ",shu:"しゅ",sho:"しょ",sya:"しゃ",syu:"しゅ",syo:"しょ",
+  cha:"ちゃ",chu:"ちゅ",cho:"ちょ",tya:"ちゃ",tyu:"ちゅ",tyo:"ちょ",
+  ja:"じゃ",ju:"じゅ",jo:"じょ",jya:"じゃ",jyu:"じゅ",jyo:"じょ",
+  zya:"じゃ",zyu:"じゅ",zyo:"じょ",
+  nya:"にゃ",nyu:"にゅ",nyo:"にょ",hya:"ひゃ",hyu:"ひゅ",hyo:"ひょ",
+  bya:"びゃ",byu:"びゅ",byo:"びょ",pya:"ぴゃ",pyu:"ぴゅ",pyo:"ぴょ",
+  mya:"みゃ",myu:"みゅ",myo:"みょ",rya:"りゃ",ryu:"りゅ",ryo:"りょ",
+  fa:"ふぁ",fi:"ふぃ",fe:"ふぇ",fo:"ふぉ",
+  thi:"てぃ",dhi:"でぃ",she:"しぇ",che:"ちぇ",je:"じぇ",
+  va:"ゔぁ",vi:"ゔぃ",vu:"ゔ",ve:"ゔぇ",vo:"ゔぉ"
+};
+var DBL = "kstpgdbjzcfhmyrwv";
+function romajiRun(run, final){
+  var out = "", i = 0, L, seg, hit;
+  while (i < run.length){
+    if (run[i] === run[i+1] && DBL.indexOf(run[i]) >= 0){ out += "っ"; i++; continue; }
+    if (run[i] === "n"){
+      if (run[i+1] === "n"){ out += "ん"; i += 2; continue; }
+      if (i + 1 < run.length && "aiueoy".indexOf(run[i+1]) < 0){ out += "ん"; i++; continue; }
+      /* 말끝 n: 타이핑 중이면 na 가 될 수 있으므로 남겨 두고, 확정 때 ん 으로 굳힌다 */
+      if (i + 1 >= run.length && final){ out += "ん"; i++; continue; }
+    }
+    hit = null;
+    for (L = 3; L >= 1; L--){
+      seg = run.substr(i, L).toLowerCase();
+      if (ROMA[seg]){ hit = ROMA[seg]; i += L; break; }
+    }
+    if (hit){ out += hit; continue; }
+    if (run[i] === "-"){ out += "ー"; i++; continue; }
+    out += run[i]; i++;
+  }
+  return out;
+}
+/* ASCII 구간만 변환하고 가나는 손대지 않는다 — 손글씨와 섞어 써도 안전 */
+function toKana(s, kata, final){
+  var out = "", run = "", i, c, conv;
+  function flush(last){
+    if (!run) return;
+    conv = romajiRun(run, last && final);
+    out += kata ? toKata(conv) : conv;
+    run = "";
+  }
+  for (i = 0; i < s.length; i++){
+    c = s[i];
+    if (/[A-Za-z-]/.test(c)) run += c; else { flush(false); out += c; }
+  }
+  flush(true);
+  return out;
+}
+
+/* ══ 설정 ══ */
+var TYPES = [
+  { k:"A", nm:"뜻 고르기",  sub:"일본어 → 뜻" },
+  { k:"B", nm:"직접 쓰기",  sub:"뜻 → 일본어" },
+  { k:"C", nm:"예문 빈칸",  sub:"문장 속 단어" }
+];
+var cfg = { units:{}, types:{ A:true, B:true, C:true }, count:20, ime:"raw" };
+UNITS.forEach(function(u){ cfg.units[u.code] = true; });
+
+function unitCount(code){ return POOL.filter(function(w){ return w.unit === code; }).length; }
+
+function drawHome(){
+  var chips = $("unitChips");
+  chips.innerHTML = "";
+  UNITS.forEach(function(u){
+    var b = document.createElement("button");
+    b.className = "chip"; b.type = "button";
+    b.setAttribute("aria-pressed", cfg.units[u.code] ? "true" : "false");
+    b.innerHTML = "<span></span><small></small>";
+    b.querySelector("span").textContent = u.title;
+    b.querySelector("small").textContent = unitCount(u.code) + "단어";
+    b.addEventListener("click", function(){
+      cfg.units[u.code] = !cfg.units[u.code];
+      b.setAttribute("aria-pressed", cfg.units[u.code] ? "true" : "false");
+      refreshStart();
+    });
+    chips.appendChild(b);
+  });
+
+  var tc = $("typeChips");
+  tc.innerHTML = "";
+  TYPES.forEach(function(t){
+    var b = document.createElement("button");
+    b.className = "chip"; b.type = "button";
+    b.setAttribute("aria-pressed", cfg.types[t.k] ? "true" : "false");
+    b.innerHTML = "<span></span><small></small>";
+    b.querySelector("span").textContent = t.nm;
+    b.querySelector("small").textContent = t.sub;
+    b.addEventListener("click", function(){
+      cfg.types[t.k] = !cfg.types[t.k];
+      b.setAttribute("aria-pressed", cfg.types[t.k] ? "true" : "false");
+      refreshStart();
+    });
+    tc.appendChild(b);
+  });
+
+  seg($("countSeg"), [10, 20, 30, 0], function(v){ return v ? String(v) : "전체"; },
+      function(){ return cfg.count; }, function(v){ cfg.count = v; });
+  seg($("imeSeg"), ["raw", "hira", "kata"],
+      function(v){ return v === "raw" ? "직접" : v === "hira" ? "あ" : "ア"; },
+      function(){ return cfg.ime; }, function(v){ cfg.ime = v; drawIme(); });
+
+  drawProgress();
+  refreshStart();
+}
+
+function seg(box, vals, label, get, set){
+  box.innerHTML = "";
+  vals.forEach(function(v){
+    var b = document.createElement("button");
+    b.type = "button"; b.textContent = label(v);
+    b.setAttribute("aria-pressed", get() === v ? "true" : "false");
+    b.addEventListener("click", function(){
+      set(v);
+      Array.prototype.forEach.call(box.children, function(c){ c.setAttribute("aria-pressed", "false"); });
+      b.setAttribute("aria-pressed", "true");
+    });
+    box.appendChild(b);
+  });
+}
+
+function drawProgress(){
+  var n = 0, m = 0, d = 0;
+  POOL.forEach(function(w){
+    var st = store[w.id];
+    if (!st || (!st.ok && !st.ng)) n++;
+    else if (st.s && st.s.B >= 3) d++;
+    else m++;
+  });
+  $("cNew").textContent = n; $("cMid").textContent = m; $("cDone").textContent = d;
+  var tot = POOL.length || 1, bar = $("progBar");
+  bar.innerHTML = "";
+  [["done", d], ["mid", m], ["new", n]].forEach(function(p){
+    if (!p[1]) return;
+    var i = document.createElement("i");
+    i.className = p[0];
+    i.style.width = (p[1] / tot * 100) + "%";
+    bar.appendChild(i);
+  });
+}
+
+function selected(){
+  return POOL.filter(function(w){ return cfg.units[w.unit]; });
+}
+function refreshStart(){
+  var n = selected().length, anyType = TYPES.some(function(t){ return cfg.types[t.k]; });
+  $("startBtn").disabled = !n || !anyType;
+  $("startBtn").textContent = !n ? "범위를 하나 이상 고르세요"
+                            : !anyType ? "문제 유형을 하나 이상 고르세요"
+                            : "시작 · " + n + "단어에서 출제";
+  $("typeHint").textContent = TYPES.filter(function(t){ return cfg.types[t.k]; })
+    .map(function(t){ return t.nm; }).join(" · ") || "없음";
+}
+
+/* ══ 출제 ══ */
+var sess = null;
+
+function weight(w, k){
+  var st = store[w.id];
+  if (!st || (!st.ok && !st.ng)) return 6;
+  var s = (st.s && st.s[k]) || 0;
+  if (s >= 3) return 0.4;
+  return 1 + st.ng * 2.5 + (s === 0 ? 1.5 : 0);
+}
+function pickWeighted(list, k){
+  var tot = 0, i, r;
+  for (i = 0; i < list.length; i++) tot += weight(list[i], k);
+  r = Math.random() * tot;
+  for (i = 0; i < list.length; i++){
+    r -= weight(list[i], k);
+    if (r <= 0) return list[i];
+  }
+  return list[list.length - 1];
+}
+function shuffle(a){
+  var i, j, t;
+  for (i = a.length - 1; i > 0; i--){ j = Math.floor(Math.random() * (i + 1)); t = a[i]; a[i] = a[j]; a[j] = t; }
+  return a;
+}
+
+function buildSession(pool){
+  var kinds = [], want = [];
+  if (cfg.types.A) kinds.push(["A", 3]);
+  if (cfg.types.B) kinds.push(["B", 5]);
+  if (cfg.types.C) kinds.push(["C", 2]);
+
+  var withEx = pool.filter(function(w){ return w.examples && w.examples.length; });
+  var n = cfg.count ? Math.min(cfg.count, pool.length * 2) : pool.length;
+  var used = {}, qs = [], guard = 0;
+
+  while (qs.length < n && guard++ < n * 40){
+    var bag = [], i;
+    kinds.forEach(function(kv){ for (i = 0; i < kv[1]; i++) bag.push(kv[0]); });
+    var k = bag[Math.floor(Math.random() * bag.length)];
+    var src = k === "C" ? withEx : pool;
+    if (!src.length) continue;
+    var avail = src.filter(function(w){ return !used[w.id + k]; });
+    if (!avail.length) continue;
+    var w = pickWeighted(avail, k);
+    used[w.id + k] = 1;
+    qs.push({ k:k, w:w });
+  }
+  return shuffle(qs);
+}
+
+function distractMeanings(w, pool){
+  var mine = {}, out = [], cand;
+  (w.meaning || []).forEach(function(m){ mine[m] = 1; });
+  cand = pool.filter(function(x){
+    return x.id !== w.id && x.meaning && x.meaning.length && !mine[x.meaning[0]];
+  });
+  cand = shuffle(cand.filter(function(x){ return x.pos === w.pos; }))
+          .concat(shuffle(cand.filter(function(x){ return x.pos !== w.pos; })));
+  var seen = {};
+  cand.forEach(function(x){
+    if (out.length >= 4) return;
+    var m = x.meaning[0];
+    if (seen[m] || mine[m]) return;
+    seen[m] = 1; out.push(m);
+  });
+  return out;
+}
+function distractWords(w, pool){
+  var cand = pool.filter(function(x){ return x.id !== w.id && x.kana !== w.kana; });
+  cand = shuffle(cand.filter(function(x){ return x.pos === w.pos; }))
+          .concat(shuffle(cand.filter(function(x){ return x.pos !== w.pos; })));
+  return cand.slice(0, 4).map(function(x){ return x.word; });
+}
+
+/* ══ 화면 전환 ══ */
+function show(which){
+  ["home", "quiz", "result"].forEach(function(s){ $(s).hidden = (s !== which); });
+  window.scrollTo(0, 0);
+}
+
+function start(pool){
+  var qs = buildSession(pool || selected());
+  if (!qs.length){ alert("출제할 문제가 없습니다. 범위나 유형을 넓혀 보세요."); return; }
+  sess = { qs:qs, at:0, score:0, wrong:[], by:{ A:[0,0], B:[0,0], C:[0,0] } };
+  show("quiz");
+  render();
+}
+
+var KIND_NM = { A:"뜻 고르기", B:"직접 쓰기", C:"예문 빈칸" };
+var answered = false, hinted = 0, penalised = false;
+
+function render(){
+  var q = sess.qs[sess.at], w = q.w;
+  answered = false; hinted = 0; penalised = false;
+
+  $("qNo").textContent = (sess.at + 1) + " / " + sess.qs.length;
+  $("qFill").style.width = (sess.at / sess.qs.length * 100) + "%";
+  $("qScore").textContent = sess.score + "점";
+  $("qKind").textContent = KIND_NM[q.k];
+  $("qUnit").textContent = (UNITS.filter(function(u){ return u.code === w.unit; })[0] || {}).title || "";
+
+  $("fb").hidden = true; $("askBox").hidden = true;
+  $("choices").hidden = true; $("choices").innerHTML = "";
+  $("inputArea").hidden = true;
+
+  var body = $("qBody");
+  body.innerHTML = "";
+
+  if (q.k === "A"){
+    add(body, "q-ask", "이 단어의 뜻은?");
+    add(body, "q-main ja", w.word);
+    if (w.word !== w.kana) add(body, "q-sub ja", w.kana);
+    var opts = shuffle([w.meaning[0]].concat(distractMeanings(w, POOL)));
+    drawChoices(opts, w.meaning[0], false);
+
+  } else if (q.k === "B"){
+    add(body, "q-ask", "일본어로 쓰면? · " + (w.pos || ""));
+    add(body, "q-main ko", w.meaning.join(", "));
+    $("inputArea").hidden = false;
+    $("ans").value = "";
+    drawIme();
+    setTimeout(function(){ $("ans").focus(); }, 30);
+
+  } else {
+    var ex = w.examples[Math.floor(Math.random() * w.examples.length)];
+    var form = ex.form || w.word;
+    add(body, "q-ask", "빈칸에 알맞은 말은?");
+    var sent = document.createElement("div");
+    sent.className = "q-sent ja";
+    sent.innerHTML = esc(ex.ja).replace(esc(form), "<u>____</u>");
+    body.appendChild(sent);
+    add(body, "q-sub", ex.ko);
+    var wopts = shuffle([w.word].concat(distractWords(w, POOL)));
+    drawChoices(wopts, w.word, true);
+  }
+}
+
+function add(box, cls, txt){
+  var d = document.createElement("div");
+  d.className = cls; d.textContent = txt;
+  box.appendChild(d);
+  return d;
+}
+function esc(s){
+  return String(s).replace(/[&<>"]/g, function(c){
+    return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c];
+  });
+}
+
+function drawChoices(opts, right, isJa){
+  var box = $("choices");
+  box.hidden = false; box.innerHTML = "";
+  opts.forEach(function(o, i){
+    var b = document.createElement("button");
+    b.className = "choice" + (isJa ? " ja-opt" : "");
+    b.type = "button";
+    b.innerHTML = "<b></b><span></span>";
+    b.querySelector("b").textContent = (i + 1);
+    b.querySelector("span").textContent = o;
+    b.addEventListener("click", function(){
+      if (answered) return;
+      var good = (o === right);
+      Array.prototype.forEach.call(box.children, function(c){
+        c.disabled = true;
+        var t = c.querySelector("span").textContent;
+        if (t === right) c.setAttribute("data-r", "ok");
+        else if (t === o && !good) c.setAttribute("data-r", "ng");
+      });
+      finish(good, good ? "" : "정답은 아래에 있습니다");
+    });
+    box.appendChild(b);
+  });
+}
+
+/* ── 입력 방식 ── */
+function drawIme(){
+  $("imeLabel").textContent =
+    cfg.ime === "raw"  ? "직접 입력 — 손글씨·일본어 키보드 그대로" :
+    cfg.ime === "hira" ? "로마자 → 히라가나 (ko → こ)" :
+                         "로마자 → 가타카나 (ko → コ)";
+}
+var composing = false;
+$("ans").addEventListener("compositionstart", function(){ composing = true; });
+$("ans").addEventListener("compositionend", function(){ composing = false; convert(); });
+$("ans").addEventListener("input", function(){ if (!composing) convert(); });
+function convert(){
+  if (cfg.ime === "raw") return;
+  var el = $("ans"), v = el.value, out = toKana(v, cfg.ime === "kata");
+  if (out !== v){ el.value = out; el.setSelectionRange(out.length, out.length); }
+}
+$("ans").addEventListener("keydown", function(e){
+  if (e.key === "Enter"){ e.preventDefault(); if (!answered) submit(); else next(); }
+});
+
+/* ── 제출 ── */
+function submit(){
+  var q = sess.qs[sess.at], w = q.w;
+  if (cfg.ime !== "raw"){
+    var fin = toKana($("ans").value, cfg.ime === "kata", true);
+    if (fin !== $("ans").value) $("ans").value = fin;
+  }
+  var v = $("ans").value;
+  var j = judge(v, w);
+
+  if (j.code === "empty"){ $("ans").focus(); return; }
+  if (j.code === "ok"){ finish(!penalised && !hinted, hinted ? "힌트를 썼으니 한 번 더 만나게 됩니다" : ""); return; }
+
+  if (j.code === "confuse"){ askConfuse(j.pair, v); return; }
+
+  if (j.code === "kana" || j.code === "near"){
+    if (!penalised){ penalised = true; stat(w.id).ng++; if (j.code === "kana") stat(w.id).kanaErr++; save(); }
+    retry(j.code === "kana"
+      ? "<b>가나 종류가 다릅니다</b> — 이 단어는 " + (isKata(w.kana) ? "가타카나" : "히라가나") + "로 씁니다"
+      : "<b>거의 맞았습니다</b> — 한 글자만 다릅니다");
+    return;
+  }
+  finish(false, "");
+}
+function isKata(s){ return /[ァ-ヺ]/.test(s); }
+
+function retry(msg){
+  var fb = $("fb");
+  fb.hidden = false; fb.className = "fb ng";
+  fb.innerHTML = '<div class="fb-line"><span class="dot"></span><span></span></div>';
+  fb.querySelector("span:last-child").innerHTML = msg + " — 다시 써 보세요";
+  $("ans").value = "";
+  $("ans").focus();
+}
+
+/* 혼동쌍 되묻기 — PRD §6.4.4 */
+function askConfuse(pair, typed){
+  var box = $("askBox");
+  box.hidden = false;
+  box.innerHTML =
+    '<p><b class="ja pair"></b> 로 인식됐습니다. 이렇게 쓰신 게 맞나요?</p>' +
+    '<p style="font-size:13px;color:var(--ink-soft)">' +
+      '<span class="ja"></span> 와 <span class="ja"></span> 는 자형이 닮아 손글씨가 자주 뒤바뀝니다.</p>' +
+    '<div class="row">' +
+      '<button class="btn" id="askYes" type="button">네, 그렇게 썼어요</button>' +
+      '<button class="btn pri" id="askNo" type="button">아니요, 잘못 인식됐어요</button>' +
+    '</div>';
+  box.querySelector(".pair").textContent = typed;
+  var sp = box.querySelectorAll("p:nth-of-type(2) span");
+  sp[0].textContent = pair.typed; sp[1].textContent = pair.want;
+
+  $("askYes").addEventListener("click", function(){ box.hidden = true; finish(false, ""); });
+  $("askNo").addEventListener("click", function(){
+    box.hidden = true;
+    $("ans").value = ""; $("ans").focus();
+  });
+}
+
+$("submitBtn").addEventListener("click", function(){ if (!answered) submit(); else next(); });
+$("skipBtn").addEventListener("click", function(){ if (!answered) finish(false, ""); });
+$("hintBtn").addEventListener("click", function(){
+  var w = sess.qs[sess.at].w, k = w.kana;
+  hinted++;
+  var msg = hinted === 1
+    ? "글자 수 " + k.length + "자 — " + k.replace(/./g, "○")
+    : k[0] + k.slice(1).replace(/./g, "○");
+  var fb = $("fb");
+  fb.hidden = false; fb.className = "fb";
+  fb.innerHTML = '<div class="fb-line" style="color:var(--ink-soft)"><span class="dot" style="background:var(--ink-faint)"></span><span class="ja" style="font-size:24px;letter-spacing:.1em"></span></div>';
+  fb.querySelector("span:last-child").textContent = msg;
+  if (hinted >= 2) $("hintBtn").disabled = true;
+  $("ans").focus();
+});
+
+/* ── 채점 확정 ── */
+function finish(good, extra){
+  var q = sess.qs[sess.at], w = q.w, st = stat(w.id);
+  answered = true;
+  st.last = Date.now();
+  if (good){ st.ok++; st.s[q.k] = (st.s[q.k] || 0) + 1; sess.score++; sess.by[q.k][0]++; }
+  else {
+    if (!penalised) st.ng++;
+    st.s[q.k] = 0;
+    sess.wrong.push({ w:w, k:q.k, kana:penalised && st.kanaErr > 0 });
+  }
+  sess.by[q.k][1]++;
+  save();
+
+  var fb = $("fb");
+  fb.hidden = false;
+  fb.className = "fb " + (good ? "ok" : "ng");
+  fb.innerHTML =
+    '<div class="fb-line"><span class="dot"></span><b></b><span class="x"></span></div>' +
+    '<div class="reveal">' +
+      '<span class="big ja"></span>' +
+      '<span class="sm"></span>' +
+      '<span class="ex"></span>' +
+    '</div>';
+  fb.querySelector("b").textContent = good ? "정답" : "오답";
+  fb.querySelector(".x").textContent = extra;
+  fb.querySelector(".big").textContent = w.kana;
+  fb.querySelector(".sm").textContent =
+    (w.word !== w.kana ? w.word + " · " : "") + w.meaning.join(", ") +
+    (w.note ? " (" + w.note + ")" : "");
+  var exBox = fb.querySelector(".ex");
+  if (w.examples && w.examples.length){
+    var ex = w.examples[0];
+    exBox.innerHTML = '<span class="ja"></span><i></i>';
+    exBox.querySelector(".ja").textContent = ex.ja;
+    exBox.querySelector("i").textContent = ex.ko;
+  }
+
+  $("submitBtn").textContent = (sess.at + 1 >= sess.qs.length) ? "결과 보기" : "다음 →";
+  $("hintBtn").disabled = true;
+  $("skipBtn").disabled = true;
+  if (q.k !== "B"){
+    var go = document.createElement("button");
+    go.className = "btn pri"; go.type = "button";
+    go.textContent = (sess.at + 1 >= sess.qs.length) ? "결과 보기" : "다음 →";
+    go.addEventListener("click", next);
+    fb.appendChild(go);
+    go.focus();
+  } else $("ans").blur();
+}
+
+function next(){
+  sess.at++;
+  $("hintBtn").disabled = false;
+  $("skipBtn").disabled = false;
+  $("submitBtn").textContent = "확인";
+  if (sess.at >= sess.qs.length) showResult(); else render();
+}
+
+/* ══ 결과 ══ */
+function showResult(){
+  show("result");
+  $("rScore").textContent = sess.score;
+  $("rOf").textContent = "/ " + sess.qs.length;
+  $("rBreak").textContent = TYPES.filter(function(t){ return sess.by[t.k][1]; })
+    .map(function(t){ return t.nm + " " + sess.by[t.k][0] + "/" + sess.by[t.k][1]; }).join("  ·  ");
+
+  var box = $("rWrongs");
+  box.innerHTML = "";
+  $("rWrongSec").hidden = !sess.wrong.length;
+  sess.wrong.forEach(function(x){
+    var d = document.createElement("div");
+    d.className = "wrong";
+    d.innerHTML = '<span class="w ja"></span><span class="t"></span><span class="m"></span>';
+    d.querySelector(".w").textContent = x.w.kana + (x.w.word !== x.w.kana ? "  " + x.w.word : "");
+    d.querySelector(".t").textContent = KIND_NM[x.k];
+    d.querySelector(".m").textContent = x.w.meaning.join(", ");
+    box.appendChild(d);
+  });
+  $("againBtn").hidden = !sess.wrong.length;
+  drawProgress();
+}
+
+$("againBtn").addEventListener("click", function(){
+  var seen = {}, pool = [];
+  sess.wrong.forEach(function(x){ if (!seen[x.w.id]){ seen[x.w.id] = 1; pool.push(x.w); } });
+  start(pool);
+});
+$("homeBtn").addEventListener("click", function(){ drawHome(); show("home"); });
+$("quitBtn").addEventListener("click", function(){ drawHome(); show("home"); });
+$("startBtn").addEventListener("click", function(){ start(); });
+$("resetBtn").addEventListener("click", function(){
+  if (!confirm("학습 기록을 모두 지웁니다. 계속할까요?")) return;
+  store = {}; save(); drawProgress();
+});
+
+document.addEventListener("keydown", function(e){
+  if ($("quiz").hidden || answered) return;
+  if (/^[1-5]$/.test(e.key)){
+    var box = $("choices");
+    if (box.hidden) return;
+    var b = box.children[Number(e.key) - 1];
+    if (b) b.click();
+  }
+});
+
+drawHome();
+show("home");
+})();
+</script>
