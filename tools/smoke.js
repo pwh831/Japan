@@ -14,9 +14,20 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   const p = await b.newPage();
   const errs = [];
   p.on('pageerror', e => errs.push('PAGEERROR: ' + e.message));
-  await p.goto('file://' + require('path').resolve(__dirname, '../일본어-단어시험.html'));
+  /* ★ 산출물을 빈 디렉터리에 복사해서 연다.
+     저장소 안에서 열면 data/*.js 가 상대 경로로 우연히 잡혀, 인라인이 빠져도
+     통과해 버린다. 실제로 verbs.js 누락을 이 테스트가 놓쳤다. */
+  const os = require('os'), path = require('path');
+  const built = path.resolve(__dirname, '../일본어-단어시험.html');
+  const alone = fs.mkdtempSync(path.join(os.tmpdir(), 'jp-alone-'));
+  fs.copyFileSync(built, path.join(alone, 'app.html'));
+  await p.goto('file://' + path.join(alone, 'app.html'));
   await p.waitForTimeout(400);
   let fail = 0; const t = (ok, m) => { if (!ok) fail++; console.log((ok?'  ✓ ':'  ✗ ')+m); };
+
+  t(!fs.readFileSync(built,'utf8').includes('<script src='),
+    '산출물에 외부 스크립트가 없다 (파일 하나로 자립)');
+  t((await p.$$('.test')).length === 3, '빈 디렉터리에서도 홈이 뜬다 (시험 카드 3개)');
 
   const byName = {}; E.VERBS.forEach(v => byName[v.kana] = v);
   const formOf = ask => (E.FORMS.find(f => ask.indexOf(f.nm) === 0) || {}).k;

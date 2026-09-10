@@ -472,24 +472,74 @@ var WORDS = [
 ];
 
 </script>
-<script src="data/verbs.js"></script>
+<script>
+/* 시험 3 · 동사 활용 데이터
+ *
+ * 출처: 제6과 98~107쪽에 나온 동사 25개.
+ *   107쪽 정리하기 2 「동사의 기본형은 [u]단으로 끝난다」 표가 근거이고,
+ *   동사테스트 탭에서 ます형과 たい형이 확인됐습니다.
+ *
+ * ★ 활용형은 여기 적지 않습니다. group 하나면 규칙으로 만들어집니다.
+ *      1류(5단)  어미 [u]단 → [i]단 + ます    いく  → いきます
+ *      2류(1단)  る 떼고 + ます                たべる → たべます
+ *      3류(불규칙) 외운다                       くる  → きます · する → します
+ *   ましょう형과 たい형도 같은 어간에서 나옵니다 (いき+ましょう · いき+たい).
+ *
+ * ⚠️ tricky: る 로 끝나 2류처럼 보이지만 1류인 동사.
+ *   규칙만 믿고 자동 판정하면 かえる → かえます 라는 틀린 답을 정답으로 채점합니다.
+ *   100쪽 학습지 필기에도 '예외' 표시가 있습니다. group 은 반드시 손으로 적습니다.
+ */
+
+var VERBS = [
+  /* ── 1류 (5단) 16 ── */
+  { id:"v01", kana:"あらう",         group:1, meaning:["씻다"],            wordId:"j602" },
+  { id:"v02", kana:"のむ",           group:1, meaning:["마시다"],          wordId:"j604" },
+  { id:"v03", kana:"いく",           group:1, meaning:["가다"],            wordId:"j607" },
+  { id:"v04", kana:"よむ",           group:1, meaning:["읽다"],            wordId:"j609" },
+  { id:"v05", kana:"やすむ",         group:1, meaning:["쉬다"],            wordId:"j610" },
+  { id:"v06", kana:"はなす",         group:1, meaning:["말하다"],          wordId:"j612" },
+  { id:"v07", kana:"かえる",         group:1, meaning:["(집에) 돌아가다"], wordId:"j613", tricky:true },
+  { id:"v08", kana:"のる",           group:1, meaning:["타다"],            wordId:"j614" },
+  { id:"v09", kana:"あそぶ",         group:1, meaning:["놀다"],            wordId:"j615" },
+  { id:"v10", kana:"さそう",         group:1, meaning:["권하다"],          wordId:"j669" },
+  { id:"v11", kana:"まもる",         group:1, meaning:["지키다"],          wordId:"j641" },
+  { id:"v12", kana:"はいる",         group:1, meaning:["들어가다"],        wordId:"j642", tricky:true },
+  { id:"v13", kana:"しゃがむ",       group:1, meaning:["쭈그려 앉다"],     wordId:"j643" },
+  { id:"v14", kana:"まつ",           group:1, meaning:["기다리다"],        wordId:"j644" },
+  { id:"v15", kana:"けす",           group:1, meaning:["끄다"],            wordId:"j645" },
+  { id:"v16", kana:"よぶ",           group:1, meaning:["부르다"],          wordId:"j647" },
+
+  /* ── 2류 (1단) 6 ── */
+  { id:"v17", kana:"おきる",         group:2, meaning:["일어나다"],        wordId:"j601" },
+  { id:"v18", kana:"たべる",         group:2, meaning:["먹다"],            wordId:"j603" },
+  { id:"v19", kana:"みる",           group:2, meaning:["보다"],            wordId:"j605" },
+  { id:"v20", kana:"ねる",           group:2, meaning:["자다"],            wordId:"j606" },
+  { id:"v21", kana:"でる",           group:2, meaning:["나가다"],          wordId:"j656" },
+  { id:"v22", kana:"あける",         group:2, meaning:["열다"],            wordId:"j646" },
+
+  /* ── 3류 (불규칙) 3 ── */
+  { id:"v23", kana:"くる",           group:3, meaning:["오다"],            wordId:"j611" },
+  { id:"v24", kana:"する",           group:3, meaning:["하다"] },
+  { id:"v25", kana:"べんきょうする", group:3, meaning:["공부하다"],        wordId:"j608" }
+];
+
+/* 출제하는 활용형과 배분 (PRD §6.4).
+   たい 가 가장 높은 이유: 107쪽 교재 표에 없었는데 동사테스트에는 나왔다.
+   가장 덜 다뤄진 형이므로 가장 많이 낸다. */
+var FORMS = [
+  { k:"tai",    nm:"たい형",    ko:"~하고 싶다", suffix:"たい",    weight:40 },
+  { k:"masu",   nm:"ます형",    ko:"~합니다",    suffix:"ます",    weight:30 },
+  { k:"mashou", nm:"ましょう형", ko:"~합시다",    suffix:"ましょう", weight:30 }
+];
+
+var GROUP_NM = { 1:"1류", 2:"2류", 3:"3류" };
+
+</script>
 <script>
 (function(){
 "use strict";
 
 var $ = function(id){ return document.getElementById(id); };
-var POOL = WORDS.filter(function(w){ return !w.skip; });
-
-/* ══ 저장 ══ */
-var KEY = "jp-vocab-v1";
-var store = {};
-try { store = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ store = {}; }
-function stat(id){
-  if (!store[id]) store[id] = { ok:0, ng:0, kanaErr:0, last:0, s:{ A:0, B:0, C:0 } };
-  if (!store[id].s) store[id].s = { A:0, B:0, C:0 };
-  return store[id];
-}
-function save(){ try { localStorage.setItem(KEY, JSON.stringify(store)); } catch(e){} }
 
 /* ══ 가나 채점 — PRD §5.2 ══ */
 function norm(s){
@@ -692,7 +742,11 @@ var store = { word:{}, verb:{}, phrase:{}, rules:{} };
 (function load(){
   var raw, old;
   try { raw = JSON.parse(localStorage.getItem(KEY) || "null"); } catch(e){}
-  if (raw && raw.word){ store = raw; store.rules = store.rules || {}; return; }
+  if (raw && typeof raw === "object" && (raw.word || raw.verb || raw.phrase || raw.rules)){
+    store.word = raw.word || {}; store.verb = raw.verb || {};
+    store.phrase = raw.phrase || {}; store.rules = raw.rules || {};
+    return;
+  }
   /* v1 기록을 단어 칸으로 옮긴다 — 버리면 오답 우선 출제가 처음부터 다시 시작한다 */
   try { old = JSON.parse(localStorage.getItem(OLD) || "null"); } catch(e){}
   if (old && typeof old === "object") store.word = old;
@@ -886,7 +940,7 @@ function pickBy(list, wKey){
 function buildSession(pool){
   var kinds = T().types.filter(function(t){ return C().types[t.k]; });
   if (!kinds.length || !pool.length) return [];
-  var withEx = pool.filter(function(w){ return w.examples && w.examples.length; });
+  var withEx = cfg.test === "word" ? pool.filter(function(w){ return blankable(w).length; }) : [];
   var n = cfg.count ? Math.min(cfg.count, pool.length * 3) : pool.length;
   var used = {}, qs = [], guard = 0;
 
@@ -904,6 +958,13 @@ function buildSession(pool){
     qs.push(q);
   }
   return shuffle(qs);
+}
+
+/* 유형 C 에 쓸 수 있는 예문 — 표제어가 문장 안에 그대로 있어야 한다.
+   「～けど」 처럼 물결표가 붙거나 「まもります」 처럼 문장에는 활용형만 있는 항목은
+   빈칸을 파도 보기와 아귀가 안 맞으므로 C 에서 뺀다(A·B 에는 그대로 나온다). */
+function blankable(w){
+  return (w.examples || []).filter(function(e){ return e.ja.indexOf(w.word) >= 0; });
 }
 
 function distractMeanings(w){
@@ -999,12 +1060,14 @@ function render(){
     openInput();
 
   } else if (q.k === "C"){
-    var ex = q.w.examples[Math.floor(Math.random() * q.w.examples.length)];
-    var form = ex.form || q.w.word;
+    var cex = blankable(q.w);
+    var ex = cex[Math.floor(Math.random() * cex.length)];
     add(body, "q-ask", "빈칸에 알맞은 말은?");
     var sent = document.createElement("div");
     sent.className = "q-sent ja";
-    sent.innerHTML = esc(ex.ja).replace(esc(form), "<u>____</u>");
+    /* 단어가 나온 자리를 전부 가린다. 첫 자리만 가리면 「はやく、はやく!」 처럼
+       두 번 나오는 문장에서 정답이 그대로 보인다. */
+    sent.innerHTML = esc(ex.ja).split(esc(q.w.word)).join("<u>____</u>");
     body.appendChild(sent);
     add(body, "q-sub", ex.ko);
     drawChoices(shuffle([q.w.word].concat(distractWords(q.w))), q.w.word, true);
@@ -1087,7 +1150,10 @@ function submit(){
     var fin = toKana($("ans").value, cfg.ime === "kata", true);
     if (fin !== $("ans").value) $("ans").value = fin;
   }
-  var j = judge($("ans").value, { kana:want, word:want, jaAliases:[] });
+  /* 단어 시험은 항목을 그대로 넘긴다 — 합성 객체를 넘기면 jaAliases 가 죽어
+     교재가 인쇄한 「～けど」 같은 표기가 오답이 된다. */
+  var target = (cfg.test === "word") ? q.w : { kana:want, word:want, jaAliases:[] };
+  var j = judge($("ans").value, target);
 
   if (j.code === "empty"){ $("ans").focus(); return; }
   if (j.code === "ok"){ finish(!penalised && !hinted, hinted ? "힌트를 썼으니 한 번 더 만나게 됩니다" : ""); return; }

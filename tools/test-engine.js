@@ -112,5 +112,27 @@ eq(E.deconj("かえます", E.VERBS).length, 0, "かえます 는 어떤 동사�
 // 배분 합이 100
 eq(E.FORMS.reduce(function(a,f){return a+f.weight;},0), 100, "형 배분 합계 100");
 
+console.log("── 유형 C 빈칸 불변식 ──");
+function blankable(w){ return (w.examples||[]).filter(function(e){ return e.ja.indexOf(w.word) >= 0; }); }
+var cWords = E.WORDS.filter(function(w){ return blankable(w).length; });
+eq(cWords.length >= 30, true, "유형 C 출제 가능 단어 " + cWords.length + "개 (30 이상)");
+var leaks = [];
+cWords.forEach(function(w){ blankable(w).forEach(function(e){
+  if (e.ja.split(w.word).join("____").indexOf(w.word) >= 0) leaks.push(w.id + " " + e.ja);
+}); });
+eq(leaks.join(" | "), "", "빈칸을 판 뒤 정답이 문장에 남지 않는다");
+/* 표제어가 문장에 없는 항목은 C 에서 빠져야 한다 — 빈칸과 보기가 아귀가 안 맞으므로 */
+["j629","j641","j663","j668","j670","j690"].forEach(function(id){
+  var w = E.WORDS.filter(function(x){ return x.id === id; })[0];
+  eq(blankable(w).length, 0, id + " (" + w.word + ") 는 유형 C 에서 빠진다");
+});
+
+console.log("── jaAliases · 교재 인쇄 표기를 그대로 써도 정답 ──");
+["j629","j633","j663","j668","j670","j690"].forEach(function(id){
+  var w = E.WORDS.filter(function(x){ return x.id === id; })[0];
+  eq(E.judge(w.word, w).code, "ok", w.word + " → 정답 (jaAliases)");
+  eq(E.judge(w.kana, w).code, "ok", w.kana + " → 정답 (물결표 없이)");
+});
+
 console.log("\n" + pass + " 통과 · " + fail + " 실패");
 process.exit(fail ? 1 : 0);
