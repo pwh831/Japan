@@ -1,0 +1,13 @@
+{
+  "devDependencies": {
+    "playwright": "^1.63.0"
+  },
+  "name": "japanese-exam",
+  "private": true,
+  "description": "일본어 시험 대비 — 단어·표현·동사 활용",
+  "scripts": {
+    "build": "python3 build.py",
+    "test": "python3 tools/extract-engine.py > /tmp/engine.js && node tools/test-engine.js /tmp/engine.js",
+    "smoke": "python3 build.py && node tools/smoke.js"
+  }
+}

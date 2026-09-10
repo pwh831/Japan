@@ -1,4 +1,4 @@
-<title>일본어 단어 시험</title>
+<title>일본어 시험</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
@@ -177,6 +177,25 @@ footer{border-top:1px solid var(--edge);padding-top:15px;font-size:12.5px;
        color:var(--ink-faint);text-wrap:pretty}
 footer b{color:var(--ink-soft);font-weight:600}
 
+/* ── 시험 고르기 ── */
+.tests{display:flex;flex-direction:column;gap:8px}
+.test{display:flex;align-items:center;gap:13px;width:100%;text-align:left;font:inherit;
+      border:1px solid var(--edge);background:var(--card);color:var(--ink);
+      border-radius:4px;padding:13px 15px;cursor:pointer}
+.test:hover{border-color:var(--rule)}
+.test[aria-pressed="true"]{border-color:var(--rule);border-left-width:3px;background:var(--rule-soft)}
+.test:disabled{opacity:.5;cursor:default}
+.test .n{font-size:16px;font-weight:600;flex:1}
+.test .n span{display:block;font-size:12.5px;font-weight:400;color:var(--ink-faint)}
+.test .c{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-faint);white-space:nowrap}
+.test[aria-pressed="true"] .c{color:var(--rule);font-weight:500}
+
+/* ── 활용표 (동사 해설) ── */
+.ctab{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:14px;margin-top:5px}
+.ctab dt{color:var(--ink-faint);font-size:12px;align-self:center}
+.ctab dd{margin:0;font-size:19px;letter-spacing:.04em}
+.ctab dd.hit{color:var(--rule);font-weight:600}
+
 @media (max-width:430px){
   .cells{--cell:50px;--glyph:36px;--pad:14px}
   .q-main{font-size:32px} .q-main.ko{font-size:25px} .q-sent{font-size:21px}
@@ -189,47 +208,46 @@ footer b{color:var(--ink-soft);font-weight:600}
 <!-- ══ 홈 ══ -->
 <div id="home">
   <div style="display:flex;flex-direction:column;gap:7px">
-    <span class="eyebrow">가나 표기 훈련</span>
-    <h1>일본어 단어 시험</h1>
-    <p style="color:var(--ink-soft)">뜻을 보고 <b>직접 써서</b> 확인합니다. 히라가나·가타카나 구분까지 채점합니다.</p>
+    <span class="eyebrow">제6과 · ハナちゃん、あぶない!</span>
+    <h1>일본어 시험</h1>
+    <p style="color:var(--ink-soft)">세 시험을 따로 봅니다. 외우는 방식이 달라서 진도도 따로 셉니다.</p>
   </div>
 
-  <div class="note" id="sampleNote">
-    <b>제6과 100~107쪽 66단어</b>가 들어 있습니다. 각 쪽 맨 아래 <span class="ja">ことば</span> 목록입니다.
-    108쪽 이후를 받으면 이어서 채웁니다.
-  </div>
+  <section>
+    <h2 class="sec">무엇을 볼까요</h2>
+    <div class="tests" id="testPick"></div>
+  </section>
 
   <section>
     <h2 class="sec">진도</h2>
     <div style="display:flex;flex-direction:column;gap:9px">
       <div class="prog" id="progBar"></div>
       <div class="legend">
-        <span><i class="done" style="background:var(--rule)"></i><span id="cDone">0</span> 숙달</span>
-        <span><i class="mid" style="background:var(--shu)"></i><span id="cMid">0</span> 학습 중</span>
-        <span><i class="new" style="background:var(--edge)"></i><span id="cNew">0</span> 미학습</span>
+        <span><i style="background:var(--rule)"></i><span id="cDone">0</span> 숙달</span>
+        <span><i style="background:var(--shu)"></i><span id="cMid">0</span> 학습 중</span>
+        <span><i style="background:var(--edge)"></i><span id="cNew">0</span> 미학습</span>
       </div>
-      <p style="font-size:12.5px;color:var(--ink-faint)">숙달은 <b>쓰기(뜻→일본어)</b>를 연속 3회 맞힌 단어입니다.
-        뜻만 아는 단어는 숙달로 넘어가지 않습니다.</p>
+      <p id="progNote" style="font-size:12.5px;color:var(--ink-faint)"></p>
     </div>
   </section>
 
   <section>
-    <h2 class="sec">범위</h2>
-    <div class="chips" id="unitChips"></div>
+    <h2 class="sec" id="rangeLabel">범위</h2>
+    <div class="chips" id="rangeChips"></div>
   </section>
 
   <section>
     <h2 class="sec">설정</h2>
     <div class="opts">
       <div class="opt">
-        <span class="opt-nm">문제 유형<span id="typeHint">셋 다</span></span>
+        <span class="opt-nm">문제 유형<span id="typeHint"></span></span>
         <div class="chips" id="typeChips"></div>
       </div>
       <div class="opt">
         <span class="opt-nm">문항 수</span>
         <div class="seg" id="countSeg"></div>
       </div>
-      <div class="opt">
+      <div class="opt" id="imeOpt">
         <span class="opt-nm">입력 방식<span>쓰기 문제에서 답을 넣는 법</span></span>
         <div class="seg" id="imeSeg"></div>
       </div>
@@ -454,6 +472,7 @@ var WORDS = [
 ];
 
 </script>
+<script src="data/verbs.js"></script>
 <script>
 (function(){
 "use strict";
@@ -591,47 +610,159 @@ function toKana(s, kata, final){
   return out;
 }
 
-/* ══ 설정 ══ */
-var TYPES = [
-  { k:"A", nm:"뜻 고르기",  sub:"일본어 → 뜻" },
-  { k:"B", nm:"직접 쓰기",  sub:"뜻 → 일본어" },
-  { k:"C", nm:"예문 빈칸",  sub:"문장 속 단어" }
+/* ══ 동사 활용 — 어간 하나에서 세 형이 나온다 (PRD §6.2) ══ */
+
+/* 5단 동사 어미: [u]단 → [i]단 */
+var U2I = { "う":"い", "く":"き", "ぐ":"ぎ", "す":"し", "つ":"ち",
+            "ぬ":"に", "ぶ":"び", "む":"み", "る":"り" };
+
+/* ます형 어간(연용형). ます·ましょう·たい 가 전부 여기에 붙는다. */
+function stem(v){
+  var k = v.kana, last = k.slice(-1);
+  if (v.group === 3){
+    if (k === "くる") return "き";
+    if (k === "する") return "し";
+    if (/する$/.test(k)) return k.slice(0, -2) + "し";   /* べんきょうする → べんきょうし */
+    return null;
+  }
+  if (v.group === 2) return k.slice(0, -1);              /* る 제거 */
+  if (!U2I[last]) return null;                           /* 1류인데 [u]단이 아니면 데이터 오류 */
+  return k.slice(0, -1) + U2I[last];
+}
+
+function conj(v, form){
+  var st = stem(v), i;
+  if (st === null) return null;
+  for (i = 0; i < FORMS.length; i++) if (FORMS[i].k === form) return st + FORMS[i].suffix;
+  return null;
+}
+
+/* 활용형에서 기본형으로 (유형 J). 어미를 떼고 후보를 되찾는다. */
+function deconj(surface, pool){
+  var out = [], i, j;
+  for (i = 0; i < pool.length; i++)
+    for (j = 0; j < FORMS.length; j++)
+      if (conj(pool[i], FORMS[j].k) === surface) out.push(pool[i]);
+  return out;
+}
+
+/* 데이터 검증 — group 이 빠졌거나 어미가 이상하면 여기서 걸린다. */
+function verbDataErrors(pool){
+  var bad = [], i, v;
+  for (i = 0; i < pool.length; i++){
+    v = pool[i];
+    if ([1,2,3].indexOf(v.group) < 0){ bad.push(v.kana + ": group 없음"); continue; }
+    if (stem(v) === null) bad.push(v.kana + ": 어간을 못 구함 (group " + v.group + ")");
+    if (v.group === 2 && v.kana.slice(-1) !== "る") bad.push(v.kana + ": 2류인데 る 로 안 끝남");
+  }
+  return bad;
+}
+
+/* ══ 세 시험 ══ */
+var TESTS = [
+  { k:"word", nm:"단어", sub:"낱말의 뜻과 표기", ready:true,
+    types:[ {k:"A",nm:"뜻 고르기",  sub:"일본어 → 뜻",   w:30},
+            {k:"B",nm:"직접 쓰기",  sub:"뜻 → 일본어",   w:50},
+            {k:"C",nm:"예문 빈칸",  sub:"문장 속 단어",  w:20} ],
+    master:"쓰기(뜻→일본어)를 연속 3회 맞힌 단어가 숙달입니다. 뜻만 아는 단어는 넘어가지 않습니다." },
+  { k:"verb", nm:"동사 활용", sub:"ます · ましょう · たい", ready:true,
+    types:[ {k:"H",nm:"활용형 쓰기", sub:"기본형 → 활용형", w:60},
+            {k:"I",nm:"그룹 고르기", sub:"1류·2류·3류",    w:25},
+            {k:"J",nm:"기본형 되찾기",sub:"활용형 → 기본형", w:15} ],
+    master:"세 활용형(ます·ましょう·たい)을 각각 연속 3회 맞히면 숙달입니다. 규칙이 잡히면 평범한 동사는 덜 나오고 예외만 남습니다." },
+  { k:"phrase", nm:"표현", sub:"문장을 언제 쓰나", ready:false, types:[],
+    master:"" }
 ];
-var cfg = { units:{}, types:{ A:true, B:true, C:true }, count:20, ime:"raw" };
-UNITS.forEach(function(u){ cfg.units[u.code] = true; });
+function T(){ var i; for (i=0;i<TESTS.length;i++) if (TESTS[i].k===cfg.test) return TESTS[i]; }
 
-function unitCount(code){ return POOL.filter(function(w){ return w.unit === code; }).length; }
+var POOL = WORDS.filter(function(w){ return !w.skip; });
+var VPOOL = VERBS;
 
+var cfg = {
+  test:"word", count:20, ime:"raw",
+  word:{ range:{}, types:{ A:1, B:1, C:1 } },
+  verb:{ range:{ 1:1, 2:1, 3:1 }, types:{ H:1, I:1, J:1 } }
+};
+UNITS.forEach(function(u){ cfg.word.range[u.code] = 1; });
+function C(){ return cfg[cfg.test]; }
+
+/* ══ 저장 — 시험별로 따로 (PRD §9) ══ */
+var KEY = "jp-exam-v2", OLD = "jp-vocab-v1";
+var store = { word:{}, verb:{}, phrase:{}, rules:{} };
+(function load(){
+  var raw, old;
+  try { raw = JSON.parse(localStorage.getItem(KEY) || "null"); } catch(e){}
+  if (raw && raw.word){ store = raw; store.rules = store.rules || {}; return; }
+  /* v1 기록을 단어 칸으로 옮긴다 — 버리면 오답 우선 출제가 처음부터 다시 시작한다 */
+  try { old = JSON.parse(localStorage.getItem(OLD) || "null"); } catch(e){}
+  if (old && typeof old === "object") store.word = old;
+  save();
+})();
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(store)); } catch(e){} }
+function stat(id){
+  var box = store[cfg.test];
+  if (!box[id]) box[id] = { ok:0, ng:0, kanaErr:0, last:0, s:{} };
+  if (!box[id].s) box[id].s = {};
+  return box[id];
+}
+/* 규칙 숙달: 같은 그룹·형을 서로 다른 동사로 연속 5회 (PRD §6.5) */
+function ruleKey(g, f){ return g + "-" + f; }
+function rule(g, f){
+  var k = ruleKey(g, f);
+  if (!store.rules[k]) store.rules[k] = { n:0, last:"" };
+  return store.rules[k];
+}
+function ruleDone(g, f){ return rule(g, f).n >= 5; }
+
+/* ══ 홈 ══ */
 function drawHome(){
-  var chips = $("unitChips");
-  chips.innerHTML = "";
-  UNITS.forEach(function(u){
+  var pick = $("testPick");
+  pick.innerHTML = "";
+  TESTS.forEach(function(t){
+    var b = document.createElement("button");
+    b.className = "test"; b.type = "button";
+    b.disabled = !t.ready;
+    b.setAttribute("aria-pressed", cfg.test === t.k ? "true" : "false");
+    b.innerHTML = '<span class="n"></span><span class="c"></span>';
+    b.querySelector(".n").innerHTML = "<b></b><span></span>";
+    b.querySelector("b").textContent = t.nm;
+    b.querySelector(".n span").textContent = t.sub;
+    b.querySelector(".c").textContent = !t.ready ? "준비 중"
+      : (t.k === "word" ? POOL.length : VPOOL.length) + "항목";
+    if (t.ready) b.addEventListener("click", function(){ cfg.test = t.k; drawHome(); });
+    pick.appendChild(b);
+  });
+
+  $("rangeLabel").textContent = cfg.test === "word" ? "범위 — 교재 쪽" : "범위 — 동사 그룹";
+  var rc = $("rangeChips");
+  rc.innerHTML = "";
+  rangeItems().forEach(function(r){
     var b = document.createElement("button");
     b.className = "chip"; b.type = "button";
-    b.setAttribute("aria-pressed", cfg.units[u.code] ? "true" : "false");
+    b.setAttribute("aria-pressed", C().range[r.k] ? "true" : "false");
     b.innerHTML = "<span></span><small></small>";
-    b.querySelector("span").textContent = u.title;
-    b.querySelector("small").textContent = unitCount(u.code) + "단어";
+    b.querySelector("span").textContent = r.nm;
+    b.querySelector("small").textContent = r.n + "항목" + (r.note ? " · " + r.note : "");
     b.addEventListener("click", function(){
-      cfg.units[u.code] = !cfg.units[u.code];
-      b.setAttribute("aria-pressed", cfg.units[u.code] ? "true" : "false");
+      C().range[r.k] = C().range[r.k] ? 0 : 1;
+      b.setAttribute("aria-pressed", C().range[r.k] ? "true" : "false");
       refreshStart();
     });
-    chips.appendChild(b);
+    rc.appendChild(b);
   });
 
   var tc = $("typeChips");
   tc.innerHTML = "";
-  TYPES.forEach(function(t){
+  T().types.forEach(function(t){
     var b = document.createElement("button");
     b.className = "chip"; b.type = "button";
-    b.setAttribute("aria-pressed", cfg.types[t.k] ? "true" : "false");
+    b.setAttribute("aria-pressed", C().types[t.k] ? "true" : "false");
     b.innerHTML = "<span></span><small></small>";
     b.querySelector("span").textContent = t.nm;
     b.querySelector("small").textContent = t.sub;
     b.addEventListener("click", function(){
-      cfg.types[t.k] = !cfg.types[t.k];
-      b.setAttribute("aria-pressed", cfg.types[t.k] ? "true" : "false");
+      C().types[t.k] = C().types[t.k] ? 0 : 1;
+      b.setAttribute("aria-pressed", C().types[t.k] ? "true" : "false");
       refreshStart();
     });
     tc.appendChild(b);
@@ -643,8 +774,22 @@ function drawHome(){
       function(v){ return v === "raw" ? "직접" : v === "hira" ? "あ" : "ア"; },
       function(){ return cfg.ime; }, function(v){ cfg.ime = v; drawIme(); });
 
+  $("progNote").textContent = T().master;
   drawProgress();
   refreshStart();
+}
+
+function rangeItems(){
+  if (cfg.test === "word")
+    return UNITS.map(function(u){
+      return { k:u.code, nm:u.title.replace("6과 · ", ""), note:u.pages,
+               n:POOL.filter(function(w){ return w.unit === u.code; }).length };
+    });
+  return [1, 2, 3].map(function(g){
+    var vs = VPOOL.filter(function(v){ return v.group === g; });
+    return { k:String(g), nm:GROUP_NM[g], n:vs.length,
+             note: vs.some(function(v){ return v.tricky; }) ? "예외 포함" : "" };
+  });
 }
 
 function seg(box, vals, label, get, set){
@@ -662,57 +807,67 @@ function seg(box, vals, label, get, set){
   });
 }
 
+function selected(){
+  if (cfg.test === "word") return POOL.filter(function(w){ return cfg.word.range[w.unit]; });
+  return VPOOL.filter(function(v){ return cfg.verb.range[String(v.group)]; });
+}
+
+function mastered(item){
+  var st = store[cfg.test][item.id];
+  if (!st) return false;
+  if (cfg.test === "word") return (st.s.B || 0) >= 3;
+  return FORMS.every(function(f){ return (st.s["H" + f.k] || 0) >= 3; });
+}
+
 function drawProgress(){
-  var n = 0, m = 0, d = 0;
-  POOL.forEach(function(w){
-    var st = store[w.id];
+  var n = 0, m = 0, d = 0, all = cfg.test === "word" ? POOL : VPOOL;
+  all.forEach(function(it){
+    var st = store[cfg.test][it.id];
     if (!st || (!st.ok && !st.ng)) n++;
-    else if (st.s && st.s.B >= 3) d++;
+    else if (mastered(it)) d++;
     else m++;
   });
   $("cNew").textContent = n; $("cMid").textContent = m; $("cDone").textContent = d;
-  var tot = POOL.length || 1, bar = $("progBar");
+  var tot = all.length || 1, bar = $("progBar");
   bar.innerHTML = "";
-  [["done", d], ["mid", m], ["new", n]].forEach(function(p){
+  [["done", d, "var(--rule)"], ["mid", m, "var(--shu)"], ["new", n, "var(--edge)"]].forEach(function(p){
     if (!p[1]) return;
     var i = document.createElement("i");
-    i.className = p[0];
+    i.style.background = p[2];
     i.style.width = (p[1] / tot * 100) + "%";
     bar.appendChild(i);
   });
 }
 
-function selected(){
-  return POOL.filter(function(w){ return cfg.units[w.unit]; });
-}
 function refreshStart(){
-  var n = selected().length, anyType = TYPES.some(function(t){ return cfg.types[t.k]; });
+  var n = selected().length,
+      anyType = T().types.some(function(t){ return C().types[t.k]; });
   $("startBtn").disabled = !n || !anyType;
   $("startBtn").textContent = !n ? "범위를 하나 이상 고르세요"
                             : !anyType ? "문제 유형을 하나 이상 고르세요"
-                            : "시작 · " + n + "단어에서 출제";
-  $("typeHint").textContent = TYPES.filter(function(t){ return cfg.types[t.k]; })
+                            : "시작 · " + T().nm + " " + n + "항목에서 출제";
+  $("typeHint").textContent = T().types.filter(function(t){ return C().types[t.k]; })
     .map(function(t){ return t.nm; }).join(" · ") || "없음";
 }
 
 /* ══ 출제 ══ */
 var sess = null;
 
-function weight(w, k){
-  var st = store[w.id];
+function skey(q){ return q.k + (q.form || ""); }
+function weight(item, key, q){
+  var st = store[cfg.test][item.id];
   if (!st || (!st.ok && !st.ng)) return 6;
-  var s = (st.s && st.s[k]) || 0;
+  var s = st.s[key] || 0;
+  if (item.tricky) return Math.max(2.5, 1 + st.ng * 2.5);   /* 예외는 늘 자주 */
+  if (q && q.form && ruleDone(item.group, q.form) && s >= 2) return 0.3;
   if (s >= 3) return 0.4;
   return 1 + st.ng * 2.5 + (s === 0 ? 1.5 : 0);
 }
-function pickWeighted(list, k){
+function pickWeighted(list, key, q){
   var tot = 0, i, r;
-  for (i = 0; i < list.length; i++) tot += weight(list[i], k);
+  for (i = 0; i < list.length; i++) tot += weight(list[i], key, q);
   r = Math.random() * tot;
-  for (i = 0; i < list.length; i++){
-    r -= weight(list[i], k);
-    if (r <= 0) return list[i];
-  }
+  for (i = 0; i < list.length; i++){ r -= weight(list[i], key, q); if (r <= 0) return list[i]; }
   return list[list.length - 1];
 }
 function shuffle(a){
@@ -720,41 +875,45 @@ function shuffle(a){
   for (i = a.length - 1; i > 0; i--){ j = Math.floor(Math.random() * (i + 1)); t = a[i]; a[i] = a[j]; a[j] = t; }
   return a;
 }
+function pickBy(list, wKey){
+  var tot = 0, i, r;
+  for (i = 0; i < list.length; i++) tot += list[i][wKey];
+  r = Math.random() * tot;
+  for (i = 0; i < list.length; i++){ r -= list[i][wKey]; if (r <= 0) return list[i]; }
+  return list[0];
+}
 
 function buildSession(pool){
-  var kinds = [], want = [];
-  if (cfg.types.A) kinds.push(["A", 3]);
-  if (cfg.types.B) kinds.push(["B", 5]);
-  if (cfg.types.C) kinds.push(["C", 2]);
-
+  var kinds = T().types.filter(function(t){ return C().types[t.k]; });
+  if (!kinds.length || !pool.length) return [];
   var withEx = pool.filter(function(w){ return w.examples && w.examples.length; });
-  var n = cfg.count ? Math.min(cfg.count, pool.length * 2) : pool.length;
+  var n = cfg.count ? Math.min(cfg.count, pool.length * 3) : pool.length;
   var used = {}, qs = [], guard = 0;
 
   while (qs.length < n && guard++ < n * 40){
-    var bag = [], i;
-    kinds.forEach(function(kv){ for (i = 0; i < kv[1]; i++) bag.push(kv[0]); });
-    var k = bag[Math.floor(Math.random() * bag.length)];
-    var src = k === "C" ? withEx : pool;
-    if (!src.length) continue;
-    var avail = src.filter(function(w){ return !used[w.id + k]; });
+    var kind = pickBy(kinds, "w"), q = { k:kind.k };
+    var src = pool;
+    if (kind.k === "C"){ src = withEx; if (!src.length) continue; }
+    if (kind.k === "H" || kind.k === "J") q.form = pickBy(FORMS, "weight").k;
+    var key = skey(q);
+    var avail = src.filter(function(it){ return !used[it.id + key]; });
     if (!avail.length) continue;
-    var w = pickWeighted(avail, k);
-    used[w.id + k] = 1;
-    qs.push({ k:k, w:w });
+    var item = pickWeighted(avail, key, q);
+    used[item.id + key] = 1;
+    if (cfg.test === "word") q.w = item; else q.v = item;
+    qs.push(q);
   }
   return shuffle(qs);
 }
 
-function distractMeanings(w, pool){
-  var mine = {}, out = [], cand;
+function distractMeanings(w){
+  var mine = {}, out = [], seen = {};
   (w.meaning || []).forEach(function(m){ mine[m] = 1; });
-  cand = pool.filter(function(x){
+  var cand = POOL.filter(function(x){
     return x.id !== w.id && x.meaning && x.meaning.length && !mine[x.meaning[0]];
   });
   cand = shuffle(cand.filter(function(x){ return x.pos === w.pos; }))
           .concat(shuffle(cand.filter(function(x){ return x.pos !== w.pos; })));
-  var seen = {};
   cand.forEach(function(x){
     if (out.length >= 4) return;
     var m = x.meaning[0];
@@ -763,75 +922,31 @@ function distractMeanings(w, pool){
   });
   return out;
 }
-function distractWords(w, pool){
-  var cand = pool.filter(function(x){ return x.id !== w.id && x.kana !== w.kana; });
+function distractWords(w){
+  var cand = POOL.filter(function(x){ return x.id !== w.id && x.kana !== w.kana; });
   cand = shuffle(cand.filter(function(x){ return x.pos === w.pos; }))
           .concat(shuffle(cand.filter(function(x){ return x.pos !== w.pos; })));
   return cand.slice(0, 4).map(function(x){ return x.word; });
 }
 
-/* ══ 화면 전환 ══ */
+/* ══ 화면 ══ */
 function show(which){
-  ["home", "quiz", "result"].forEach(function(s){ $(s).hidden = (s !== which); });
+  ["home", "quiz", "result"].forEach(function(x){ $(x).hidden = (x !== which); });
   window.scrollTo(0, 0);
 }
-
 function start(pool){
   var qs = buildSession(pool || selected());
   if (!qs.length){ alert("출제할 문제가 없습니다. 범위나 유형을 넓혀 보세요."); return; }
-  sess = { qs:qs, at:0, score:0, wrong:[], by:{ A:[0,0], B:[0,0], C:[0,0] } };
+  sess = { test:cfg.test, qs:qs, at:0, score:0, wrong:[], by:{} };
+  T().types.forEach(function(t){ sess.by[t.k] = [0, 0]; });
   show("quiz");
   render();
 }
 
-var KIND_NM = { A:"뜻 고르기", B:"직접 쓰기", C:"예문 빈칸" };
 var answered = false, hinted = 0, penalised = false;
-
-function render(){
-  var q = sess.qs[sess.at], w = q.w;
-  answered = false; hinted = 0; penalised = false;
-
-  $("qNo").textContent = (sess.at + 1) + " / " + sess.qs.length;
-  $("qFill").style.width = (sess.at / sess.qs.length * 100) + "%";
-  $("qScore").textContent = sess.score + "점";
-  $("qKind").textContent = KIND_NM[q.k];
-  $("qUnit").textContent = (UNITS.filter(function(u){ return u.code === w.unit; })[0] || {}).title || "";
-
-  $("fb").hidden = true; $("askBox").hidden = true;
-  $("choices").hidden = true; $("choices").innerHTML = "";
-  $("inputArea").hidden = true;
-
-  var body = $("qBody");
-  body.innerHTML = "";
-
-  if (q.k === "A"){
-    add(body, "q-ask", "이 단어의 뜻은?");
-    add(body, "q-main ja", w.word);
-    if (w.word !== w.kana) add(body, "q-sub ja", w.kana);
-    var opts = shuffle([w.meaning[0]].concat(distractMeanings(w, POOL)));
-    drawChoices(opts, w.meaning[0], false);
-
-  } else if (q.k === "B"){
-    add(body, "q-ask", "일본어로 쓰면? · " + (w.pos || ""));
-    add(body, "q-main ko", w.meaning.join(", "));
-    $("inputArea").hidden = false;
-    $("ans").value = "";
-    drawIme();
-    setTimeout(function(){ $("ans").focus(); }, 30);
-
-  } else {
-    var ex = w.examples[Math.floor(Math.random() * w.examples.length)];
-    var form = ex.form || w.word;
-    add(body, "q-ask", "빈칸에 알맞은 말은?");
-    var sent = document.createElement("div");
-    sent.className = "q-sent ja";
-    sent.innerHTML = esc(ex.ja).replace(esc(form), "<u>____</u>");
-    body.appendChild(sent);
-    add(body, "q-sub", ex.ko);
-    var wopts = shuffle([w.word].concat(distractWords(w, POOL)));
-    drawChoices(wopts, w.word, true);
-  }
-}
+function KINDNM(k){ var t = T().types.filter(function(x){ return x.k === k; })[0]; return t ? t.nm : k; }
+function formNm(f){ var x = FORMS.filter(function(y){ return y.k === f; })[0]; return x ? x.nm : f; }
+function formKo(f){ var x = FORMS.filter(function(y){ return y.k === f; })[0]; return x ? x.ko : ""; }
 
 function add(box, cls, txt){
   var d = document.createElement("div");
@@ -843,6 +958,82 @@ function esc(s){
   return String(s).replace(/[&<>"]/g, function(c){
     return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c];
   });
+}
+function answerOf(q){
+  if (cfg.test === "word") return q.w.kana;
+  if (q.k === "H") return conj(q.v, q.form);
+  if (q.k === "J") return q.v.kana;
+  return null;
+}
+
+function render(){
+  var q = sess.qs[sess.at];
+  answered = false; hinted = 0; penalised = false;
+
+  $("qNo").textContent = (sess.at + 1) + " / " + sess.qs.length;
+  $("qFill").style.width = (sess.at / sess.qs.length * 100) + "%";
+  $("qScore").textContent = sess.score + "점";
+  $("qKind").textContent = KINDNM(q.k);
+  $("qUnit").textContent = cfg.test === "word"
+    ? ((UNITS.filter(function(u){ return u.code === q.w.unit; })[0] || {}).title || "")
+    : GROUP_NM[q.v.group] + (q.v.tricky ? " · 예외" : "");
+
+  $("fb").hidden = true; $("askBox").hidden = true;
+  $("choices").hidden = true; $("choices").innerHTML = "";
+  $("inputArea").hidden = true;
+  $("hintBtn").disabled = false; $("skipBtn").disabled = false;
+  $("submitBtn").textContent = "확인";
+
+  var body = $("qBody");
+  body.innerHTML = "";
+
+  if (q.k === "A"){
+    add(body, "q-ask", "이 단어의 뜻은?");
+    add(body, "q-main ja", q.w.word);
+    if (q.w.word !== q.w.kana) add(body, "q-sub ja", q.w.kana);
+    drawChoices(shuffle([q.w.meaning[0]].concat(distractMeanings(q.w))), q.w.meaning[0], false);
+
+  } else if (q.k === "B"){
+    add(body, "q-ask", "일본어로 쓰면? · " + (q.w.pos || ""));
+    add(body, "q-main ko", q.w.meaning.join(", "));
+    openInput();
+
+  } else if (q.k === "C"){
+    var ex = q.w.examples[Math.floor(Math.random() * q.w.examples.length)];
+    var form = ex.form || q.w.word;
+    add(body, "q-ask", "빈칸에 알맞은 말은?");
+    var sent = document.createElement("div");
+    sent.className = "q-sent ja";
+    sent.innerHTML = esc(ex.ja).replace(esc(form), "<u>____</u>");
+    body.appendChild(sent);
+    add(body, "q-sub", ex.ko);
+    drawChoices(shuffle([q.w.word].concat(distractWords(q.w))), q.w.word, true);
+
+  } else if (q.k === "H"){
+    add(body, "q-ask", formNm(q.form) + "으로 쓰면?  " + formKo(q.form));
+    add(body, "q-main ja", q.v.kana);
+    add(body, "q-sub", q.v.meaning.join(", ") + " · " + GROUP_NM[q.v.group]);
+    openInput();
+
+  } else if (q.k === "I"){
+    add(body, "q-ask", "이 동사는 몇 류인가요?");
+    add(body, "q-main ja", q.v.kana);
+    add(body, "q-sub", q.v.meaning.join(", "));
+    drawChoices([GROUP_NM[1], GROUP_NM[2], GROUP_NM[3]], GROUP_NM[q.v.group], false);
+
+  } else {   /* J */
+    add(body, "q-ask", "이 활용형의 기본형은?  (" + formNm(q.form) + ")");
+    add(body, "q-main ja", conj(q.v, q.form));
+    add(body, "q-sub", q.v.meaning.join(", "));
+    openInput();
+  }
+}
+
+function openInput(){
+  $("inputArea").hidden = false;
+  $("ans").value = "";
+  drawIme();
+  setTimeout(function(){ $("ans").focus(); }, 30);
 }
 
 function drawChoices(opts, right, isJa){
@@ -864,13 +1055,13 @@ function drawChoices(opts, right, isJa){
         if (t === right) c.setAttribute("data-r", "ok");
         else if (t === o && !good) c.setAttribute("data-r", "ng");
       });
-      finish(good, good ? "" : "정답은 아래에 있습니다");
+      finish(good, "");
     });
     box.appendChild(b);
   });
 }
 
-/* ── 입력 방식 ── */
+/* ══ 입력 ══ */
 function drawIme(){
   $("imeLabel").textContent =
     cfg.ime === "raw"  ? "직접 입력 — 손글씨·일본어 키보드 그대로" :
@@ -890,42 +1081,40 @@ $("ans").addEventListener("keydown", function(e){
   if (e.key === "Enter"){ e.preventDefault(); if (!answered) submit(); else next(); }
 });
 
-/* ── 제출 ── */
 function submit(){
-  var q = sess.qs[sess.at], w = q.w;
+  var q = sess.qs[sess.at], want = answerOf(q);
   if (cfg.ime !== "raw"){
     var fin = toKana($("ans").value, cfg.ime === "kata", true);
     if (fin !== $("ans").value) $("ans").value = fin;
   }
-  var v = $("ans").value;
-  var j = judge(v, w);
+  var j = judge($("ans").value, { kana:want, word:want, jaAliases:[] });
 
   if (j.code === "empty"){ $("ans").focus(); return; }
   if (j.code === "ok"){ finish(!penalised && !hinted, hinted ? "힌트를 썼으니 한 번 더 만나게 됩니다" : ""); return; }
-
-  if (j.code === "confuse"){ askConfuse(j.pair, v); return; }
-
+  if (j.code === "confuse"){ askConfuse(j.pair, $("ans").value); return; }
   if (j.code === "kana" || j.code === "near"){
-    if (!penalised){ penalised = true; stat(w.id).ng++; if (j.code === "kana") stat(w.id).kanaErr++; save(); }
+    if (!penalised){
+      penalised = true;
+      var st = stat(cfg.test === "word" ? q.w.id : q.v.id);
+      st.ng++; if (j.code === "kana") st.kanaErr++;
+      save();
+    }
     retry(j.code === "kana"
-      ? "<b>가나 종류가 다릅니다</b> — 이 단어는 " + (isKata(w.kana) ? "가타카나" : "히라가나") + "로 씁니다"
+      ? "<b>가나 종류가 다릅니다</b> — 이 답은 " + (/[ァ-ヺ]/.test(want) ? "가타카나" : "히라가나") + "로 씁니다"
       : "<b>거의 맞았습니다</b> — 한 글자만 다릅니다");
     return;
   }
   finish(false, "");
 }
-function isKata(s){ return /[ァ-ヺ]/.test(s); }
 
 function retry(msg){
   var fb = $("fb");
   fb.hidden = false; fb.className = "fb ng";
   fb.innerHTML = '<div class="fb-line"><span class="dot"></span><span></span></div>';
   fb.querySelector("span:last-child").innerHTML = msg + " — 다시 써 보세요";
-  $("ans").value = "";
-  $("ans").focus();
+  $("ans").value = ""; $("ans").focus();
 }
 
-/* 혼동쌍 되묻기 — PRD §6.4.4 */
 function askConfuse(pair, typed){
   var box = $("askBox");
   box.hidden = false;
@@ -940,22 +1129,18 @@ function askConfuse(pair, typed){
   box.querySelector(".pair").textContent = typed;
   var sp = box.querySelectorAll("p:nth-of-type(2) span");
   sp[0].textContent = pair.typed; sp[1].textContent = pair.want;
-
   $("askYes").addEventListener("click", function(){ box.hidden = true; finish(false, ""); });
-  $("askNo").addEventListener("click", function(){
-    box.hidden = true;
-    $("ans").value = ""; $("ans").focus();
-  });
+  $("askNo").addEventListener("click", function(){ box.hidden = true; $("ans").value = ""; $("ans").focus(); });
 }
 
 $("submitBtn").addEventListener("click", function(){ if (!answered) submit(); else next(); });
 $("skipBtn").addEventListener("click", function(){ if (!answered) finish(false, ""); });
 $("hintBtn").addEventListener("click", function(){
-  var w = sess.qs[sess.at].w, k = w.kana;
+  var want = answerOf(sess.qs[sess.at]);
+  if (!want) return;
   hinted++;
-  var msg = hinted === 1
-    ? "글자 수 " + k.length + "자 — " + k.replace(/./g, "○")
-    : k[0] + k.slice(1).replace(/./g, "○");
+  var msg = hinted === 1 ? "글자 수 " + want.length + "자 — " + want.replace(/./g, "○")
+                         : want[0] + want.slice(1).replace(/./g, "○");
   var fb = $("fb");
   fb.hidden = false; fb.className = "fb";
   fb.innerHTML = '<div class="fb-line" style="color:var(--ink-soft)"><span class="dot" style="background:var(--ink-faint)"></span><span class="ja" style="font-size:24px;letter-spacing:.1em"></span></div>';
@@ -964,62 +1149,88 @@ $("hintBtn").addEventListener("click", function(){
   $("ans").focus();
 });
 
-/* ── 채점 확정 ── */
+/* ══ 채점 확정 ══ */
 function finish(good, extra){
-  var q = sess.qs[sess.at], w = q.w, st = stat(w.id);
+  var q = sess.qs[sess.at], item = cfg.test === "word" ? q.w : q.v;
+  var st = stat(item.id), key = skey(q);
   answered = true;
   st.last = Date.now();
-  if (good){ st.ok++; st.s[q.k] = (st.s[q.k] || 0) + 1; sess.score++; sess.by[q.k][0]++; }
-  else {
-    if (!penalised) st.ng++;
-    st.s[q.k] = 0;
-    sess.wrong.push({ w:w, k:q.k, kana:penalised && st.kanaErr > 0 });
-  }
+
+  if (good){ st.ok++; st.s[key] = (st.s[key] || 0) + 1; sess.score++; sess.by[q.k][0]++; }
+  else { if (!penalised) st.ng++; st.s[key] = 0; sess.wrong.push({ q:q, item:item }); }
   sess.by[q.k][1]++;
+
+  /* 규칙 숙달 — 서로 다른 동사로 연속해야 오른다 */
+  if (cfg.test === "verb" && q.k === "H"){
+    var r = rule(item.group, q.form);
+    if (!good) r.n = 0;
+    else if (r.last !== item.id){ r.n++; r.last = item.id; }
+  }
   save();
 
   var fb = $("fb");
   fb.hidden = false;
   fb.className = "fb " + (good ? "ok" : "ng");
-  fb.innerHTML =
-    '<div class="fb-line"><span class="dot"></span><b></b><span class="x"></span></div>' +
-    '<div class="reveal">' +
-      '<span class="big ja"></span>' +
-      '<span class="sm"></span>' +
-      '<span class="ex"></span>' +
-    '</div>';
+  fb.innerHTML = '<div class="fb-line"><span class="dot"></span><b></b><span class="x"></span></div>' +
+                 '<div class="reveal"></div>';
   fb.querySelector("b").textContent = good ? "정답" : "오답";
   fb.querySelector(".x").textContent = extra;
-  fb.querySelector(".big").textContent = w.kana;
-  fb.querySelector(".sm").textContent =
-    (w.word !== w.kana ? w.word + " · " : "") + w.meaning.join(", ") +
-    (w.note ? " (" + w.note + ")" : "");
-  var exBox = fb.querySelector(".ex");
-  if (w.examples && w.examples.length){
-    var ex = w.examples[0];
-    exBox.innerHTML = '<span class="ja"></span><i></i>';
-    exBox.querySelector(".ja").textContent = ex.ja;
-    exBox.querySelector("i").textContent = ex.ko;
-  }
+  fb.querySelector(".reveal").appendChild(cfg.test === "word" ? revealWord(q.w) : revealVerb(q.v, q.form));
 
+  $("hintBtn").disabled = true; $("skipBtn").disabled = true;
   $("submitBtn").textContent = (sess.at + 1 >= sess.qs.length) ? "결과 보기" : "다음 →";
-  $("hintBtn").disabled = true;
-  $("skipBtn").disabled = true;
-  if (q.k !== "B"){
+  if (q.k === "A" || q.k === "C" || q.k === "I"){
     var go = document.createElement("button");
     go.className = "btn pri"; go.type = "button";
-    go.textContent = (sess.at + 1 >= sess.qs.length) ? "결과 보기" : "다음 →";
+    go.textContent = $("submitBtn").textContent;
     go.addEventListener("click", next);
     fb.appendChild(go);
     go.focus();
   } else $("ans").blur();
 }
 
+function revealWord(w){
+  var d = document.createElement("div");
+  d.style.display = "flex"; d.style.flexDirection = "column"; d.style.gap = "3px";
+  d.innerHTML = '<span class="big ja"></span><span class="sm"></span><span class="ex"></span>';
+  d.querySelector(".big").textContent = w.kana;
+  d.querySelector(".sm").textContent =
+    (w.word !== w.kana ? w.word + " · " : "") + w.meaning.join(", ") + (w.note ? " (" + w.note + ")" : "");
+  if (w.examples && w.examples.length){
+    var ex = w.examples[0], box = d.querySelector(".ex");
+    box.innerHTML = '<span class="ja"></span><i></i>';
+    box.querySelector(".ja").textContent = ex.ja;
+    box.querySelector("i").textContent = ex.ko;
+  }
+  return d;
+}
+
+/* 동사는 활용표를 통째로 보여 준다 — 규칙이 눈에 남는다 */
+function revealVerb(v, form){
+  var d = document.createElement("div");
+  d.style.display = "flex"; d.style.flexDirection = "column"; d.style.gap = "4px";
+  var head = document.createElement("span");
+  head.className = "sm";
+  head.textContent = v.meaning.join(", ") + " · " + GROUP_NM[v.group] +
+                     (v.tricky ? "  ⚠ る 로 끝나지만 " + GROUP_NM[v.group] + " (예외)" : "");
+  d.appendChild(head);
+  var dl = document.createElement("dl");
+  dl.className = "ctab";
+  [["기본형", v.kana, false]].concat(FORMS.map(function(f){
+    return [f.nm, conj(v, f.k), f.k === form];
+  })).forEach(function(row){
+    var dt = document.createElement("dt"), dd = document.createElement("dd");
+    dt.textContent = row[0];
+    dd.className = "ja" + (row[2] ? " hit" : "");
+    dd.textContent = row[1];
+    dl.appendChild(dt); dl.appendChild(dd);
+  });
+  d.appendChild(dl);
+  return d;
+}
+
 function next(){
   sess.at++;
-  $("hintBtn").disabled = false;
-  $("skipBtn").disabled = false;
-  $("submitBtn").textContent = "확인";
   if (sess.at >= sess.qs.length) showResult(); else render();
 }
 
@@ -1028,7 +1239,7 @@ function showResult(){
   show("result");
   $("rScore").textContent = sess.score;
   $("rOf").textContent = "/ " + sess.qs.length;
-  $("rBreak").textContent = TYPES.filter(function(t){ return sess.by[t.k][1]; })
+  $("rBreak").textContent = T().types.filter(function(t){ return sess.by[t.k][1]; })
     .map(function(t){ return t.nm + " " + sess.by[t.k][0] + "/" + sess.by[t.k][1]; }).join("  ·  ");
 
   var box = $("rWrongs");
@@ -1038,9 +1249,10 @@ function showResult(){
     var d = document.createElement("div");
     d.className = "wrong";
     d.innerHTML = '<span class="w ja"></span><span class="t"></span><span class="m"></span>';
-    d.querySelector(".w").textContent = x.w.kana + (x.w.word !== x.w.kana ? "  " + x.w.word : "");
-    d.querySelector(".t").textContent = KIND_NM[x.k];
-    d.querySelector(".m").textContent = x.w.meaning.join(", ");
+    d.querySelector(".w").textContent = cfg.test === "word"
+      ? x.item.kana : x.item.kana + " → " + (answerOf(x.q) || "");
+    d.querySelector(".t").textContent = KINDNM(x.q.k) + (x.q.form ? " · " + formNm(x.q.form) : "");
+    d.querySelector(".m").textContent = x.item.meaning.join(", ");
     box.appendChild(d);
   });
   $("againBtn").hidden = !sess.wrong.length;
@@ -1049,15 +1261,17 @@ function showResult(){
 
 $("againBtn").addEventListener("click", function(){
   var seen = {}, pool = [];
-  sess.wrong.forEach(function(x){ if (!seen[x.w.id]){ seen[x.w.id] = 1; pool.push(x.w); } });
+  sess.wrong.forEach(function(x){ if (!seen[x.item.id]){ seen[x.item.id] = 1; pool.push(x.item); } });
   start(pool);
 });
 $("homeBtn").addEventListener("click", function(){ drawHome(); show("home"); });
 $("quitBtn").addEventListener("click", function(){ drawHome(); show("home"); });
 $("startBtn").addEventListener("click", function(){ start(); });
 $("resetBtn").addEventListener("click", function(){
-  if (!confirm("학습 기록을 모두 지웁니다. 계속할까요?")) return;
-  store = {}; save(); drawProgress();
+  if (!confirm(T().nm + " 시험의 학습 기록을 지웁니다. 계속할까요?")) return;
+  store[cfg.test] = {};
+  if (cfg.test === "verb") store.rules = {};
+  save(); drawProgress();
 });
 
 document.addEventListener("keydown", function(e){

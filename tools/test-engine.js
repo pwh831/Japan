@@ -61,5 +61,56 @@ var g = { kana:"ぎゅうにゅう", word:"牛乳" };
 eq(E.judge("ぎゆうにゆう",g).code,"wrong","작은 ゅ 를 큰 ゆ 로 쓰면 오답(두 자리)");
 eq(E.judge("きゅうにゅう",g).code,"near","탁점 빠짐 한 자리");
 
+console.log("── 동사 활용 (PRD §6.2) ──");
+eq(E.verbDataErrors(E.VERBS).join("|"), "", "동사 데이터 검증 (group·어미)");
+eq(E.VERBS.length, 25, "동사 25개");
+
+// 그룹별 규칙
+eq(E.conj({kana:"いく",group:1},"masu"),"いきます","1류 く→き");
+eq(E.conj({kana:"あらう",group:1},"masu"),"あらいます","1류 う→い (わ 아님)");
+eq(E.conj({kana:"まつ",group:1},"masu"),"まちます","1류 つ→ち");
+eq(E.conj({kana:"あそぶ",group:1},"masu"),"あそびます","1류 ぶ→び");
+eq(E.conj({kana:"はなす",group:1},"masu"),"はなします","1류 す→し");
+eq(E.conj({kana:"たべる",group:2},"masu"),"たべます","2류 る 제거");
+eq(E.conj({kana:"くる",group:3},"masu"),"きます","3류 くる→きます");
+eq(E.conj({kana:"する",group:3},"masu"),"します","3류 する→します");
+eq(E.conj({kana:"べんきょうする",group:3},"masu"),"べんきょうします","3류 ~する");
+eq(E.conj({kana:"いく",group:1},"mashou"),"いきましょう","ましょう형");
+eq(E.conj({kana:"いく",group:1},"tai"),"いきたい","たい형");
+eq(E.conj({kana:"くる",group:3},"tai"),"きたい","3류 たい형");
+
+// ★ 예외 — 규칙만 믿으면 여기서 틀린 답을 정답으로 채점한다
+eq(E.conj({kana:"かえる",group:1},"masu"),"かえります","예외 かえる → かえります");
+eq(E.conj({kana:"かえる",group:1},"tai"),"かえりたい","예외 かえる → かえりたい (かえたい 아님)");
+eq(E.conj({kana:"はいる",group:1},"masu"),"はいります","예외 はいる → はいります");
+var tricky = E.VERBS.filter(function(v){ return v.tricky; }).map(function(v){ return v.kana; });
+eq(tricky.sort().join(","), "かえる,はいる", "tricky 표시가 두 개");
+E.VERBS.filter(function(v){return v.tricky;}).forEach(function(v){
+  eq(v.group, 1, v.kana + " 는 group 1 이어야 한다");
+});
+
+// ★ 교재가 실제로 인쇄한 형과 대조 — 엔진이 지어내지 않는지
+console.log("   교재 인쇄본 대조:");
+var printed = {};
+E.WORDS.forEach(function(w){ printed[w.kana] = w.unit; });
+[["まもる",1,"masu","まもります"],["はいる",1,"masu","はいります"],
+ ["しゃがむ",1,"masu","しゃがみます"],["まつ",1,"masu","まちます"],
+ ["けす",1,"masu","けします"],["あける",2,"masu","あけます"],
+ ["よぶ",1,"masu","よびます"],["あらう",1,"mashou","あらいましょう"],
+ ["でる",2,"mashou","でましょう"],["まもる",1,"mashou","まもりましょう"]
+].forEach(function(t){
+  var got = E.conj({kana:t[0],group:t[1]}, t[2]);
+  eq(got, t[3], t[0] + " → " + t[3] + " (교재 " + (printed[t[3]] ? "수록" : "미수록") + ")");
+  eq(printed[t[3]] ? "있음" : "없음", "있음", "  └ " + t[3] + " 가 words.js 에 실제로 있는가");
+});
+
+// 역방향 (유형 J)
+eq(E.deconj("きます", E.VERBS).map(function(v){return v.kana;}).join(","), "くる", "きます → くる");
+eq(E.deconj("かえります", E.VERBS).map(function(v){return v.kana;}).join(","), "かえる", "かえります → かえる");
+eq(E.deconj("かえます", E.VERBS).length, 0, "かえます 는 어떤 동사에서도 안 나온다");
+
+// 배분 합이 100
+eq(E.FORMS.reduce(function(a,f){return a+f.weight;},0), 100, "형 배분 합계 100");
+
 console.log("\n" + pass + " 통과 · " + fail + " 실패");
 process.exit(fail ? 1 : 0);

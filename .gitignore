@@ -20,3 +20,7 @@ skills-lock.json
 # data/ 는 이 프로젝트의 단어 데이터 자리이므로 특히 섞이면 안 된다.
 /agent/
 /data/skills/
+
+# tools/smoke.js 가 쓰는 Playwright. 브라우저는 컨테이너에 이미 있으므로
+# 다시 받을 때는 npm i 만 하면 된다.
+node_modules/

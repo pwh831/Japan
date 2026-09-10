@@ -1,0 +1,82 @@
+const { chromium } = require('playwright');
+const fs = require('fs');
+
+/* 이 컨테이너에는 Chromium 이 미리 깔려 있고 Playwright 가 기대하는 판번호와
+   다를 수 있다. 있으면 그것을 쓰고, 없으면 Playwright 가 알아서 찾게 둔다. */
+function launchOpts(){
+  const pinned = process.env.CHROME_PATH ||
+    '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+  return fs.existsSync(pinned) ? { executablePath: pinned } : {};
+}
+const E = require(process.env.ENGINE || '/tmp/engine.js');
+(async () => {
+  const b = await chromium.launch(launchOpts());
+  const p = await b.newPage();
+  const errs = [];
+  p.on('pageerror', e => errs.push('PAGEERROR: ' + e.message));
+  await p.goto('file://' + require('path').resolve(__dirname, '../일본어-단어시험.html'));
+  await p.waitForTimeout(400);
+  let fail = 0; const t = (ok, m) => { if (!ok) fail++; console.log((ok?'  ✓ ':'  ✗ ')+m); };
+
+  const byName = {}; E.VERBS.forEach(v => byName[v.kana] = v);
+  const formOf = ask => (E.FORMS.find(f => ask.indexOf(f.nm) === 0) || {}).k;
+
+  await p.click('.test >> nth=1'); await p.waitForTimeout(150);
+  await p.click('#startBtn'); await p.waitForTimeout(250);
+
+  let right = 0, typed = 0, checked = { H:0, J:0 };
+  for (let i = 0; i < 30; i++) {
+    if (await p.$eval('#result', e => !e.hidden)) break;
+    const ask  = (await p.textContent('#qBody .q-ask')).trim();
+    const main = (await p.textContent('#qBody .q-main')).trim();
+    const choicesOpen = await p.$eval('#choices', e => !e.hidden);
+
+    if (choicesOpen) {                      // 유형 I — 정답 그룹을 눌러 본다
+      const v = byName[main];
+      await p.click(`#choices .choice:has-text("${E.FORMS && v ? (v.group+'류') : '1류'}")`);
+      await p.waitForTimeout(120); await p.click('#fb .btn');
+    } else {
+      let want;
+      if (ask.indexOf('기본형은') >= 0) {   // 유형 J — 활용형 → 기본형
+        const cands = E.deconj(main, E.VERBS);
+        want = cands.length ? cands[0].kana : null; checked.J++;
+      } else {                              // 유형 H — 기본형 → 활용형
+        want = E.conj(byName[main], formOf(ask)); checked.H++;
+      }
+      if (!want) { await p.click('#skipBtn'); await p.waitForTimeout(100); await p.click('#submitBtn'); continue; }
+      await p.fill('#ans', want);
+      await p.click('#submitBtn'); await p.waitForTimeout(150);
+      const verdict = await p.textContent('#fb b').catch(() => '');
+      if (verdict === '정답') right++; else console.log('    ✗ ' + main + ' + ' + ask + ' → 입력 ' + want + ' 인데 ' + verdict);
+      typed++;
+      await p.click('#submitBtn');
+    }
+    await p.waitForTimeout(120);
+  }
+  t(typed > 0, '타이핑 문제 ' + typed + '개 (H ' + checked.H + ' · J ' + checked.J + ')');
+  t(right === typed, '엔진이 낸 정답이 앱 채점을 통과: ' + right + '/' + typed);
+
+  // 오답 경로: 일부러 틀리게 (예외 동사에 규칙만 적용한 답)
+  await p.click('#homeBtn'); await p.waitForTimeout(150);
+  await p.evaluate(() => localStorage.clear());
+  await p.reload(); await p.waitForTimeout(400);
+  await p.click('.test >> nth=1'); await p.waitForTimeout(150);
+  await p.click('#typeChips .chip >> nth=1'); // 그룹 고르기 끄기
+  await p.click('#typeChips .chip >> nth=2'); // 기본형 되찾기 끄기
+  await p.click('#startBtn'); await p.waitForTimeout(250);
+  const main2 = (await p.textContent('#qBody .q-main')).trim();
+  const ask2  = (await p.textContent('#qBody .q-ask')).trim();
+  const v2 = byName[main2], f2 = formOf(ask2);
+  const wrong = (v2.group === 1 && v2.kana.slice(-1) === 'る')
+      ? v2.kana.slice(0,-1) + E.FORMS.find(f=>f.k===f2).suffix   // かえる → かえます (틀린 답)
+      : 'さかな';
+  await p.fill('#ans', wrong);
+  await p.click('#submitBtn'); await p.waitForTimeout(200);
+  const fbTxt = await p.textContent('#fb');
+  t(/오답|다릅니다|맞았습니다/.test(fbTxt), '틀린 답이 오답으로 잡힘 (' + wrong + ')');
+
+  t(errs.length === 0, errs.length ? '페이지 오류:\n     ' + errs.join('\n     ') : '페이지 오류 없음');
+  await b.close();
+  console.log('\n' + (fail ? fail + '건 실패' : '전부 통과'));
+  process.exit(fail ? 1 : 0);
+})();
