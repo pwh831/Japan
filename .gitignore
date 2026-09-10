@@ -10,3 +10,13 @@ skills-lock.json
 .claude/skills/*
 !.claude/skills/grill-me/
 !.claude/skills/grilling/
+!.claude/skills/critique/
+!.claude/skills/log/
+
+# critique 스킬이 남기는 점검 기록 — 자동 생성물이라 저장소에 쌓지 않는다.
+.devils-advocate/
+
+# npx skills 설치기가 다른 에이전트용으로 만드는 디렉터리.
+# data/ 는 이 프로젝트의 단어 데이터 자리이므로 특히 섞이면 안 된다.
+/agent/
+/data/skills/
