@@ -195,8 +195,8 @@ footer b{color:var(--ink-soft);font-weight:600}
   </div>
 
   <div class="note" id="sampleNote">
-    <b>지금 들어 있는 42단어는 샘플입니다.</b> 학습지를 받으면 <code>data/words.js</code>만
-    갈아 끼우면 되고, 앱은 그대로 씁니다.
+    <b>제6과 100~102쪽 35단어</b>가 들어 있습니다. 각 쪽 맨 아래 <span class="ja">ことば</span> 목록입니다.
+    103쪽 이후를 받으면 이어서 채웁니다.
   </div>
 
   <section>
@@ -308,92 +308,74 @@ footer b{color:var(--ink-soft);font-weight:600}
 <script>
 /* 일본어 단어 시험 — 단어 데이터
  *
- * ⚠️ 지금 들어 있는 42항목은 학습지가 아니라 **샘플**입니다.
- *    학습지를 받으면 이 파일만 통째로 갈아 끼우면 됩니다. 앱은 건드릴 것이 없습니다.
+ * 출처: 제6과 「ハナちゃん、あぶない!」 98~102쪽 (수령분)
+ *   각 쪽 맨 아래 ことば 목록이 시험범위 단어입니다.
+ *   교재가 단어를 가나로만 적어 놓으므로 word 와 kana 가 같습니다.
+ *   표기는 교재 그대로 옮겼습니다 — 띄어쓰기·「～」까지.
  *
- * 필수 필드: id · unit · word · kana · meaning
- *   kana 는 한→일 유형의 정답 기준이므로 학습지 표기를 글자 하나까지 그대로 옮깁니다.
- *   장음 ー, 촉음 っ, 탁점, 히라가나/가타카나 구분이 전부 채점에 쓰입니다.
+ * 아직 안 받은 쪽: 103쪽 이후 (5장 더 예정)
  */
 
 var UNITS = [
-  { code:"001", title:"1과 · 사람과 사물", pages:"샘플" },
-  { code:"002", title:"2과 · 가족",        pages:"샘플" },
-  { code:"003", title:"3과 · 음식",        pages:"샘플" },
-  { code:"004", title:"4과 · 장소와 생활",  pages:"샘플" }
+  { code:"006a", title:"6과 · 동작 동사",   pages:"100쪽" },
+  { code:"006b", title:"6과 · 주말·교통",   pages:"101쪽" },
+  { code:"006c", title:"6과 · 지진 대처",   pages:"102쪽" }
 ];
 
 var WORDS = [
-  /* ── 001 사람과 사물 ── */
-  { id:"w101", unit:"001", pos:"명사", word:"学生",   kana:"がくせい",  meaning:["학생"],
-    examples:[{ ja:"わたしは学生です。", ko:"저는 학생입니다.", form:"学生" }] },
-  { id:"w102", unit:"001", pos:"명사", word:"先生",   kana:"せんせい",  meaning:["선생님"] },
-  { id:"w103", unit:"001", pos:"명사", word:"友達",   kana:"ともだち",  meaning:["친구"],
-    examples:[{ ja:"友達と映画を見ます。", ko:"친구와 영화를 봅니다.", form:"友達" }] },
-  { id:"w104", unit:"001", pos:"명사", word:"名前",   kana:"なまえ",    meaning:["이름"] },
-  { id:"w105", unit:"001", pos:"명사", word:"本",     kana:"ほん",      meaning:["책"],
-    examples:[{ ja:"これは本です。", ko:"이것은 책입니다.", form:"本" }] },
-  { id:"w106", unit:"001", pos:"명사", word:"かばん", kana:"かばん",    meaning:["가방"] },
-  { id:"w107", unit:"001", pos:"명사", word:"時計",   kana:"とけい",    meaning:["시계"] },
-  { id:"w108", unit:"001", pos:"명사", word:"電話",   kana:"でんわ",    meaning:["전화"],
-    examples:[{ ja:"母に電話をかけます。", ko:"어머니께 전화를 겁니다.", form:"電話" }] },
-  { id:"w109", unit:"001", pos:"명사", word:"車",     kana:"くるま",    meaning:["자동차", "차"] },
-  { id:"w110", unit:"001", pos:"명사", word:"かさ",   kana:"かさ",      meaning:["우산"] },
+  /* ── 100쪽 ことば · なにを する? (동작 동사 15) ── */
+  { id:"j601", unit:"006a", pos:"동사", word:"おきる",       kana:"おきる",       meaning:["일어나다"] },
+  { id:"j602", unit:"006a", pos:"동사", word:"あらう",       kana:"あらう",       meaning:["씻다"] },
+  { id:"j603", unit:"006a", pos:"동사", word:"たべる",       kana:"たべる",       meaning:["먹다"] },
+  { id:"j604", unit:"006a", pos:"동사", word:"のむ",         kana:"のむ",         meaning:["마시다"] },
+  { id:"j605", unit:"006a", pos:"동사", word:"みる",         kana:"みる",         meaning:["보다"],
+    examples:[{ ja:"ともだちと アニメを みる よていだよ。", ko:"친구와 애니메이션을 볼 예정이야.", form:"みる" }] },
+  { id:"j606", unit:"006a", pos:"동사", word:"ねる",         kana:"ねる",         meaning:["자다"] },
+  { id:"j607", unit:"006a", pos:"동사", word:"いく",         kana:"いく",         meaning:["가다"],
+    examples:[{ ja:"ぼうさいセンターは どうやって いくのかな?", ko:"방재 센터는 어떻게 가는 걸까?", form:"いく" }] },
+  { id:"j608", unit:"006a", pos:"동사", word:"べんきょうする", kana:"べんきょうする", meaning:["공부하다"] },
+  { id:"j609", unit:"006a", pos:"동사", word:"よむ",         kana:"よむ",         meaning:["읽다"] },
+  { id:"j610", unit:"006a", pos:"동사", word:"やすむ",       kana:"やすむ",       meaning:["쉬다"] },
+  { id:"j611", unit:"006a", pos:"동사", word:"くる",         kana:"くる",         meaning:["오다"] },
+  { id:"j612", unit:"006a", pos:"동사", word:"はなす",       kana:"はなす",       meaning:["말하다"] },
+  { id:"j613", unit:"006a", pos:"동사", word:"かえる",       kana:"かえる",       meaning:["(집에) 돌아가다", "돌아오다"] },
+  { id:"j614", unit:"006a", pos:"동사", word:"のる",         kana:"のる",         meaning:["타다"] },
+  { id:"j615", unit:"006a", pos:"동사", word:"あそぶ",       kana:"あそぶ",       meaning:["놀다"],
+    examples:[{ ja:"うみで あそぶ", ko:"바다에서 놀다", form:"あそぶ" }] },
 
-  /* ── 002 가족 ── */
-  { id:"w201", unit:"002", pos:"명사", word:"家族",   kana:"かぞく",    meaning:["가족"] },
-  { id:"w202", unit:"002", pos:"명사", word:"父",     kana:"ちち",      meaning:["아버지"], note:"자기 아버지를 남에게 말할 때" },
-  { id:"w203", unit:"002", pos:"명사", word:"母",     kana:"はは",      meaning:["어머니"], note:"자기 어머니를 남에게 말할 때" },
-  { id:"w204", unit:"002", pos:"명사", word:"兄",     kana:"あに",      meaning:["형", "오빠"] },
-  { id:"w205", unit:"002", pos:"명사", word:"姉",     kana:"あね",      meaning:["누나", "언니"] },
-  { id:"w206", unit:"002", pos:"명사", word:"弟",     kana:"おとうと",  meaning:["남동생"] },
-  { id:"w207", unit:"002", pos:"명사", word:"妹",     kana:"いもうと",  meaning:["여동생"] },
-  { id:"w208", unit:"002", pos:"명사", word:"子供",   kana:"こども",    meaning:["아이", "어린이"] },
+  /* ── 101쪽 ことば · きいて はなしましょう (13) ── */
+  { id:"j621", unit:"006b", pos:"명사", word:"しんじゅく",   kana:"しんじゅく",   meaning:["신주쿠"], note:"지명" },
+  { id:"j622", unit:"006b", pos:"부사", word:"どうやって",   kana:"どうやって",   meaning:["어떻게 해서"],
+    examples:[{ ja:"ぼうさいセンターは どうやって いくのかな?", ko:"방재 센터는 어떻게 가는 걸까?", form:"どうやって" }] },
+  { id:"j623", unit:"006b", pos:"명사", word:"バス",         kana:"バス",         meaning:["버스"] },
+  { id:"j624", unit:"006b", pos:"명사", word:"でんしゃ",     kana:"でんしゃ",     meaning:["전철"] },
+  { id:"j625", unit:"006b", pos:"명사", word:"がっこう",     kana:"がっこう",     meaning:["학교"] },
+  { id:"j626", unit:"006b", pos:"명사", word:"じてんしゃ",   kana:"じてんしゃ",   meaning:["자전거"] },
+  { id:"j627", unit:"006b", pos:"명사", word:"しゅうまつ",   kana:"しゅうまつ",   meaning:["주말"],
+    examples:[{ ja:"こんどの しゅうまつ、なに する?", ko:"이번 주말, 뭐 할래?", form:"しゅうまつ" }] },
+  { id:"j628", unit:"006b", pos:"명사", word:"アニメ",       kana:"アニメ",       meaning:["애니메이션"],
+    examples:[{ ja:"ともだちと アニメを みる よていだよ。", ko:"친구와 애니메이션을 볼 예정이야.", form:"アニメ" }] },
+  { id:"j629", unit:"006b", pos:"표현", word:"～よていだ",   kana:"よていだ",     meaning:["예정이다"],
+    jaAliases:["～よていだ"],
+    examples:[{ ja:"ともだちと アニメを みる よていだよ。", ko:"친구와 애니메이션을 볼 예정이야.", form:"よてい" }] },
+  { id:"j630", unit:"006b", pos:"표현", word:"かいものに いく", kana:"かいものに いく", meaning:["장 보러 가다", "쇼핑하러 가다"] },
+  { id:"j631", unit:"006b", pos:"명사", word:"うんどう",     kana:"うんどう",     meaning:["운동"],
+    examples:[{ ja:"うんどうを する", ko:"운동을 하다", form:"うんどう" }] },
+  { id:"j632", unit:"006b", pos:"명사", word:"うみ",         kana:"うみ",         meaning:["바다"],
+    examples:[{ ja:"うみで あそぶ", ko:"바다에서 놀다", form:"うみ" }] },
+  { id:"j633", unit:"006b", pos:"조사", word:"～で",         kana:"で",           meaning:["에서"],
+    jaAliases:["～で"], note:"장소" },
 
-  /* ── 003 음식 ── */
-  { id:"w301", unit:"003", pos:"명사", word:"食べ物", kana:"たべもの",  meaning:["음식", "먹을 것"],
-    examples:[{ ja:"好きな食べ物は何ですか。", ko:"좋아하는 음식은 무엇입니까?", form:"食べ物" }] },
-  { id:"w302", unit:"003", pos:"명사", word:"飲み物", kana:"のみもの",  meaning:["음료", "마실 것"] },
-  { id:"w303", unit:"003", pos:"명사", word:"ご飯",   kana:"ごはん",    meaning:["밥"] },
-  { id:"w304", unit:"003", pos:"명사", word:"パン",   kana:"パン",      meaning:["빵"],
-    examples:[{ ja:"朝はパンを食べます。", ko:"아침에는 빵을 먹습니다.", form:"パン" }] },
-  { id:"w305", unit:"003", pos:"명사", word:"コーヒー", kana:"コーヒー", meaning:["커피"],
-    examples:[{ ja:"毎朝コーヒーを飲みます。", ko:"매일 아침 커피를 마십니다.", form:"コーヒー" }] },
-  { id:"w306", unit:"003", pos:"명사", word:"牛乳",   kana:"ぎゅうにゅう", meaning:["우유"],
-    examples:[{ ja:"牛乳を買いました。", ko:"우유를 샀습니다.", form:"牛乳" }] },
-  { id:"w307", unit:"003", pos:"명사", word:"卵",     kana:"たまご",    meaning:["달걀", "계란"] },
-  { id:"w308", unit:"003", pos:"명사", word:"野菜",   kana:"やさい",    meaning:["채소", "야채"],
-    examples:[{ ja:"野菜が好きです。", ko:"채소를 좋아합니다.", form:"野菜" }] },
-  { id:"w309", unit:"003", pos:"명사", word:"果物",   kana:"くだもの",  meaning:["과일"] },
-  { id:"w310", unit:"003", pos:"명사", word:"お茶",   kana:"おちゃ",    meaning:["차"] },
-  { id:"w311", unit:"003", pos:"명사", word:"ラーメン", kana:"ラーメン", meaning:["라면", "라멘"] },
-  { id:"w312", unit:"003", pos:"명사", word:"ケーキ", kana:"ケーキ",    meaning:["케이크"] },
-  { id:"w313", unit:"003", pos:"명사", word:"水",     kana:"みず",      meaning:["물"] },
-
-  /* ── 004 장소와 생활 ── */
-  { id:"w401", unit:"004", pos:"명사", word:"学校",   kana:"がっこう",  meaning:["학교"],
-    examples:[{ ja:"学校へ行きます。", ko:"학교에 갑니다.", form:"学校" }] },
-  { id:"w402", unit:"004", pos:"명사", word:"病院",   kana:"びょういん", meaning:["병원"] },
-  { id:"w403", unit:"004", pos:"명사", word:"駅",     kana:"えき",      meaning:["역"],
-    examples:[{ ja:"駅で友達に会いました。", ko:"역에서 친구를 만났습니다.", form:"駅" }] },
-  { id:"w404", unit:"004", pos:"명사", word:"店",     kana:"みせ",      meaning:["가게"] },
-  { id:"w405", unit:"004", pos:"명사", word:"部屋",   kana:"へや",      meaning:["방"],
-    examples:[{ ja:"部屋を掃除します。", ko:"방을 청소합니다.", form:"部屋" }] },
-  { id:"w406", unit:"004", pos:"명사", word:"窓",     kana:"まど",      meaning:["창문"] },
-  { id:"w407", unit:"004", pos:"명사", word:"切手",   kana:"きって",    meaning:["우표"],
-    examples:[{ ja:"切手を三枚ください。", ko:"우표를 세 장 주세요.", form:"切手" }] },
-  { id:"w408", unit:"004", pos:"명사", word:"手紙",   kana:"てがみ",    meaning:["편지"] },
-  { id:"w409", unit:"004", pos:"명사", word:"新聞",   kana:"しんぶん",  meaning:["신문"],
-    examples:[{ ja:"毎朝新聞を読みます。", ko:"매일 아침 신문을 읽습니다.", form:"新聞" }] },
-  { id:"w410", unit:"004", pos:"명사", word:"テレビ", kana:"テレビ",    meaning:["텔레비전", "티브이"],
-    examples:[{ ja:"毎晩テレビを見ます。", ko:"매일 밤 텔레비전을 봅니다.", form:"テレビ" }] },
-  { id:"w411", unit:"004", pos:"명사", word:"パソコン", kana:"パソコン", meaning:["컴퓨터"],
-    examples:[{ ja:"パソコンで仕事をします。", ko:"컴퓨터로 일을 합니다.", form:"パソコン" }] },
-  { id:"w412", unit:"004", pos:"명사", word:"傘",     kana:"かさ",      meaning:["우산"], skip:true }
+  /* ── 102쪽 ことば · どう しますか。(지진 대처 7 · ます형 그대로) ── */
+  { id:"j641", unit:"006c", pos:"동사", word:"まもります",   kana:"まもります",   meaning:["지킵니다"],
+    examples:[{ ja:"まず、あたまと からだを まもりましょう。", ko:"먼저, 머리와 몸을 지킵시다.", form:"まもり" }] },
+  { id:"j642", unit:"006c", pos:"동사", word:"はいります",   kana:"はいります",   meaning:["들어갑니다"] },
+  { id:"j643", unit:"006c", pos:"동사", word:"しゃがみます", kana:"しゃがみます", meaning:["쭈그려 앉습니다"] },
+  { id:"j644", unit:"006c", pos:"동사", word:"まちます",     kana:"まちます",     meaning:["기다립니다"] },
+  { id:"j645", unit:"006c", pos:"동사", word:"けします",     kana:"けします",     meaning:["끕니다"] },
+  { id:"j646", unit:"006c", pos:"동사", word:"あけます",     kana:"あけます",     meaning:["엽니다"] },
+  { id:"j647", unit:"006c", pos:"동사", word:"よびます",     kana:"よびます",     meaning:["부릅니다"] }
 ];
-
-/* w412 는 w110 과 같은 단어라 중복 — skip:true 인 항목은 출제에서 빠진다.
-   학습지에서 같은 단어가 두 과에 나올 때 쓰는 표시입니다. */
 
 </script>
 <script>
