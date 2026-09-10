@@ -134,5 +134,40 @@ console.log("── jaAliases · 교재 인쇄 표기를 그대로 써도 정답
   eq(E.judge(w.kana, w).code, "ok", w.kana + " → 정답 (물결표 없이)");
 });
 
+console.log("── 시험 2 · 표현 (PRD §5) ──");
+eq(E.phraseDataErrors(E.PHRASES).join(" / "), "", "표현 데이터 검증 (key·vs·use)");
+eq(E.PHRASES.length, 10, "표현 10항목");
+eq(E.PHRASES.filter(function(p){ return p.kind === "대비"; }).length, 3, "대비 3항목");
+eq(E.PFORMS.reduce(function(a,f){ return a + f.w; }, 0), 100, "유형 배분 합계 100");
+
+/* 빈칸을 판 뒤 정답이 남으면 안 된다 */
+var pleak = [];
+E.PHRASES.forEach(function(p){ E.sides(p).forEach(function(sd){
+  var d = E.sideOf(p, sd);
+  if (d.ja.split(d.key).join("____").indexOf(d.key) >= 0) pleak.push(p.id);
+}); });
+eq(pleak.join(","), "", "표현 빈칸 뒤에 정답이 남지 않는다");
+
+/* 대비는 짝의 key 가 서로 달라야 고를 수 있다 */
+E.PHRASES.filter(function(p){ return p.vs; }).forEach(function(p){
+  eq(p.key !== p.vs.key, true, p.id + " 짝의 key 가 다르다 (" + p.key + " ↔ " + p.vs.key + ")");
+  eq(p.vs.ja.indexOf(p.key) < 0, true, p.id + " 짝 문장에 이쪽 key 가 섞여 있지 않다");
+});
+
+/* 문장이 곧 key 인 항목은 유형 G 에서 빠진다 — 「____?」 는 물어볼 것이 없다 */
+["p04","p05"].forEach(function(id){
+  var p = E.PHRASES.filter(function(x){ return x.id === id; })[0];
+  eq(E.gOk(p, 0), false, id + " (" + p.ja + ") 는 유형 G 에서 빠진다");
+});
+eq(E.gOk(E.PHRASES.filter(function(x){ return x.id === "p01"; })[0], 0), true, "p01 은 유형 G 가능");
+
+/* 오답 보기를 4개 뽑을 수 있을 만큼 서로 다른 뜻·문장이 있는가 */
+var kos = {}, jas = {};
+E.PHRASES.forEach(function(p){ E.sides(p).forEach(function(sd){
+  var d = E.sideOf(p, sd); kos[d.ko] = 1; jas[d.ja] = 1;
+}); });
+eq(Object.keys(kos).length >= 6, true, "서로 다른 뜻 " + Object.keys(kos).length + "개 (오답 보기 4개 확보)");
+eq(Object.keys(jas).length >= 6, true, "서로 다른 문장 " + Object.keys(jas).length + "개");
+
 console.log("\n" + pass + " 통과 · " + fail + " 실패");
 process.exit(fail ? 1 : 0);

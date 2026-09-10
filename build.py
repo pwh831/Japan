@@ -15,7 +15,7 @@ import io, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC  = os.path.join(HERE, "index.html")
 OUT  = os.path.join(HERE, "일본어-단어시험.html")
-DATA = ["data/words.js", "data/verbs.js"]      # data/phrases.js 는 M7 예정
+DATA = ["data/words.js", "data/verbs.js", "data/phrases.js"]
 
 def main():
     html = io.open(SRC, encoding="utf-8").read()

@@ -536,6 +536,93 @@ var GROUP_NM = { 1:"1류", 2:"2류", 3:"3류" };
 
 </script>
 <script>
+/* 시험 2 · 표현 데이터
+ *
+ * 출처: 제6과 98쪽 「의사소통 기본 표현」, 105·107쪽 「정리하기」, 106쪽 본문 대화.
+ *   정리하기에는 ことば 목록이 없어 시험 1(단어)에는 안 들어가지만,
+ *   교재가 일부러 나란히 놓고 비교시키는 내용이라 이 시험의 핵심 재료입니다(PRD §3.3).
+ *
+ * kind
+ *   대비 — 교재가 짝지어 비교시키는 것. vs 가 있고, 양쪽을 번갈아 낸다.
+ *   표현 — 언제 쓰는지가 핵심인 문장.
+ *   전개 — 이야기 순서를 잇는 말.
+ *
+ * key 가 단어 시험의 kana 에 해당한다 — 채점 대상은 문장 전체가 아니라 key 다.
+ *   key 는 반드시 ja 안에 그대로 있어야 한다(빌드 시 검사).
+ */
+
+var PUNITS = [
+  { code:"p98",  title:"의사소통 기본 표현", pages:"98쪽"  },
+  { code:"p105", title:"정리하기 1",         pages:"105쪽" },
+  { code:"p107", title:"정리하기 2",         pages:"107쪽" }
+];
+
+var PHRASES = [
+  /* ── 98쪽 의사소통 기본 표현 (5) ── */
+  { id:"p01", unit:"p98", kind:"표현",
+    ja:"こんどの しゅうまつ、なに する?", ko:"이번 주말, 뭐 할래?",
+    use:"앞으로의 예정을 물을 때", key:"こんど", note:"상황 설명(예정)" },
+
+  { id:"p02", unit:"p98", kind:"표현",
+    ja:"ぼうさいセンターは どうやって いくのかな?", ko:"방재 센터는 어떻게 가는 걸까?",
+    use:"가는 방법을 물을 때", key:"どうやって", note:"방법·이유" },
+
+  { id:"p03", unit:"p98", kind:"표현",
+    ja:"まず、あたまと からだを まもりましょう。", ko:"먼저, 머리와 몸을 지킵시다.",
+    use:"함께 하자고 지시할 때", key:"まもりましょう", note:"지시" },
+
+  { id:"p04", unit:"p98", kind:"전개",
+    ja:"それから?", ko:"그다음은?",
+    use:"다음 순서를 물어 이야기를 이을 때", key:"それから", note:"화제 전개" },
+
+  { id:"p05", unit:"p98", kind:"표현",
+    ja:"あぶない!", ko:"위험해!",
+    use:"위험을 알려 주의를 줄 때", key:"あぶない", note:"주의 환기" },
+
+  /* ── 105쪽 정리하기 1 (3) ── */
+  { id:"p06", unit:"p105", kind:"대비",
+    ja:"どこか いく?", ko:"어딘가 갈까?",
+    use:"정해지지 않은 곳을 말할 때", key:"どこか",
+    vs:{ ja:"どこが いい?", ko:"어디가 좋아?", key:"どこが",
+         why:"どこか 는 '어디인가', どこが 는 '어디가'. か 는 정해지지 않음, が 는 고르는 대상" },
+    note:"105쪽 정리하기 1" },
+
+  { id:"p07", unit:"p105", kind:"대비",
+    ja:"もう すぐ ぼうさいの ひだから。", ko:"이제 곧 방재의 날이니까.",
+    use:"이유를 댈 때", key:"だから",
+    vs:{ ja:"えきから バスが あるよ。", ko:"역에서 (가는) 버스가 있어.", key:"から",
+         why:"앞이 명사+だ 면 이유(때문에), 장소면 출발·기점(에서)" },
+    note:"105쪽 정리하기 1 · ～から 의 두 뜻" },
+
+  { id:"p08", unit:"p105", kind:"표현",
+    ja:"どうやって いくの?", ko:"어떻게 해서 가는 거야?",
+    use:"방법을 물을 때", key:"どうやって", note:"105쪽 정리하기 1 · 방법" },
+
+  /* ── 107쪽 정리하기 2 (2) ── */
+  { id:"p09", unit:"p107", kind:"대비",
+    ja:"はい、そうです。", ko:"네, 그렇습니다.",
+    use:"맞다고 답할 때", key:"そうです",
+    vs:{ ja:"いいえ、ちがいます。", ko:"아니요, 틀렸습니다.", key:"ちがいます",
+         why:"긍정은 そうです, 부정은 ちがいます" },
+    note:"107쪽 정리하기 2 · 긍정·부정" },
+
+  { id:"p10", unit:"p107", kind:"전개",
+    ja:"まず、つくえや テーブルの したに はいります。それから、ひを けします。",
+    ko:"우선, 책상이나 테이블 밑에 들어갑니다. 그리고, 불을 끕니다.",
+    use:"두 동작의 순서를 말할 때", key:"それから", note:"107쪽 정리하기 2 · 화제 전개" }
+];
+
+/* 문제 유형과 배분 (PRD §5.4).
+   D 가 이 시험의 이유다 — 나머지 셋만이면 단어 시험과 다를 게 없다. */
+var PFORMS = [
+  { k:"D", nm:"대비 고르기", sub:"헷갈리는 짝 가르기", w:35 },
+  { k:"E", nm:"뜻 고르기",   sub:"문장 → 뜻",         w:20 },
+  { k:"F", nm:"상황 → 표현", sub:"언제 쓰나",         w:20 },
+  { k:"G", nm:"핵심어 쓰기", sub:"빈칸에 직접",        w:25 }
+];
+
+</script>
+<script>
 (function(){
 "use strict";
 
@@ -708,6 +795,37 @@ function verbDataErrors(pool){
   return bad;
 }
 
+/* ══ 표현 — 대비 항목의 양면 (PRD §5.2) ══ */
+/* 대비 항목은 양쪽을 오간다. side 0 = 본문, 1 = 짝. */
+function sideOf(p, side){
+  return (side === 1 && p.vs) ? p.vs : { ja:p.ja, ko:p.ko, key:p.key };
+}
+function sides(p){ return p.vs ? [0, 1] : [0]; }
+/* 빈칸을 파고도 문맥이 남아야 유형 G 를 낼 수 있다.
+   「それから?」 처럼 문장이 곧 key 면 「____?」 가 되어 물어볼 것이 없다. */
+function gOk(p, side){
+  var d = sideOf(p, side);
+  return d.ja.indexOf(d.key) >= 0 && (d.ja.length - d.key.length) >= 2;
+}
+
+/* 표현 데이터 검증 — key 가 문장 안에 없으면 빈칸을 팔 수 없다. */
+function phraseDataErrors(pool){
+  var bad = [], i, p, j, d;
+  for (i = 0; i < pool.length; i++){
+    p = pool[i];
+    for (j = 0; j < sides(p).length; j++){
+      d = sideOf(p, sides(p)[j]);
+      if (!d.key) bad.push(p.id + ": key 없음");
+      else if (d.ja.indexOf(d.key) < 0) bad.push(p.id + ": key「" + d.key + "」가 문장에 없음");
+    }
+    if (p.kind === "대비" && !p.vs) bad.push(p.id + ": 대비인데 vs 가 없음");
+    if (p.vs && !p.vs.why) bad.push(p.id + ": vs 에 why 가 없음");
+    if (p.vs && p.vs.key === p.key) bad.push(p.id + ": 짝의 key 가 같아 고를 수가 없음");
+    if (!p.use) bad.push(p.id + ": use 없음");
+  }
+  return bad;
+}
+
 /* ══ 세 시험 ══ */
 var TESTS = [
   { k:"word", nm:"단어", sub:"낱말의 뜻과 표기", ready:true,
@@ -720,20 +838,24 @@ var TESTS = [
             {k:"I",nm:"그룹 고르기", sub:"1류·2류·3류",    w:25},
             {k:"J",nm:"기본형 되찾기",sub:"활용형 → 기본형", w:15} ],
     master:"세 활용형(ます·ましょう·たい)을 각각 연속 3회 맞히면 숙달입니다. 규칙이 잡히면 평범한 동사는 덜 나오고 예외만 남습니다." },
-  { k:"phrase", nm:"표현", sub:"문장을 언제 쓰나", ready:false, types:[],
-    master:"" }
+  { k:"phrase", nm:"표현", sub:"문장을 언제·어떻게 쓰나", ready:true,
+    types:PFORMS,
+    master:"헷갈리는 짝은 양쪽을 번갈아 냅니다. 한쪽만 3회 맞혀서는 숙달이 아닙니다 — 한쪽만 맞히면 가른 것이 아니니까요." }
 ];
 function T(){ var i; for (i=0;i<TESTS.length;i++) if (TESTS[i].k===cfg.test) return TESTS[i]; }
 
 var POOL = WORDS.filter(function(w){ return !w.skip; });
 var VPOOL = VERBS;
+var PPOOL = PHRASES;
 
 var cfg = {
   test:"word", count:20, ime:"raw",
   word:{ range:{}, types:{ A:1, B:1, C:1 } },
-  verb:{ range:{ 1:1, 2:1, 3:1 }, types:{ H:1, I:1, J:1 } }
+  verb:{ range:{ 1:1, 2:1, 3:1 }, types:{ H:1, I:1, J:1 } },
+  phrase:{ range:{}, types:{ D:1, E:1, F:1, G:1 } }
 };
 UNITS.forEach(function(u){ cfg.word.range[u.code] = 1; });
+PUNITS.forEach(function(u){ cfg.phrase.range[u.code] = 1; });
 function C(){ return cfg[cfg.test]; }
 
 /* ══ 저장 — 시험별로 따로 (PRD §9) ══ */
@@ -781,13 +903,13 @@ function drawHome(){
     b.querySelector(".n").innerHTML = "<b></b><span></span>";
     b.querySelector("b").textContent = t.nm;
     b.querySelector(".n span").textContent = t.sub;
-    b.querySelector(".c").textContent = !t.ready ? "준비 중"
-      : (t.k === "word" ? POOL.length : VPOOL.length) + "항목";
+    b.querySelector(".c").textContent =
+      (t.k === "word" ? POOL.length : t.k === "verb" ? VPOOL.length : PPOOL.length) + "항목";
     if (t.ready) b.addEventListener("click", function(){ cfg.test = t.k; drawHome(); });
     pick.appendChild(b);
   });
 
-  $("rangeLabel").textContent = cfg.test === "word" ? "범위 — 교재 쪽" : "범위 — 동사 그룹";
+  $("rangeLabel").textContent = cfg.test === "verb" ? "범위 — 동사 그룹" : "범위 — 교재 쪽";
   var rc = $("rangeChips");
   rc.innerHTML = "";
   rangeItems().forEach(function(r){
@@ -839,6 +961,11 @@ function rangeItems(){
       return { k:u.code, nm:u.title.replace("6과 · ", ""), note:u.pages,
                n:POOL.filter(function(w){ return w.unit === u.code; }).length };
     });
+  if (cfg.test === "phrase")
+    return PUNITS.map(function(u){
+      return { k:u.code, nm:u.title, note:u.pages,
+               n:PPOOL.filter(function(x){ return x.unit === u.code; }).length };
+    });
   return [1, 2, 3].map(function(g){
     var vs = VPOOL.filter(function(v){ return v.group === g; });
     return { k:String(g), nm:GROUP_NM[g], n:vs.length,
@@ -863,6 +990,7 @@ function seg(box, vals, label, get, set){
 
 function selected(){
   if (cfg.test === "word") return POOL.filter(function(w){ return cfg.word.range[w.unit]; });
+  if (cfg.test === "phrase") return PPOOL.filter(function(x){ return cfg.phrase.range[x.unit]; });
   return VPOOL.filter(function(v){ return cfg.verb.range[String(v.group)]; });
 }
 
@@ -870,11 +998,15 @@ function mastered(item){
   var st = store[cfg.test][item.id];
   if (!st) return false;
   if (cfg.test === "word") return (st.s.B || 0) >= 3;
-  return FORMS.every(function(f){ return (st.s["H" + f.k] || 0) >= 3; });
+  if (cfg.test === "verb") return FORMS.every(function(f){ return (st.s["H" + f.k] || 0) >= 3; });
+  /* 대비는 양쪽을 다 가려야 숙달이다. 한쪽만 맞히면 가른 것이 아니다. */
+  if (item.kind === "대비") return (st.s.D || 0) >= 3 && (st.s.D1 || 0) >= 3;
+  return (gOk(item, 0) ? (st.s.G || 0) : (st.s.E || 0)) >= 3;
 }
 
 function drawProgress(){
-  var n = 0, m = 0, d = 0, all = cfg.test === "word" ? POOL : VPOOL;
+  var n = 0, m = 0, d = 0,
+      all = cfg.test === "word" ? POOL : cfg.test === "verb" ? VPOOL : PPOOL;
   all.forEach(function(it){
     var st = store[cfg.test][it.id];
     if (!st || (!st.ok && !st.ng)) n++;
@@ -907,7 +1039,7 @@ function refreshStart(){
 /* ══ 출제 ══ */
 var sess = null;
 
-function skey(q){ return q.k + (q.form || ""); }
+function skey(q){ return q.k + (q.form || "") + (q.side === 1 ? "1" : ""); }
 function weight(item, key, q){
   var st = store[cfg.test][item.id];
   if (!st || (!st.ok && !st.ng)) return 6;
@@ -929,6 +1061,13 @@ function shuffle(a){
   for (i = a.length - 1; i > 0; i--){ j = Math.floor(Math.random() * (i + 1)); t = a[i]; a[i] = a[j]; a[j] = t; }
   return a;
 }
+function pickOpt(opts, q){
+  var tot = 0, i, r;
+  for (i = 0; i < opts.length; i++) tot += weight(opts[i].x, opts[i].kk, q);
+  r = Math.random() * tot;
+  for (i = 0; i < opts.length; i++){ r -= weight(opts[i].x, opts[i].kk, q); if (r <= 0) return opts[i]; }
+  return opts[opts.length - 1];
+}
 function pickBy(list, wKey){
   var tot = 0, i, r;
   for (i = 0; i < list.length; i++) tot += list[i][wKey];
@@ -941,20 +1080,43 @@ function buildSession(pool){
   var kinds = T().types.filter(function(t){ return C().types[t.k]; });
   if (!kinds.length || !pool.length) return [];
   var withEx = cfg.test === "word" ? pool.filter(function(w){ return blankable(w).length; }) : [];
-  var n = cfg.count ? Math.min(cfg.count, pool.length * 3) : pool.length;
+  var n = cfg.count ? Math.min(cfg.count, pool.length * 4) : pool.length;
   var used = {}, qs = [], guard = 0;
 
   while (qs.length < n && guard++ < n * 40){
-    var kind = pickBy(kinds, "w"), q = { k:kind.k };
-    var src = pool;
-    if (kind.k === "C"){ src = withEx; if (!src.length) continue; }
+    var kind = pickBy(kinds, "w"), q = { k:kind.k }, src = pool, item, key;
+    if (kind.k === "C") src = withEx;
+    if (kind.k === "D") src = pool.filter(function(x){ return x.kind === "대비"; });
+    if (kind.k === "G") src = pool.filter(function(x){
+      return sides(x).some(function(sd){ return gOk(x, sd); });
+    });
+    if (!src.length) continue;
     if (kind.k === "H" || kind.k === "J") q.form = pickBy(FORMS, "weight").k;
-    var key = skey(q);
-    var avail = src.filter(function(it){ return !used[it.id + key]; });
-    if (!avail.length) continue;
-    var item = pickWeighted(avail, key, q);
+
+    if (cfg.test === "phrase"){
+      /* (항목 × 면) 조합에서 고른다. 대비는 양쪽을 따로 세야 숙달이 성립한다. */
+      var opts = [];
+      src.forEach(function(x){
+        var use = (kind.k === "F") ? [0] : sides(x);   /* use 는 본문 쪽에만 있다 */
+        use.forEach(function(sd){
+          if (kind.k === "G" && !gOk(x, sd)) return;
+          var kk = kind.k + (sd === 1 ? "1" : "");
+          if (!used[x.id + kk]) opts.push({ x:x, sd:sd, kk:kk });
+        });
+      });
+      if (!opts.length) continue;
+      var got = pickOpt(opts, q);
+      item = got.x; q.side = got.sd; key = got.kk;
+    } else {
+      key = skey(q);
+      var avail = src.filter(function(it){ return !used[it.id + key]; });
+      if (!avail.length) continue;
+      item = pickWeighted(avail, key, q);
+    }
     used[item.id + key] = 1;
-    if (cfg.test === "word") q.w = item; else q.v = item;
+    if (cfg.test === "word") q.w = item;
+    else if (cfg.test === "verb") q.v = item;
+    else q.p = item;
     qs.push(q);
   }
   return shuffle(qs);
@@ -1021,6 +1183,7 @@ function esc(s){
   });
 }
 function answerOf(q){
+  if (cfg.test === "phrase") return q.k === "G" ? sideOf(q.p, q.side).key : null;
   if (cfg.test === "word") return q.w.kana;
   if (q.k === "H") return conj(q.v, q.form);
   if (q.k === "J") return q.v.kana;
@@ -1035,9 +1198,10 @@ function render(){
   $("qFill").style.width = (sess.at / sess.qs.length * 100) + "%";
   $("qScore").textContent = sess.score + "점";
   $("qKind").textContent = KINDNM(q.k);
-  $("qUnit").textContent = cfg.test === "word"
-    ? ((UNITS.filter(function(u){ return u.code === q.w.unit; })[0] || {}).title || "")
-    : GROUP_NM[q.v.group] + (q.v.tricky ? " · 예외" : "");
+  $("qUnit").textContent =
+    cfg.test === "word"   ? ((UNITS.filter(function(u){ return u.code === q.w.unit; })[0] || {}).title || "") :
+    cfg.test === "phrase" ? ((PUNITS.filter(function(u){ return u.code === q.p.unit; })[0] || {}).pages || "") :
+                            GROUP_NM[q.v.group] + (q.v.tricky ? " · 예외" : "");
 
   $("fb").hidden = true; $("askBox").hidden = true;
   $("choices").hidden = true; $("choices").innerHTML = "";
@@ -1084,12 +1248,71 @@ function render(){
     add(body, "q-sub", q.v.meaning.join(", "));
     drawChoices([GROUP_NM[1], GROUP_NM[2], GROUP_NM[3]], GROUP_NM[q.v.group], false);
 
-  } else {   /* J */
+  } else if (q.k === "J"){
     add(body, "q-ask", "이 활용형의 기본형은?  (" + formNm(q.form) + ")");
     add(body, "q-main ja", conj(q.v, q.form));
     add(body, "q-sub", q.v.meaning.join(", "));
     openInput();
+
+  } else if (q.k === "D"){
+    /* 뜻을 같이 보여 주면 답이 새어 나간다 — 일본어 문맥만으로 가르게 둔다. */
+    add(body, "q-ask", "빈칸에 알맞은 말은?");
+    blankSentence(body, sideOf(q.p, q.side));
+    drawChoices(shuffle([q.p.key, q.p.vs.key]), sideOf(q.p, q.side).key, true);
+
+  } else if (q.k === "E"){
+    var de = sideOf(q.p, q.side);
+    add(body, "q-ask", "이 말의 뜻은?");
+    add(body, "q-sent ja", de.ja);
+    drawChoices(shuffle([de.ko].concat(distractKo(q.p, q.side))), de.ko, false);
+
+  } else if (q.k === "F"){
+    add(body, "q-ask", "이럴 때 뭐라고 하나요?");
+    add(body, "q-main ko", q.p.use);
+    drawChoices(shuffle([q.p.ja].concat(distractJa(q.p))), q.p.ja, true);
+
+  } else {   /* G */
+    var dg = sideOf(q.p, q.side);
+    add(body, "q-ask", "빈칸에 알맞은 말을 써 보세요");
+    blankSentence(body, dg);
+    add(body, "q-sub", dg.ko);
+    openInput();
   }
+}
+
+function blankSentence(box, d){
+  var el = document.createElement("div");
+  el.className = "q-sent ja";
+  el.innerHTML = esc(d.ja).split(esc(d.key)).join("<u>____</u>");
+  box.appendChild(el);
+}
+
+/* 표현 오답 보기 — 다른 표현의 뜻·문장에서 뽑는다 */
+function allSides(exceptId){
+  var out = [];
+  PPOOL.forEach(function(x){
+    if (x.id === exceptId) return;
+    sides(x).forEach(function(sd){ out.push(sideOf(x, sd)); });
+  });
+  return out;
+}
+function distractKo(p, side){
+  var mine = {}, out = [];
+  sides(p).forEach(function(sd){ mine[sideOf(p, sd).ko] = 1; });
+  shuffle(allSides(p.id)).forEach(function(d){
+    if (out.length >= 4 || mine[d.ko]) return;
+    mine[d.ko] = 1; out.push(d.ko);
+  });
+  return out;
+}
+function distractJa(p){
+  var mine = {}, out = [];
+  sides(p).forEach(function(sd){ mine[sideOf(p, sd).ja] = 1; });
+  shuffle(allSides(p.id)).forEach(function(d){
+    if (out.length >= 4 || mine[d.ja]) return;
+    mine[d.ja] = 1; out.push(d.ja);
+  });
+  return out;
 }
 
 function openInput(){
@@ -1217,7 +1440,7 @@ $("hintBtn").addEventListener("click", function(){
 
 /* ══ 채점 확정 ══ */
 function finish(good, extra){
-  var q = sess.qs[sess.at], item = cfg.test === "word" ? q.w : q.v;
+  var q = sess.qs[sess.at], item = cfg.test === "word" ? q.w : cfg.test === "verb" ? q.v : q.p;
   var st = stat(item.id), key = skey(q);
   answered = true;
   st.last = Date.now();
@@ -1241,11 +1464,14 @@ function finish(good, extra){
                  '<div class="reveal"></div>';
   fb.querySelector("b").textContent = good ? "정답" : "오답";
   fb.querySelector(".x").textContent = extra;
-  fb.querySelector(".reveal").appendChild(cfg.test === "word" ? revealWord(q.w) : revealVerb(q.v, q.form));
+  fb.querySelector(".reveal").appendChild(
+    cfg.test === "word"   ? revealWord(q.w) :
+    cfg.test === "phrase" ? revealPhrase(q.p, q.side) :
+                            revealVerb(q.v, q.form));
 
   $("hintBtn").disabled = true; $("skipBtn").disabled = true;
   $("submitBtn").textContent = (sess.at + 1 >= sess.qs.length) ? "결과 보기" : "다음 →";
-  if (q.k === "A" || q.k === "C" || q.k === "I"){
+  if (q.k === "A" || q.k === "C" || q.k === "I" || q.k === "D" || q.k === "E" || q.k === "F"){
     var go = document.createElement("button");
     go.className = "btn pri"; go.type = "button";
     go.textContent = $("submitBtn").textContent;
@@ -1295,6 +1521,28 @@ function revealVerb(v, form){
   return d;
 }
 
+/* 대비는 짝을 나란히 보여 준다 — 가르는 것이 이 시험의 이유이므로 */
+function revealPhrase(p, side){
+  var d = document.createElement("div");
+  d.style.display = "flex"; d.style.flexDirection = "column"; d.style.gap = "6px";
+  sides(p).forEach(function(sd){
+    var one = sideOf(p, sd), row = document.createElement("div");
+    row.style.display = "flex"; row.style.flexDirection = "column";
+    row.innerHTML = '<span class="big ja"></span><span class="sm"></span>';
+    row.querySelector(".big").style.fontSize = "24px";
+    row.querySelector(".big").textContent = one.ja;
+    row.querySelector(".sm").textContent = one.ko;
+    if (p.vs && sd === side){ row.style.borderLeft = "3px solid var(--rule)"; row.style.paddingLeft = "9px"; }
+    d.appendChild(row);
+  });
+  var foot = document.createElement("span");
+  foot.className = "sm";
+  foot.style.marginTop = "3px";
+  foot.textContent = (p.vs && p.vs.why) ? p.vs.why : p.use;
+  d.appendChild(foot);
+  return d;
+}
+
 function next(){
   sess.at++;
   if (sess.at >= sess.qs.length) showResult(); else render();
@@ -1315,10 +1563,16 @@ function showResult(){
     var d = document.createElement("div");
     d.className = "wrong";
     d.innerHTML = '<span class="w ja"></span><span class="t"></span><span class="m"></span>';
-    d.querySelector(".w").textContent = cfg.test === "word"
-      ? x.item.kana : x.item.kana + " → " + (answerOf(x.q) || "");
+    if (cfg.test === "phrase"){
+      var dd = sideOf(x.item, x.q.side);
+      d.querySelector(".w").textContent = dd.ja;
+      d.querySelector(".m").textContent = dd.ko;
+    } else {
+      d.querySelector(".w").textContent = cfg.test === "word"
+        ? x.item.kana : x.item.kana + " → " + (answerOf(x.q) || "");
+      d.querySelector(".m").textContent = x.item.meaning.join(", ");
+    }
     d.querySelector(".t").textContent = KINDNM(x.q.k) + (x.q.form ? " · " + formNm(x.q.form) : "");
-    d.querySelector(".m").textContent = x.item.meaning.join(", ");
     box.appendChild(d);
   });
   $("againBtn").hidden = !sess.wrong.length;

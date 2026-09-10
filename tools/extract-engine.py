@@ -11,7 +11,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.join(HERE, "..")
 
 out = []
-for f in ("data/words.js", "data/verbs.js"):
+for f in ("data/words.js", "data/verbs.js", "data/phrases.js"):
     out.append(io.open(os.path.join(ROOT, f), encoding="utf-8").read())
 
 h = io.open(os.path.join(ROOT, "index.html"), encoding="utf-8").read()
@@ -22,6 +22,8 @@ out.append(js[a:b])
 
 out.append("module.exports={judge:judge,toKana:toKana,norm:norm,"
            "stem:stem,conj:conj,deconj:deconj,verbDataErrors:verbDataErrors,"
-           "WORDS:WORDS,UNITS:UNITS,VERBS:VERBS,FORMS:FORMS};\n")
+           "WORDS:WORDS,UNITS:UNITS,VERBS:VERBS,FORMS:FORMS,"
+           "PHRASES:PHRASES,PUNITS:PUNITS,PFORMS:PFORMS,"
+           "sideOf:sideOf,sides:sides,gOk:gOk,phraseDataErrors:phraseDataErrors};\n")
 
 sys.stdout.write("\n".join(out))

@@ -86,6 +86,47 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   const fbTxt = await p.textContent('#fb');
   t(/오답|다릅니다|맞았습니다/.test(fbTxt), '틀린 답이 오답으로 잡힘 (' + wrong + ')');
 
+  // ── 시험 2 · 표현 ──
+  /* 어느 화면에 있든 홈으로 — 퀴즈 중이면 그만두기, 결과면 처음으로 */
+  if (await p.$eval('#quiz', e => !e.hidden)) await p.click('#quitBtn');
+  else if (await p.$eval('#result', e => !e.hidden)) await p.click('#homeBtn');
+  await p.waitForTimeout(200);
+  t(await p.$eval('#home', e => !e.hidden), '홈으로 돌아왔다');
+  await p.click('.test >> nth=2'); await p.waitForTimeout(200);
+  const pRange = await p.$$eval('#rangeChips .chip span:first-child', e => e.map(x => x.textContent));
+  t(pRange.length === 3, '표현 범위 3개 (교재 쪽): ' + pRange.join(' '));
+  const pTypes = await p.$$eval('#typeChips .chip span:first-child', e => e.map(x => x.textContent));
+  t(pTypes.join(',') === '대비 고르기,뜻 고르기,상황 → 표현,핵심어 쓰기', '표현 유형 4개');
+  t(/표현 10항목/.test(await p.textContent('#startBtn')), '시작: ' + await p.textContent('#startBtn'));
+
+  await p.click('#startBtn'); await p.waitForTimeout(250);
+  const pk = {}; let blanks = 0, dSeen = 0;
+  for (let i = 0; i < 25; i++) {
+    if (await p.$eval('#result', e => !e.hidden)) break;
+    const kind = await p.textContent('#qKind');
+    pk[kind] = (pk[kind] || 0) + 1;
+    if (kind === '대비 고르기') {
+      dSeen++;
+      const n = (await p.$$('#choices .choice')).length;
+      t(n === 2, '  대비는 2지선다 (' + n + ')');
+      const shown = await p.textContent('#qBody');
+      t(shown.indexOf('____') >= 0, '  대비 문장에 빈칸이 있다');
+      t(!/[가-힣]/.test((await p.$eval('#qBody', e => e.textContent)).replace('빈칸에 알맞은 말은?','')),
+        '  대비 문제에 한국어 뜻이 안 보인다 (답 노출 방지)');
+    }
+    if (await p.$eval('#choices', e => !e.hidden)) {
+      await p.click('#choices .choice >> nth=0'); await p.waitForTimeout(120);
+      await p.click('#fb .btn');
+    } else {
+      blanks++;
+      await p.click('#skipBtn'); await p.waitForTimeout(120); await p.click('#submitBtn');
+    }
+    await p.waitForTimeout(110);
+  }
+  t(await p.$eval('#result', e => !e.hidden), '표현 세션이 결과 화면까지 간다');
+  t(dSeen > 0, '대비 문제가 나왔다 (' + dSeen + '회)');
+  console.log('    표현 유형 분포:', JSON.stringify(pk));
+
   t(errs.length === 0, errs.length ? '페이지 오류:\n     ' + errs.join('\n     ') : '페이지 오류 없음');
   await b.close();
   console.log('\n' + (fail ? fail + '건 실패' : '전부 통과'));
