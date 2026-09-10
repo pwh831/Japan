@@ -1,0 +1,5 @@
+# npx skills 로 설치한 제3자 스킬 — 이 저장소의 산출물이 아니다.
+# 다시 받으려면: npx skills add mattpocock/skills
+.agents/
+.claude/
+skills-lock.json
