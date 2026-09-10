@@ -205,6 +205,17 @@ h1{
 }
 .btn:hover{border-color:var(--rule);color:var(--rule)}
 .btn:active{transform:translateY(1px)}
+.btn.on{background:var(--shu);border-color:var(--shu);color:var(--card)}
+.btn.on:hover{color:var(--card)}
+.foot-btns{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.pip[data-s="mis"]{border-color:var(--shu);background:var(--shu-soft);color:var(--shu)}
+.save-line{
+  padding:8px 16px;border-top:1px solid var(--edge-soft);
+  font-size:12px;color:var(--ink-faint);display:flex;align-items:center;gap:7px;
+}
+.save-line .dot{width:6px;height:6px;border-radius:50%;background:var(--ink-faint);flex:none}
+.save-line.on{color:var(--rule)} .save-line.on .dot{background:var(--rule)}
+.save-line.off{color:var(--shu)} .save-line.off .dot{background:var(--shu)}
 
 /* ── 코드포인트 대조 ── */
 .compare{
@@ -344,9 +355,14 @@ footer b{color:var(--ink-soft);font-weight:600}
     <div class="cp-row"><span class="cp-tag mono">입력</span><div class="cp-list" id="cpInput"></div></div>
   </div>
 
+  <div class="save-line" id="saveLine"><span class="dot"></span><span id="saveText">저장 여부 확인 중…</span></div>
+
   <div class="sheet-foot">
     <div class="pips" id="pips"></div>
-    <button class="btn" id="nextBtn" type="button">다음 과제 →</button>
+    <div class="foot-btns">
+      <button class="btn" id="misreadBtn" type="button">쓴 대로 안 나왔어요</button>
+      <button class="btn" id="nextBtn" type="button">다음 →</button>
+    </div>
   </div>
 </div>
 
@@ -369,7 +385,8 @@ footer b{color:var(--ink-soft);font-weight:600}
 </section>
 
 <footer>
-  이 페이지는 <b>기록을 저장하지 않습니다.</b> 새로 고치면 처음부터 시작합니다.<br>
+  결과는 <b>자동으로 저장됩니다</b> — 복사를 잊어도 제가 읽을 수 있고, 다시 열면 이어서 할 수 있습니다.
+  위 칸의 저장 표시가 붉으면 그때만 아래 결과를 복사해 주세요.<br>
   판정 규칙은 PRD §5.2 그대로입니다 — 공백·전각/반각만 정규화하고, 장음 <span class="ja">ー</span>·촉음 <span class="ja">っ</span>·탁점·가나 종류는 전부 채점합니다.
 </footer>
 
@@ -384,7 +401,10 @@ footer b{color:var(--ink-soft);font-weight:600}
     { w:"テレビ",       label:"가타카나 · 텔레비전",   why:"가나 종류가 구분되어 오는가" },
     { w:"きって",       label:"촉음 っ · 우표",        why:"작은 っ 가 큰 つ 로 안 바뀌는가" },
     { w:"コーヒー",     label:"장음 ー · 커피",        why:"장음부가 하이픈으로 안 바뀌는가" },
-    { w:"ぎゅうにゅう", label:"탁점·요음 · 우유",      why:"탁점과 작은 ゅ 가 살아남는가" }
+    { w:"ぎゅうにゅう", label:"탁점·요음 · 우유",      why:"탁점과 작은 ゅ 가 살아남는가" },
+    { w:"ユニット",     label:"혼동쌍 ユ / コ · 유닛",  why:"ユ 를 コ 로 읽지 않는가", pair:"ユ↔コ" },
+    { w:"シャツ",       label:"혼동쌍 シ / ツ · 셔츠",  why:"シ 와 ツ 를 뒤집지 않는가", pair:"シ↔ツ" },
+    { w:"パソコン",     label:"혼동쌍 ソ / ン · 컴퓨터", why:"ソ·ン·コ 가 뒤섞이지 않는가", pair:"ソ↔ン" }
   ];
 
   var CHECKS = [
@@ -396,7 +416,9 @@ footer b{color:var(--ink-soft);font-weight:600}
       idle:"가타카나로 쓴 글자가 가타카나로 오는지. PRD §5.2가 통째로 이 위에 서 있습니다." },
     { id:"marks", mk:"04", nm:"장음·촉음·탁점",
       idle:"ー · っ · ゛ 가 정확히 오는지. 한 글자만 어긋나도 오답이 되는 표기들입니다." },
-    { id:"cover", mk:"05", nm:"手書き 패널 가림",
+    { id:"confuse", mk:"05", nm:"혼동쌍 오인식",
+      idle:"ユ/コ · シ/ツ · ソ/ン 처럼 닮은 글자를 OS가 뒤바꾸는 빈도. 여기가 잦으면 손글씨만으로는 채점이 서지 않습니다." },
+    { id:"cover", mk:"06", nm:"手書き 패널 가림",
       idle:"손글씨판이 화면을 얼마나 덮는지. 문제와 입력칸을 어디까지 올려야 할지 정합니다." }
   ];
 
@@ -499,7 +521,15 @@ footer b{color:var(--ink-soft);font-weight:600}
     drawCps($("cpTarget"), t.w, probe.value, true);
     drawCps($("cpInput"), probe.value, t.w, true);
     setVerdict(judge(probe.value, t.w).code);
+    drawMisreadBtn();
     drawPips();
+  }
+
+  function drawMisreadBtn(){
+    var r = results[cur], on = !!(r && r.misread), b = $("misreadBtn");
+    b.className = "btn" + (on ? " on" : "");
+    b.textContent = on ? "✓ 오인식으로 표시함" : "쓴 대로 안 나왔어요";
+    b.setAttribute("aria-pressed", on ? "true" : "false");
   }
 
   function setVerdict(code){
@@ -519,7 +549,7 @@ footer b{color:var(--ink-soft);font-weight:600}
       b.setAttribute("aria-label", "과제 " + (i + 1) + "로 이동");
       if (i === cur) b.setAttribute("aria-current", "true");
       r = results[i];
-      if (r) b.setAttribute("data-s", r.code === "ok" ? "ok" : (r.code === "empty" ? "" : "bad"));
+      if (r) b.setAttribute("data-s", r.misread ? "mis" : (r.code === "ok" ? "ok" : (r.code === "empty" ? "" : "bad")));
       b.addEventListener("click", (function(n){ return function(){ cur = n; drawTask(); probe.focus(); }; })(i));
       box.appendChild(b);
     }
@@ -590,6 +620,20 @@ footer b{color:var(--ink-soft);font-weight:600}
       return { s:"fail", badge:"어긋남",
         msg:bad + "개가 목표와 다릅니다. 손이 미끄러진 것인지 OS가 바꾼 것인지 코드포인트로 가려 주세요 — OS가 바꾼 것이라면 그 표기는 jaAliases로 열어 줘야 합니다." };
     }
+    if (id === "confuse"){
+      var mis = 0, tried = 0;
+      for (i = 0; i < TASKS.length; i++){
+        r = results[i];
+        if (!r || r.code === "empty") continue;
+        tried++;
+        if (r.misread) mis++;
+      }
+      if (!tried) return { s:"idle", badge:"미확인" };
+      if (!mis) return { s:"pass", badge:"오인식 0건",
+        msg:"지금까지 " + tried + "개 모두 쓴 대로 들어왔습니다. 손글씨를 그대로 채점해도 됩니다." };
+      return { s:"fail", badge:"오인식 " + mis + "건",
+        msg:tried + "개 중 " + mis + "개가 쓴 것과 다르게 인식됐습니다. 아는 단어가 오답으로 기록된다는 뜻이라, 채점 전에 확인 단계를 두거나 타이핑 입력을 함께 열어야 합니다." };
+    }
     if (id === "cover"){
       if (!maxCover) return { s:"idle", badge:"미확인" };
       var pct = Math.round(maxCover * 100);
@@ -628,14 +672,16 @@ footer b{color:var(--ink-soft);font-weight:600}
 
   function update(){
     var t = TASKS[cur], raw = probe.value, j = judge(raw, t.w);
+    var was = results[cur];
     if (raw) sawText = true;
-    results[cur] = { raw:raw, code:j.code };
+    results[cur] = { raw:raw, code:j.code, misread: was ? !!was.misread : false };
     drawCps($("cpTarget"), t.w, raw, true);
     drawCps($("cpInput"), raw, t.w, true);
     setVerdict(j.code);
     drawPips();
     drawChecks();
     drawReport();
+    saveSoon();
   }
 
   /* ── 화면 가림 측정 ── */
@@ -664,7 +710,9 @@ footer b{color:var(--ink-soft);font-weight:600}
       mark = r.code === "ok" ? "일치" :
              r.code === "kana" ? "가나 종류만 다름" :
              r.code === "near" ? "한 글자 다름" : "불일치";
-      L.push("[" + (i+1) + "] " + t.w + "  → " + r.raw + "  " + mark);
+      L.push("[" + (i+1) + "] " + t.w + "  → " + r.raw + "  " + mark +
+             (r.misread ? "  ※ 쓴 대로 안 나옴(오인식)" : "") +
+             (t.pair ? "  [혼동쌍 " + t.pair + "]" : ""));
       if (r.code !== "ok"){
         L.push("      목표 " + cps(t.w).map(function(c){ return hex(c.cp); }).join(" "));
         L.push("      입력 " + cps(r.raw).map(function(c){ return hex(c.cp); }).join(" "));
@@ -675,11 +723,31 @@ footer b{color:var(--ink-soft);font-weight:600}
            " · update " + counts.compositionupdate +
            " · end " + counts.compositionend +
            " · input " + counts.input);
+    var misN = 0, triedN = 0;
+    for (i = 0; i < TASKS.length; i++){
+      if (results[i] && results[i].code !== "empty"){ triedN++; if (results[i].misread) misN++; }
+    }
+    L.push("오인식 " + misN + " / " + triedN + "건");
     L.push("입력방식 " + (counts.compositionstart > 0 ? "조합(composition) — 채점은 compositionend 뒤에"
                                                      : counts.input ? "직접 삽입 — input에서 읽어도 안전"
                                                      : "미확인"));
     $("report").value = L.join("\n");
   }
+
+  $("misreadBtn").addEventListener("click", function(){
+    var r = results[cur];
+    if (!r || r.code === "empty"){
+      $("verdictText").innerHTML = "<b>먼저 써 보세요</b> — 무엇이 잘못 인식됐는지 알아야 기록할 수 있습니다";
+      $("verdict").className = "verdict warn";
+      return;
+    }
+    r.misread = !r.misread;
+    drawMisreadBtn();
+    drawPips();
+    drawChecks();
+    drawReport();
+    saveSoon();
+  });
 
   $("nextBtn").addEventListener("click", function(){
     cur = (cur + 1) % TASKS.length;
@@ -698,6 +766,75 @@ footer b{color:var(--ink-soft);font-weight:600}
       ta.setAttribute("readonly", "readonly");
     }
   });
+
+  /* ── 결과 저장 — 복사를 잊어도 남도록 ── */
+  var db = null, saveTimer = null;
+
+  function buildState(){
+    var i, out = { updatedAt:new Date().toISOString(), ua:navigator.userAgent,
+                   screen:window.innerWidth + "x" + window.innerHeight,
+                   cover:maxCover ? Math.round(maxCover * 100) : 0,
+                   counts:{ compositionstart:counts.compositionstart,
+                            compositionupdate:counts.compositionupdate,
+                            compositionend:counts.compositionend,
+                            input:counts.input },
+                   tasks:[], report:$("report").value };
+    for (i = 0; i < TASKS.length; i++){
+      out.tasks.push({ target:TASKS[i].w, pair:TASKS[i].pair || "",
+                       typed:results[i] ? results[i].raw : "",
+                       code:results[i] ? results[i].code : "empty",
+                       misread:results[i] ? !!results[i].misread : false });
+    }
+    return out;
+  }
+
+  function setSaveLine(cls, text){
+    $("saveLine").className = "save-line " + cls;
+    $("saveText").textContent = text;
+  }
+
+  function saveSoon(){
+    if (!db) return;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function(){
+      db.doc("runs/latest").set(buildState()).then(function(){
+        setSaveLine("on", "저장됨 — 복사하지 않으셔도 제가 읽을 수 있습니다");
+      }, function(){
+        setSaveLine("off", "저장 실패 — 아래 결과를 복사해 주세요");
+      });
+    }, 700);
+  }
+
+  function restore(state){
+    var i, t;
+    if (!state || !state.tasks) return false;
+    for (i = 0; i < TASKS.length && i < state.tasks.length; i++){
+      t = state.tasks[i];
+      if (!t || !t.typed) continue;
+      results[i] = { raw:t.typed, code:judge(t.typed, TASKS[i].w).code, misread:!!t.misread };
+      sawText = true;
+    }
+    if (state.cover) maxCover = state.cover / 100;
+    return true;
+  }
+
+  if (window.claude && typeof window.claude.use === "function"){
+    window.claude.use("db").then(function(d){
+      db = d;
+      if (!db){ setSaveLine("off", "저장이 안 되는 화면입니다 — 아래 결과를 복사해 주세요"); return; }
+      setSaveLine("on", "결과가 저장됩니다 — 복사하지 않으셔도 됩니다");
+      db.doc("runs/latest").get().then(function(snap){
+        if (snap && snap.exists && !sawText && restore(snap.data)){
+          drawTask(); drawChecks(); drawReport();
+          setSaveLine("on", "이전 기록을 불러왔습니다");
+        }
+      }, function(){});
+    }, function(){
+      setSaveLine("off", "저장이 안 되는 화면입니다 — 아래 결과를 복사해 주세요");
+    });
+  } else {
+    setSaveLine("off", "저장이 안 되는 화면입니다 — 아래 결과를 복사해 주세요");
+  }
 
   drawTask();
   drawChecks();
