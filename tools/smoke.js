@@ -90,6 +90,19 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   const fbTxt = await p.textContent('#fb');
   t(/오답|다릅니다|맞았습니다/.test(fbTxt), '틀린 답이 오답으로 잡힘 (' + wrong + ')');
 
+  // 한 글자 차이면 되묻고 다시 쓰게 한다(정답 화면이 아직 안 나온다) — 확실히 틀린 답으로 한 번 더
+  if (!(await p.$('#fb .reveal'))) {
+    await p.fill('#ans', 'ぬぬぬぬぬ');
+    await p.click('#submitBtn'); await p.waitForTimeout(200);
+  }
+
+  // 한국어 발음 — 정답 화면에만, 문제 화면에는 없어야 한다
+  const pronRows = await p.$$eval('#fb .pron', e => e.map(x => x.textContent.trim()).filter(Boolean));
+  t(pronRows.length > 0, '정답 화면에 한국어 발음이 붙는다 (' + pronRows.slice(0,3).join(' · ') + ')');
+  t(pronRows.every(x => /^[가-힣\s·ー、。!?！？~～]+$/.test(x)), '발음 줄에 가나·한자가 남지 않았다');
+  await p.click('#submitBtn'); await p.waitForTimeout(200);
+  t(await p.$$eval('#qBody .pron', e => e.length) === 0, '문제 화면에는 발음이 없다 (읽기 연습이 사라지지 않게)');
+
   // ── 시험 2 · 표현 ──
   /* 어느 화면에 있든 홈으로 — 퀴즈 중이면 그만두기, 결과면 처음으로 */
   if (await p.$eval('#quiz', e => !e.hidden)) await p.click('#quitBtn');

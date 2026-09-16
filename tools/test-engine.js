@@ -226,5 +226,53 @@ E.PHRASES.forEach(function(p){ E.sides(p).forEach(function(sd){
 eq(Object.keys(kos).length >= 6, true, "서로 다른 뜻 " + Object.keys(kos).length + "개 (오답 보기 4개 확보)");
 eq(Object.keys(jas).length >= 6, true, "서로 다른 문장 " + Object.keys(jas).length + "개");
 
+console.log("── 가나 → 한국어 발음 ──");
+var P = E.toKo;
+eq(P("ほん"),"혼","말끝 ん 은 ㄴ");
+eq(P("しんぶん"),"심분","ん+ば행은 ㅁ, 말끝은 ㄴ");
+eq(P("しんかんせん"),"싱칸센","ん+か행은 ㅇ, 말끝은 ㄴ");
+eq(P("アトラクション"),"아토라쿠숀","가타카나 · 요음 · 말끝 ん");
+eq(P("せんせい"),"센세이","ん+さ행은 ㄴ");
+eq(P("あんない"),"안나이","ん+な행은 ㄴ");
+eq(P("がっこう"),"갓코우","촉음은 ㅅ 받침");
+eq(P("きって"),"킷테","촉음 きって");
+eq(P("コーヒー"),"코오히이","장음 ー 은 앞 모음 반복");
+eq(P("ラーメン"),"라아멘","장음 + 말끝 ん");
+eq(P("しんごう"),"싱고우","ん+が행은 ㅇ");
+eq(P("かく"),"카쿠","か=카 (외래어 표기법의 '가' 가 아니다 — §7.3)");
+eq(P("がく"),"가쿠","が=가 · 탁점을 카/가로 가른다");
+eq(P("べんきょうする"),"벵쿄우스루","ん+きょ · 요음");
+eq(P("たべる"),"타베루","기본");
+eq(P("ふぁいる"),"파이루","외래음 ふぁ");
+eq(P("きょう"),"쿄우","요음 きょ");
+eq(P("にほんご"),"니홍고","ん+ご 는 ㅇ");
+eq(P("には"),"니와","조사 は 는 와");
+eq(P("よていは ない"),"요테이와 나이","조사 は + 띄어쓰기");
+eq(P("はなす"),"하나스","낱말 첫 は 는 하 — 조사가 아니다");
+eq(P("はやく"),"하야쿠","はやく 는 하야쿠");
+eq(P("したに はいります"),"시타니 하이리마스","띄어쓰기 뒤의 は 는 하");
+eq(P("はい、そうです。"),"하이、소우데스。","문두 は");
+/* 정답 화면에 발음이 비는 줄이 없어야 한다 */
+var noPron = [];
+E.PHRASES.forEach(function(p){ E.sides(p).forEach(function(sd){
+  var d = E.sideOf(p, sd);
+  if (!E.pron(d.kana || d.ja)) noPron.push(p.id + " " + (d.kana || d.ja));
+}); });
+eq(noPron.length, 0, "발음을 못 다는 표현: " + noPron.join(", "));
+var vNoPron = [];
+E.VERBS.concat(E.ADJS).forEach(function(v){
+  E.formsOf(v).forEach(function(f){ if (!E.pron(E.anyConj(v, f.k))) vNoPron.push(v.kana + " " + f.k); });
+  if (!E.pron(v.kana)) vNoPron.push(v.kana + " 기본형");
+});
+eq(vNoPron.length, 0, "발음을 못 다는 활용형: " + vNoPron.join(", "));
+/* 단어장 전체가 발음으로 바뀌는가 — 가나가 남으면 표가 아니라 구멍이다 */
+var leak = [];
+E.WORDS.forEach(function(w){
+  if (w.skip) return;
+  var k = E.toKo(w.kana);
+  if (/[぀-ゟ゠-ヿー]/.test(k)) leak.push(w.kana + " → " + k);
+});
+eq(leak.length, 0, "가나가 그대로 남은 낱말: " + leak.slice(0, 5).join(", "));
+
 console.log("\n" + pass + " 통과 · " + fail + " 실패");
 process.exit(fail ? 1 : 0);

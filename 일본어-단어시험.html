@@ -152,6 +152,9 @@ p{margin:0}
 .reveal .big{font-size:32px;line-height:1.3;letter-spacing:.06em;font-weight:500}
 .reveal .sm{font-size:13.5px;color:var(--ink-soft)}
 .reveal .ex{font-size:15px;color:var(--ink-soft);margin-top:4px;line-height:1.55}
+/* 한국어 발음 — 정답을 본 뒤에만 나온다. 문제 쪽에 있으면 읽기 연습이 사라진다. */
+.pron{font-size:12.5px;color:var(--ink-faint);letter-spacing:.02em}
+.ctab dd .pron{display:block;margin-top:-1px}
 .reveal .ex i{display:block;font-style:normal;font-size:12.5px;color:var(--ink-faint)}
 
 /* 되묻기 */
@@ -660,6 +663,9 @@ var GROUP_NM = { 1:"1류", 2:"2류", 3:"3류" };
  *   made:true 는 단어장 문형에 범위 안 낱말을 끼워 제가 만든 문장입니다.
  *
  * key 는 반드시 ja 안에 그대로 있어야 합니다(phraseDataErrors 가 검사).
+ *
+ * kana 는 ja 에 한자가 있을 때만 적습니다 — 정답을 보여 줄 때 한국어 발음을 달아야
+ *   하는데, 한자가 남으면 반쯤만 읽히기 때문입니다(phraseDataErrors 가 검사).
  */
 
 var PUNITS = [
@@ -742,6 +748,7 @@ var PHRASES = [
 
   { id:"p15", unit:"q3", kind:"표현", made:true,
     ja:"あんなに 人が ならんで います。", ko:"저렇게 사람이 줄 서 있습니다.",
+    kana:"あんなに ひとが ならんで います。",
     use:"지금의 상태·진행을 말할 때 (～て います)", key:"ならんで",
     note:"단어장 4쪽 문형 · 문장은 범위 안 낱말로 구성" },
 
@@ -887,6 +894,96 @@ function toKana(s, kata, final){
   return out;
 }
 
+/* ══ 가나 → 한국어 발음 (읽기 도우미) ══ */
+/* か=카 · が=가 로 적는다. 국립국어원 외래어 표기법은 어두에서 둘 다 '가' 로 적지만,
+   이 앱은 탁점을 엄격하게 채점하므로(§7.3) 그 둘이 붙어 버리면 곤란하다.
+   모라 단위 1:1 이라 발음에서 가나를 되짚을 수 있다 — 쓰기 연습에 그게 필요하다. */
+var KO1 = {
+  "あ":"아","い":"이","う":"우","え":"에","お":"오",
+  "か":"카","き":"키","く":"쿠","け":"케","こ":"코",
+  "さ":"사","し":"시","す":"스","せ":"세","そ":"소",
+  "た":"타","ち":"치","つ":"츠","て":"테","と":"토",
+  "な":"나","に":"니","ぬ":"누","ね":"네","の":"노",
+  "は":"하","ひ":"히","ふ":"후","へ":"헤","ほ":"호",
+  "ま":"마","み":"미","む":"무","め":"메","も":"모",
+  "や":"야","ゆ":"유","よ":"요",
+  "ら":"라","り":"리","る":"루","れ":"레","ろ":"로",
+  "わ":"와","を":"오",
+  "が":"가","ぎ":"기","ぐ":"구","げ":"게","ご":"고",
+  "ざ":"자","じ":"지","ず":"즈","ぜ":"제","ぞ":"조",
+  "だ":"다","ぢ":"지","づ":"즈","で":"데","ど":"도",
+  "ば":"바","び":"비","ぶ":"부","べ":"베","ぼ":"보",
+  "ぱ":"파","ぴ":"피","ぷ":"푸","ぺ":"페","ぽ":"포"
+};
+var KO2 = {
+  "きゃ":"캬","きゅ":"큐","きょ":"쿄", "ぎゃ":"갸","ぎゅ":"규","ぎょ":"교",
+  "しゃ":"샤","しゅ":"슈","しょ":"쇼", "じゃ":"자","じゅ":"주","じょ":"조",
+  "ちゃ":"차","ちゅ":"추","ちょ":"초", "にゃ":"냐","にゅ":"뉴","にょ":"뇨",
+  "ひゃ":"햐","ひゅ":"휴","ひょ":"효", "びゃ":"뱌","びゅ":"뷰","びょ":"뵤",
+  "ぴゃ":"퍄","ぴゅ":"퓨","ぴょ":"표", "みゃ":"먀","みゅ":"뮤","みょ":"묘",
+  "りゃ":"랴","りゅ":"류","りょ":"료",
+  "ふぁ":"파","ふぃ":"피","ふぇ":"페","ふぉ":"포",
+  "てぃ":"티","でぃ":"디","しぇ":"셰","ちぇ":"체","じぇ":"제",
+  "うぃ":"위","うぇ":"웨","うぉ":"워"
+};
+/* 종성 붙이기 — 한글은 초·중·종성이 한 글자로 합쳐진다 */
+function koJong(syl, j){
+  var c = syl.charCodeAt(0) - 0xAC00;
+  if (c < 0 || c > 11171 || c % 28 !== 0) return syl;   /* 한글이 아니거나 이미 받침이 있으면 그대로 */
+  return String.fromCharCode(0xAC00 + c + j);
+}
+/* 장음 ー 이 반복할 모음 */
+var KO_LONG = { 0:"아", 1:"애", 2:"아", 4:"어", 5:"에", 6:"어",
+                8:"오", 12:"오", 13:"우", 17:"우", 18:"으", 20:"이" };
+function koLong(syl){
+  var c = syl.charCodeAt(0) - 0xAC00;
+  if (c < 0 || c > 11171) return "";
+  return KO_LONG[Math.floor((c % 588) / 28)] || "";
+}
+/* 조사인가 — 낱말 한가운데의 は 는 '하' 다(はなす·はやく). 낱말 끝에 홀로 붙어야 조사다.
+   앞이 글자이고(낱말 첫 글자가 아니고) 뒤가 띄어쓰기·문장부호·끝이면 조사로 본다. */
+var KO_BREAK = " 　、。,.!?！？…~～「」()（）";
+function koParticle(h, i){
+  var pv = h[i - 1], nx = h[i + 1];
+  if (!pv || KO_BREAK.indexOf(pv) >= 0) return false;     /* 낱말 첫 글자 → 조사가 아니다 */
+  return !nx || KO_BREAK.indexOf(nx) >= 0;                /* 낱말 끝에 홀로 → 조사 */
+}
+function hasKanji(s){ return /[\u3400-\u9FFF]/.test(s || ""); }
+/* 한자가 남으면 발음을 달지 않는다 — 반쯤 읽힌 줄은 없느니만 못하다 */
+function pron(s){ return hasKanji(s) ? "" : toKo(s); }
+function toKo(s){
+  var h = toHira(s || ""), out = "", i = 0, ch, nx, hit, j, last;
+  function lastSyl(){ return out.length ? out[out.length - 1] : ""; }
+  while (i < h.length){
+    ch = h[i];
+    if (ch === " " || ch === "　"){ out += " "; i++; continue; }
+    if (ch === "ー"){ out += koLong(lastSyl()); i++; continue; }
+    if (ch === "っ"){                                   /* 촉음 → ㅅ 받침 */
+      last = lastSyl();
+      if (last) out = out.slice(0, -1) + koJong(last, 19);
+      i++; continue;
+    }
+    if (ch === "ん"){                                   /* 발음 → 뒤 자음에 따라 ㄴ·ㅁ·ㅇ */
+      nx = h[i + 1] || "";
+      j = 4;                                            /* 말끝의 ん 은 언제나 ㄴ — nx 가 비면 여기서 멈춘다 */
+      if (nx && "まみむめもばびぶべぼぱぴぷぺぽ".indexOf(nx) >= 0) j = 16;
+      else if (nx && "かきくけこがぎぐげご".indexOf(nx) >= 0) j = 21;
+      last = lastSyl();
+      if (last) out = out.slice(0, -1) + koJong(last, j);
+      i++; continue;
+    }
+    if (ch === "は" || ch === "へ"){                     /* 조사 は·へ 는 와·에 로 읽는다 */
+      if (koParticle(h, i)){ out += (ch === "は" ? "와" : "에"); i++; continue; }
+    }
+    hit = KO2[h.substr(i, 2)];
+    if (hit){ out += hit; i += 2; continue; }
+    hit = KO1[ch];
+    if (hit){ out += hit; i++; continue; }
+    out += ch; i++;                                     /* 한자·기호는 그대로 둔다 */
+  }
+  return out;
+}
+
 /* ══ 동사 활용 — 어간 하나에서 세 형이 나온다 (PRD §6.2) ══ */
 
 /* 5단 동사 어미: [u]단 → [i]단 */
@@ -987,7 +1084,7 @@ function verbDataErrors(pool){
 /* ══ 표현 — 대비 항목의 양면 (PRD §5.2) ══ */
 /* 대비 항목은 양쪽을 오간다. side 0 = 본문, 1 = 짝. */
 function sideOf(p, side){
-  return (side === 1 && p.vs) ? p.vs : { ja:p.ja, ko:p.ko, key:p.key };
+  return (side === 1 && p.vs) ? p.vs : { ja:p.ja, ko:p.ko, key:p.key, kana:p.kana };
 }
 function sides(p){ return p.vs ? [0, 1] : [0]; }
 /* 빈칸을 파고도 문맥이 남아야 유형 G 를 낼 수 있다.
@@ -1011,6 +1108,9 @@ function phraseDataErrors(pool){
     if (p.vs && !p.vs.why) bad.push(p.id + ": vs 에 why 가 없음");
     if (p.vs && p.vs.key === p.key) bad.push(p.id + ": 짝의 key 가 같아 고를 수가 없음");
     if (!p.use) bad.push(p.id + ": use 없음");
+    /* 한자가 든 문장은 kana 를 따로 적어야 한국어 발음을 달 수 있다 */
+    if (hasKanji(p.ja) && !p.kana) bad.push(p.id + ": 한자가 있는데 kana 가 없음");
+    if (p.kana && hasKanji(p.kana)) bad.push(p.id + ": kana 에 한자가 남음");
   }
   return bad;
 }
@@ -1708,8 +1808,10 @@ function finish(good, extra){
 function revealWord(w){
   var d = document.createElement("div");
   d.style.display = "flex"; d.style.flexDirection = "column"; d.style.gap = "3px";
-  d.innerHTML = '<span class="big ja"></span><span class="sm"></span><span class="ex"></span>';
+  d.innerHTML = '<span class="big ja"></span><span class="pron"></span>' +
+                '<span class="sm"></span><span class="ex"></span>';
   d.querySelector(".big").textContent = w.kana;
+  d.querySelector(".pron").textContent = pron(w.kana);
   d.querySelector(".sm").textContent =
     (w.word !== w.kana ? w.word + " · " : "") + w.meaning.join(", ") + (w.note ? " (" + w.note + ")" : "");
   if (w.examples && w.examples.length){
@@ -1742,6 +1844,9 @@ function revealVerb(v, form){
     dt.textContent = row[0];
     dd.className = "ja" + (row[2] ? " hit" : "");
     dd.textContent = row[1];
+    var pr = document.createElement("span");
+    pr.className = "pron"; pr.textContent = pron(row[1]);
+    dd.appendChild(pr);
     dl.appendChild(dt); dl.appendChild(dd);
   });
   d.appendChild(dl);
@@ -1755,9 +1860,11 @@ function revealPhrase(p, side){
   sides(p).forEach(function(sd){
     var one = sideOf(p, sd), row = document.createElement("div");
     row.style.display = "flex"; row.style.flexDirection = "column";
-    row.innerHTML = '<span class="big ja"></span><span class="sm"></span>';
+    row.innerHTML = '<span class="big ja"></span><span class="pron"></span>' +
+                    '<span class="sm"></span>';
     row.querySelector(".big").style.fontSize = "24px";
     row.querySelector(".big").textContent = one.ja;
+    row.querySelector(".pron").textContent = pron(one.kana || one.ja);
     row.querySelector(".sm").textContent = one.ko;
     if (p.vs && sd === side){ row.style.borderLeft = "3px solid var(--rule)"; row.style.paddingLeft = "9px"; }
     d.appendChild(row);
