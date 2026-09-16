@@ -471,19 +471,67 @@ function stem(v){
   return k.slice(0, -1) + U2I[last];
 }
 
+/* て형 음편 — 어간이 아니라 어미에서 갈린다 (단어장 3쪽 <동사의 음편>) */
+var TE1 = { "う":"って", "つ":"って", "る":"って",
+            "ぬ":"んで", "む":"んで", "ぶ":"んで",
+            "く":"いて", "ぐ":"いで", "す":"して" };
+function teForm(v){
+  if (v.teIrreg) return v.teIrreg;          /* いく → いって (★ 촉음 예외) */
+  var k = v.kana, last = k.slice(-1);
+  if (v.group === 3){
+    if (k === "くる") return "きて";
+    if (/する$/.test(k)) return k.slice(0, -2) + "して";
+    return null;
+  }
+  if (v.group === 2) return k.slice(0, -1) + "て";
+  if (!TE1[last]) return null;
+  return k.slice(0, -1) + TE1[last];
+}
+
 function conj(v, form){
+  if (form === "te") return teForm(v);
   var st = stem(v), i;
   if (st === null) return null;
-  for (i = 0; i < FORMS.length; i++) if (FORMS[i].k === form) return st + FORMS[i].suffix;
+  for (i = 0; i < FORMS.length; i++)
+    if (FORMS[i].k === form && FORMS[i].suffix) return st + FORMS[i].suffix;
   return null;
+}
+
+/* い형용사 활용 — 단어장 4쪽. いい 만 불규칙이라 데이터에 직접 적혀 있다. */
+function isAdj(it){ return !it.group; }
+function adjConj(a, form){
+  if (a.forms && a.forms[form]) return a.forms[form];
+  var base = a.kana.slice(0, -1);
+  if (form === "neg")  return base + "くない";
+  if (form === "te")   return base + "くて";
+  if (form === "past") return base + "かった";
+  return null;
+}
+function anyConj(it, form){ return isAdj(it) ? adjConj(it, form) : conj(it, form); }
+function formsOf(it){ return isAdj(it) ? ADJFORMS : FORMS; }
+
+function adjDataErrors(pool){
+  var bad = [], i, a, j, f;
+  for (i = 0; i < pool.length; i++){
+    a = pool[i];
+    if (a.kana.slice(-1) !== "い") bad.push(a.kana + ": い 로 끝나지 않음");
+    if (a.irregular && !a.forms) bad.push(a.kana + ": 불규칙인데 forms 가 없음");
+    for (j = 0; j < ADJFORMS.length; j++){
+      f = ADJFORMS[j].k;
+      if (!adjConj(a, f)) bad.push(a.kana + ": " + f + " 를 못 만듦");
+    }
+  }
+  return bad;
 }
 
 /* 활용형에서 기본형으로 (유형 J). 어미를 떼고 후보를 되찾는다. */
 function deconj(surface, pool){
-  var out = [], i, j;
-  for (i = 0; i < pool.length; i++)
-    for (j = 0; j < FORMS.length; j++)
-      if (conj(pool[i], FORMS[j].k) === surface) out.push(pool[i]);
+  var out = [], i, fl, j;
+  for (i = 0; i < pool.length; i++){
+    fl = formsOf(pool[i]);
+    for (j = 0; j < fl.length; j++)
+      if (anyConj(pool[i], fl[j].k) === surface){ out.push(pool[i]); break; }
+  }
   return out;
 }
 
@@ -494,6 +542,7 @@ function verbDataErrors(pool){
     v = pool[i];
     if ([1,2,3].indexOf(v.group) < 0){ bad.push(v.kana + ": group 없음"); continue; }
     if (stem(v) === null) bad.push(v.kana + ": 어간을 못 구함 (group " + v.group + ")");
+    if (teForm(v) === null) bad.push(v.kana + ": て형을 못 만듦");
     if (v.group === 2 && v.kana.slice(-1) !== "る") bad.push(v.kana + ": 2류인데 る 로 안 끝남");
   }
   return bad;
@@ -537,11 +586,11 @@ var TESTS = [
             {k:"B",nm:"직접 쓰기",  sub:"뜻 → 일본어",   w:50},
             {k:"C",nm:"예문 빈칸",  sub:"문장 속 단어",  w:20} ],
     master:"쓰기(뜻→일본어)를 연속 3회 맞힌 단어가 숙달입니다. 뜻만 아는 단어는 넘어가지 않습니다." },
-  { k:"verb", nm:"동사 활용", sub:"ます · ましょう · たい", ready:true,
+  { k:"verb", nm:"활용", sub:"동사 ます·ましょう·たい·て · い형용사", ready:true,
     types:[ {k:"H",nm:"활용형 쓰기", sub:"기본형 → 활용형", w:60},
             {k:"I",nm:"그룹 고르기", sub:"1류·2류·3류",    w:25},
             {k:"J",nm:"기본형 되찾기",sub:"활용형 → 기본형", w:15} ],
-    master:"세 활용형(ます·ましょう·たい)을 각각 연속 3회 맞히면 숙달입니다. 규칙이 잡히면 평범한 동사는 덜 나오고 예외만 남습니다." },
+    master:"활용형을 각각 연속 3회 맞히면 숙달입니다. 규칙이 잡히면 평범한 것은 덜 나오고 예외(かえる·はいる·はしる·しる·きる·いく·いい)만 남습니다." },
   { k:"phrase", nm:"표현", sub:"문장을 언제·어떻게 쓰나", ready:true,
     types:PFORMS,
     master:"헷갈리는 짝은 양쪽을 번갈아 냅니다. 한쪽만 3회 맞혀서는 숙달이 아닙니다 — 한쪽만 맞히면 가른 것이 아니니까요." }
@@ -549,13 +598,13 @@ var TESTS = [
 function T(){ var i; for (i=0;i<TESTS.length;i++) if (TESTS[i].k===cfg.test) return TESTS[i]; }
 
 var POOL = WORDS.filter(function(w){ return !w.skip; });
-var VPOOL = VERBS;
+var VPOOL = VERBS.concat(ADJS);
 var PPOOL = PHRASES;
 
 var cfg = {
   test:"word", count:20, ime:"raw",
   word:{ range:{}, types:{ A:1, B:1, C:1 } },
-  verb:{ range:{ 1:1, 2:1, 3:1 }, types:{ H:1, I:1, J:1 } },
+  verb:{ range:{ 1:1, 2:1, 3:1, adj:1 }, types:{ H:1, I:1, J:1 } },
   phrase:{ range:{}, types:{ D:1, E:1, F:1, G:1 } }
 };
 UNITS.forEach(function(u){ cfg.word.range[u.code] = 1; });
@@ -670,11 +719,14 @@ function rangeItems(){
       return { k:u.code, nm:u.title, note:u.pages,
                n:PPOOL.filter(function(x){ return x.unit === u.code; }).length };
     });
-  return [1, 2, 3].map(function(g){
-    var vs = VPOOL.filter(function(v){ return v.group === g; });
+  var out = [1, 2, 3].map(function(g){
+    var vs = VERBS.filter(function(v){ return v.group === g; });
     return { k:String(g), nm:GROUP_NM[g], n:vs.length,
-             note: vs.some(function(v){ return v.tricky; }) ? "예외 포함" : "" };
+             note: vs.some(function(v){ return v.tricky || v.teIrreg; }) ? "예외 포함" : "" };
   });
+  out.push({ k:"adj", nm:"い형용사", n:ADJS.length,
+             note: ADJS.some(function(a){ return a.irregular; }) ? "예외 포함" : "" });
+  return out;
 }
 
 function seg(box, vals, label, get, set){
@@ -695,14 +747,17 @@ function seg(box, vals, label, get, set){
 function selected(){
   if (cfg.test === "word") return POOL.filter(function(w){ return cfg.word.range[w.unit]; });
   if (cfg.test === "phrase") return PPOOL.filter(function(x){ return cfg.phrase.range[x.unit]; });
-  return VPOOL.filter(function(v){ return cfg.verb.range[String(v.group)]; });
+  return VPOOL.filter(function(v){
+    return isAdj(v) ? cfg.verb.range.adj : cfg.verb.range[String(v.group)];
+  });
 }
 
 function mastered(item){
   var st = store[cfg.test][item.id];
   if (!st) return false;
   if (cfg.test === "word") return (st.s.B || 0) >= 3;
-  if (cfg.test === "verb") return FORMS.every(function(f){ return (st.s["H" + f.k] || 0) >= 3; });
+  if (cfg.test === "verb")
+    return formsOf(item).every(function(f){ return (st.s["H" + f.k] || 0) >= 3; });
   /* 대비는 양쪽을 다 가려야 숙달이다. 한쪽만 맞히면 가른 것이 아니다. */
   if (item.kind === "대비") return (st.s.D || 0) >= 3 && (st.s.D1 || 0) >= 3;
   return (gOk(item, 0) ? (st.s.G || 0) : (st.s.E || 0)) >= 3;
@@ -766,10 +821,13 @@ function shuffle(a){
   return a;
 }
 function pickOpt(opts, q){
-  var tot = 0, i, r;
-  for (i = 0; i < opts.length; i++) tot += weight(opts[i].x, opts[i].kk, q);
+  var tot = 0, i, r, wv = [];
+  for (i = 0; i < opts.length; i++){
+    wv[i] = weight(opts[i].x, opts[i].kk, q) * (opts[i].w || 1);
+    tot += wv[i];
+  }
   r = Math.random() * tot;
-  for (i = 0; i < opts.length; i++){ r -= weight(opts[i].x, opts[i].kk, q); if (r <= 0) return opts[i]; }
+  for (i = 0; i < opts.length; i++){ r -= wv[i]; if (r <= 0) return opts[i]; }
   return opts[opts.length - 1];
 }
 function pickBy(list, wKey){
@@ -794,10 +852,22 @@ function buildSession(pool){
     if (kind.k === "G") src = pool.filter(function(x){
       return sides(x).some(function(sd){ return gOk(x, sd); });
     });
+    if (kind.k === "I") src = src.filter(function(x){ return !isAdj(x); });  /* 그룹은 동사만 */
     if (!src.length) continue;
-    if (kind.k === "H" || kind.k === "J") q.form = pickBy(FORMS, "weight").k;
 
-    if (cfg.test === "phrase"){
+    if (cfg.test === "verb" && (kind.k === "H" || kind.k === "J")){
+      /* 항목마다 쓸 수 있는 형이 다르다 — 동사는 FORMS, い형용사는 ADJFORMS. */
+      var vopts = [];
+      src.forEach(function(it){
+        formsOf(it).forEach(function(f){
+          var vk = kind.k + f.k;
+          if (!used[it.id + vk]) vopts.push({ x:it, f:f.k, kk:vk, w:f.weight });
+        });
+      });
+      if (!vopts.length) continue;
+      var vgot = pickOpt(vopts, q);
+      item = vgot.x; q.form = vgot.f; key = vgot.kk;
+    } else if (cfg.test === "phrase"){
       /* (항목 × 면) 조합에서 고른다. 대비는 양쪽을 따로 세야 숙달이 성립한다. */
       var opts = [];
       src.forEach(function(x){
@@ -826,11 +896,18 @@ function buildSession(pool){
   return shuffle(qs);
 }
 
-/* 유형 C 에 쓸 수 있는 예문 — 표제어가 문장 안에 그대로 있어야 한다.
-   「～けど」 처럼 물결표가 붙거나 「まもります」 처럼 문장에는 활용형만 있는 항목은
-   빈칸을 파도 보기와 아귀가 안 맞으므로 C 에서 뺀다(A·B 에는 그대로 나온다). */
+/* 유형 C 의 빈칸 — 문장에 실제로 나타난 표기를 가린다.
+   단어장은 한자로 적고(駅) 예문은 가나로 쓰므로(えき), 둘 중 문장에 있는 쪽을 쓴다.
+   시험이 가나 표기를 묻기 때문에 보기도 가나로 낸다.
+   「～けど」 처럼 물결표가 붙거나 문장에 활용형만 있는 항목은 어느 쪽도 안 맞아
+   C 에서 빠진다(A·B 에는 그대로 나온다). */
+function cSurface(w, e){
+  if (e.ja.indexOf(w.kana) >= 0) return w.kana;
+  if (e.ja.indexOf(w.word) >= 0) return w.word;
+  return null;
+}
 function blankable(w){
-  return (w.examples || []).filter(function(e){ return e.ja.indexOf(w.word) >= 0; });
+  return (w.examples || []).filter(function(e){ return cSurface(w, e) !== null; });
 }
 
 function distractMeanings(w){
@@ -853,7 +930,7 @@ function distractWords(w){
   var cand = POOL.filter(function(x){ return x.id !== w.id && x.kana !== w.kana; });
   cand = shuffle(cand.filter(function(x){ return x.pos === w.pos; }))
           .concat(shuffle(cand.filter(function(x){ return x.pos !== w.pos; })));
-  return cand.slice(0, 4).map(function(x){ return x.word; });
+  return cand.slice(0, 4).map(function(x){ return x.kana; });   /* 보기는 가나로 */
 }
 
 /* ══ 화면 ══ */
@@ -872,8 +949,14 @@ function start(pool){
 
 var answered = false, hinted = 0, penalised = false;
 function KINDNM(k){ var t = T().types.filter(function(x){ return x.k === k; })[0]; return t ? t.nm : k; }
-function formNm(f){ var x = FORMS.filter(function(y){ return y.k === f; })[0]; return x ? x.nm : f; }
-function formKo(f){ var x = FORMS.filter(function(y){ return y.k === f; })[0]; return x ? x.ko : ""; }
+function formInfo(f){
+  var all = FORMS.concat(ADJFORMS), i;
+  for (i = 0; i < all.length; i++) if (all[i].k === f) return all[i];
+  return null;
+}
+function formNm(f){ var x = formInfo(f); return x ? x.nm : f; }
+function formKo(f){ var x = formInfo(f); return x ? x.ko : ""; }
+function famNm(it){ return isAdj(it) ? "い형용사" : GROUP_NM[it.group]; }
 
 function add(box, cls, txt){
   var d = document.createElement("div");
@@ -889,7 +972,7 @@ function esc(s){
 function answerOf(q){
   if (cfg.test === "phrase") return q.k === "G" ? sideOf(q.p, q.side).key : null;
   if (cfg.test === "word") return q.w.kana;
-  if (q.k === "H") return conj(q.v, q.form);
+  if (q.k === "H") return anyConj(q.v, q.form);
   if (q.k === "J") return q.v.kana;
   return null;
 }
@@ -905,7 +988,7 @@ function render(){
   $("qUnit").textContent =
     cfg.test === "word"   ? ((UNITS.filter(function(u){ return u.code === q.w.unit; })[0] || {}).title || "") :
     cfg.test === "phrase" ? ((PUNITS.filter(function(u){ return u.code === q.p.unit; })[0] || {}).pages || "") :
-                            GROUP_NM[q.v.group] + (q.v.tricky ? " · 예외" : "");
+                            famNm(q.v) + ((q.v.tricky || q.v.teIrreg || q.v.irregular) ? " · 예외" : "");
 
   $("fb").hidden = true; $("askBox").hidden = true;
   $("choices").hidden = true; $("choices").innerHTML = "";
@@ -930,20 +1013,21 @@ function render(){
   } else if (q.k === "C"){
     var cex = blankable(q.w);
     var ex = cex[Math.floor(Math.random() * cex.length)];
+    var surf = cSurface(q.w, ex);
     add(body, "q-ask", "빈칸에 알맞은 말은?");
     var sent = document.createElement("div");
     sent.className = "q-sent ja";
     /* 단어가 나온 자리를 전부 가린다. 첫 자리만 가리면 「はやく、はやく!」 처럼
        두 번 나오는 문장에서 정답이 그대로 보인다. */
-    sent.innerHTML = esc(ex.ja).split(esc(q.w.word)).join("<u>____</u>");
+    sent.innerHTML = esc(ex.ja).split(esc(surf)).join("<u>____</u>");
     body.appendChild(sent);
     add(body, "q-sub", ex.ko);
-    drawChoices(shuffle([q.w.word].concat(distractWords(q.w))), q.w.word, true);
+    drawChoices(shuffle([surf].concat(distractWords(q.w))), surf, true);
 
   } else if (q.k === "H"){
     add(body, "q-ask", formNm(q.form) + "으로 쓰면?  " + formKo(q.form));
     add(body, "q-main ja", q.v.kana);
-    add(body, "q-sub", q.v.meaning.join(", ") + " · " + GROUP_NM[q.v.group]);
+    add(body, "q-sub", q.v.meaning.join(", ") + " · " + famNm(q.v));
     openInput();
 
   } else if (q.k === "I"){
@@ -954,7 +1038,7 @@ function render(){
 
   } else if (q.k === "J"){
     add(body, "q-ask", "이 활용형의 기본형은?  (" + formNm(q.form) + ")");
-    add(body, "q-main ja", conj(q.v, q.form));
+    add(body, "q-main ja", anyConj(q.v, q.form));
     add(body, "q-sub", q.v.meaning.join(", "));
     openInput();
 
@@ -1155,7 +1239,7 @@ function finish(good, extra){
 
   /* 규칙 숙달 — 서로 다른 동사로 연속해야 오른다 */
   if (cfg.test === "verb" && q.k === "H"){
-    var r = rule(item.group, q.form);
+    var r = rule(isAdj(item) ? "adj" : item.group, q.form);
     if (!good) r.n = 0;
     else if (r.last !== item.id){ r.n++; r.last = item.id; }
   }
@@ -1207,13 +1291,16 @@ function revealVerb(v, form){
   d.style.display = "flex"; d.style.flexDirection = "column"; d.style.gap = "4px";
   var head = document.createElement("span");
   head.className = "sm";
-  head.textContent = v.meaning.join(", ") + " · " + GROUP_NM[v.group] +
-                     (v.tricky ? "  ⚠ る 로 끝나지만 " + GROUP_NM[v.group] + " (예외)" : "");
+  head.textContent = (v.word && v.word !== v.kana ? v.word + " · " : "") +
+    v.meaning.join(", ") + " · " + famNm(v) +
+    (v.tricky    ? "  ⚠ る 로 끝나지만 1류 (예외)" :
+     v.teIrreg   ? "  ⚠ て형만 예외 — いいて 가 아니다" :
+     v.irregular ? "  ⚠ 불규칙 — いくない 가 아니다" : "");
   d.appendChild(head);
   var dl = document.createElement("dl");
   dl.className = "ctab";
-  [["기본형", v.kana, false]].concat(FORMS.map(function(f){
-    return [f.nm, conj(v, f.k), f.k === form];
+  [["기본형", v.kana, false]].concat(formsOf(v).map(function(f){
+    return [f.nm, anyConj(v, f.k), f.k === form];
   })).forEach(function(row){
     var dt = document.createElement("dt"), dd = document.createElement("dd");
     dt.textContent = row[0];

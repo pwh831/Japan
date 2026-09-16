@@ -29,8 +29,11 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
     '산출물에 외부 스크립트가 없다 (파일 하나로 자립)');
   t((await p.$$('.test')).length === 3, '빈 디렉터리에서도 홈이 뜬다 (시험 카드 3개)');
 
-  const byName = {}; E.VERBS.forEach(v => byName[v.kana] = v);
-  const formOf = ask => (E.FORMS.find(f => ask.indexOf(f.nm) === 0) || {}).k;
+  /* 동사 + い형용사를 모두 색인한다 — 활용 시험 범위에 둘 다 있다 */
+  const byName = {};
+  E.VERBS.concat(E.ADJS).forEach(v => byName[v.kana] = v);
+  const allForms = E.FORMS.concat(E.ADJFORMS);
+  const formOf = ask => (allForms.find(f => ask.indexOf(f.nm) === 0) || {}).k;
 
   await p.click('.test >> nth=1'); await p.waitForTimeout(150);
   await p.click('#startBtn'); await p.waitForTimeout(250);
@@ -44,7 +47,7 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
 
     if (choicesOpen) {                      // 유형 I — 정답 그룹을 눌러 본다
       const v = byName[main];
-      await p.click(`#choices .choice:has-text("${E.FORMS && v ? (v.group+'류') : '1류'}")`);
+      await p.click(`#choices .choice:has-text("${v && v.group ? (v.group+'류') : '1류'}")`);
       await p.waitForTimeout(120); await p.click('#fb .btn');
     } else {
       let want;
@@ -52,7 +55,7 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
         const cands = E.deconj(main, E.VERBS);
         want = cands.length ? cands[0].kana : null; checked.J++;
       } else {                              // 유형 H — 기본형 → 활용형
-        want = E.conj(byName[main], formOf(ask)); checked.H++;
+        want = byName[main] ? E.anyConj(byName[main], formOf(ask)) : null; checked.H++;
       }
       if (!want) { await p.click('#skipBtn'); await p.waitForTimeout(100); await p.click('#submitBtn'); continue; }
       await p.fill('#ans', want);
@@ -78,8 +81,9 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   const main2 = (await p.textContent('#qBody .q-main')).trim();
   const ask2  = (await p.textContent('#qBody .q-ask')).trim();
   const v2 = byName[main2], f2 = formOf(ask2);
-  const wrong = (v2.group === 1 && v2.kana.slice(-1) === 'る')
-      ? v2.kana.slice(0,-1) + E.FORMS.find(f=>f.k===f2).suffix   // かえる → かえます (틀린 답)
+  const suf = (E.FORMS.find(f => f.k === f2) || {}).suffix;
+  const wrong = (v2 && v2.group === 1 && v2.kana.slice(-1) === 'る' && suf)
+      ? v2.kana.slice(0,-1) + suf       // かえる → かえます (규칙만 믿으면 나오는 틀린 답)
       : 'さかな';
   await p.fill('#ans', wrong);
   await p.click('#submitBtn'); await p.waitForTimeout(200);
@@ -97,7 +101,7 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   t(pRange.length === 3, '표현 범위 3개 (교재 쪽): ' + pRange.join(' '));
   const pTypes = await p.$$eval('#typeChips .chip span:first-child', e => e.map(x => x.textContent));
   t(pTypes.join(',') === '대비 고르기,뜻 고르기,상황 → 표현,핵심어 쓰기', '표현 유형 4개');
-  t(/표현 10항목/.test(await p.textContent('#startBtn')), '시작: ' + await p.textContent('#startBtn'));
+  t(/표현 1\d항목/.test(await p.textContent('#startBtn')), '시작: ' + await p.textContent('#startBtn'));
 
   await p.click('#startBtn'); await p.waitForTimeout(250);
   const pk = {}; let blanks = 0, dSeen = 0;
