@@ -226,6 +226,20 @@ E.PHRASES.forEach(function(p){ E.sides(p).forEach(function(sd){
 eq(Object.keys(kos).length >= 6, true, "서로 다른 뜻 " + Object.keys(kos).length + "개 (오답 보기 4개 확보)");
 eq(Object.keys(jas).length >= 6, true, "서로 다른 문장 " + Object.keys(jas).length + "개");
 
+console.log("── 문제가 답을 하나로 좁히는가 ──");
+/* 유형 B 는 뜻만 보여 준다. 두 낱말이 뜻을 나눠 가지면 맞게 써도 오답이 된다. */
+var live = E.WORDS.filter(function(w){ return !w.skip; }), clash = [];
+live.forEach(function(w){ live.forEach(function(x){
+  if (x.id <= w.id || x.kana === w.kana) return;
+  w.meaning.forEach(function(m){ if (x.meaning.indexOf(m) >= 0)
+    clash.push(m + ": " + w.kana + "/" + x.kana); });
+}); });
+eq(clash.length, 0, "뜻이 겹쳐 답이 둘인 낱말: " + clash.join(", "));
+
+/* 유형 J 는 활용형만 보여 준다. 같은 활용형이 두 동사에서 나오면 둘 다 정답이어야 한다. */
+eq(E.deconj("よんで", E.VERBS).map(function(v){ return v.kana; }).sort().join(","),
+   "よぶ,よむ", "よんで 의 기본형은 よむ 와 よぶ 둘 다");
+
 console.log("── 가나 → 한국어 발음 ──");
 var P = E.toKo;
 eq(P("ほん"),"혼","말끝 ん 은 ㄴ");

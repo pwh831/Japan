@@ -84,7 +84,7 @@ var WORDS = [
   { id:"w203", unit:"s2", pos:"표현", word:"どこが",   kana:"どこが",   meaning:["어디가"], note:"どこか(어딘가)와 구별" },
   { id:"w204", unit:"s2", pos:"명사", word:"ぼうさいセンター", kana:"ぼうさいセンター", meaning:["방재 센터"],
     examples:[{ ja:"ぼうさいセンターは どうやって いくのかな?", ko:"방재 센터는 어떻게 가는 걸까?", form:"ぼうさいセンター" }] },
-  { id:"w205", unit:"s2", pos:"표현", word:"どう",     kana:"どう",     meaning:["어때?", "어떻게"] },
+  { id:"w205", unit:"s2", pos:"표현", word:"どう",     kana:"どう",     meaning:["어때?"] },
   { id:"w206", unit:"s2", pos:"표현", word:"もう すぐ", kana:"もう すぐ", meaning:["이제 곧"],
     examples:[{ ja:"もう すぐ ぼうさいの ひだから。", ko:"이제 곧 방재의 날이니까.", form:"もう すぐ" }] },
   { id:"w207", unit:"s2", pos:"명사", word:"ぼうさいの 日", kana:"ぼうさいの ひ", meaning:["방재의 날"],

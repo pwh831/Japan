@@ -95,6 +95,23 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
     await p.fill('#ans', 'ぬぬぬぬぬ');
     await p.click('#submitBtn'); await p.waitForTimeout(200);
   }
+  await p.click('#submitBtn'); await p.waitForTimeout(200);   // 다음 문제로
+
+  // 한 글자 빗나갔다가 다시 맞게 쓴 경우 — 점수는 안 주더라도 '오답' 이라 부르면 안 된다
+  const main3 = (await p.textContent('#qBody .q-main')).trim();
+  const ask3  = (await p.textContent('#qBody .q-ask')).trim();
+  const want3 = byName[main3] ? E.anyConj(byName[main3], formOf(ask3)) : null;
+  if (want3 && want3.length > 2) {
+    await p.fill('#ans', want3.slice(0, -1));                 // lev 1 → 되묻고 다시 쓰게 한다
+    await p.click('#submitBtn'); await p.waitForTimeout(200);
+    t(!(await p.$('#fb .reveal')), '한 글자 차이는 바로 끝내지 않고 다시 쓰게 한다');
+    await p.fill('#ans', want3);                              // 이번엔 맞게
+    await p.click('#submitBtn'); await p.waitForTimeout(200);
+    const verdict3 = (await p.textContent('#fb b')).trim();
+    t(verdict3 === '맞게 썼습니다',
+      '맞게 쓴 답을 오답이라 부르지 않는다 (' + want3 + ' → "' + verdict3 + '")');
+    t(/점수에는 안 들어갑니다/.test(await p.textContent('#fb')), '점수에 안 들어가는 이유를 말해 준다');
+  }
 
   // 한국어 발음 — 정답 화면에만, 문제 화면에는 없어야 한다
   const pronRows = await p.$$eval('#fb .pron', e => e.map(x => x.textContent.trim()).filter(Boolean));

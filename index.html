@@ -146,6 +146,7 @@ p{margin:0}
 .fb-line .dot{width:9px;height:9px;border-radius:50%;flex:none}
 .fb.ok .fb-line{color:var(--rule)} .fb.ok .dot{background:var(--rule)}
 .fb.ng .fb-line{color:var(--shu)}  .fb.ng .dot{background:var(--shu)}
+.fb.half .fb-line{color:var(--ink-soft)} .fb.half .dot{background:var(--ink-faint)}
 .fb b{font-weight:600}
 .reveal{display:flex;flex-direction:column;gap:3px;padding:11px 13px;
         background:var(--edge-soft);border-radius:3px}
@@ -1259,11 +1260,24 @@ function submit(){
   }
   /* 단어 시험은 항목을 그대로 넘긴다 — 합성 객체를 넘기면 jaAliases 가 죽어
      교재가 인쇄한 「～けど」 같은 표기가 오답이 된다. */
-  var target = (cfg.test === "word") ? q.w : { kana:want, word:want, jaAliases:[] };
+  var target;
+  if (cfg.test === "word") target = q.w;
+  else if (cfg.test === "verb" && q.k === "J")
+    /* よんで 는 よむ 에서도 よぶ 에서도 나온다 — 어느 쪽을 써도 맞는 답이다 */
+    target = { kana:want, word:want,
+               jaAliases: deconj(anyConj(q.v, q.form), VPOOL).map(function(v){ return v.kana; }) };
+  else target = { kana:want, word:want, jaAliases:[] };
   var j = judge($("ans").value, target);
 
   if (j.code === "empty"){ $("ans").focus(); return; }
-  if (j.code === "ok"){ finish(!penalised && !hinted, hinted ? "힌트를 썼으니 한 번 더 만나게 됩니다" : ""); return; }
+  if (j.code === "ok"){
+    /* 쓴 것은 맞다. 점수에 안 들어갈 뿐이다 — 그 둘을 같은 말로 부르면 안 된다. */
+    finish(!penalised && !hinted,
+           hinted   ? "힌트를 봤으니 점수에는 안 들어갑니다 — 한 번 더 만나게 됩니다" :
+           penalised ? "앞에서 한 번 빗나가서 점수에는 안 들어갑니다 — 한 번 더 만나게 됩니다" : "",
+           true);
+    return;
+  }
   if (j.code === "confuse"){ askConfuse(j.pair, $("ans").value); return; }
   if (j.code === "kana" || j.code === "near"){
     if (!penalised){
@@ -1323,7 +1337,10 @@ $("hintBtn").addEventListener("click", function(){
 });
 
 /* ══ 채점 확정 ══ */
-function finish(good, extra){
+/* right — 마지막에 쓴 것이 맞았는가. good — 그것이 점수가 되는가.
+   힌트를 봤거나 앞에서 한 번 빗나가면 right 이면서 good 이 아니다.
+   그때 빨간 '오답' 을 띄우면 맞게 쓴 사람에게 틀렸다고 말하는 것이 된다. */
+function finish(good, extra, right){
   var q = sess.qs[sess.at], item = cfg.test === "word" ? q.w : cfg.test === "verb" ? q.v : q.p;
   var st = stat(item.id), key = skey(q);
   answered = true;
@@ -1343,10 +1360,10 @@ function finish(good, extra){
 
   var fb = $("fb");
   fb.hidden = false;
-  fb.className = "fb " + (good ? "ok" : "ng");
+  fb.className = "fb " + (good ? "ok" : (right ? "half" : "ng"));
   fb.innerHTML = '<div class="fb-line"><span class="dot"></span><b></b><span class="x"></span></div>' +
                  '<div class="reveal"></div>';
-  fb.querySelector("b").textContent = good ? "정답" : "오답";
+  fb.querySelector("b").textContent = good ? "정답" : (right ? "맞게 썼습니다" : "오답");
   fb.querySelector(".x").textContent = extra;
   fb.querySelector(".reveal").appendChild(
     cfg.test === "word"   ? revealWord(q.w) :
@@ -1410,6 +1427,17 @@ function revealVerb(v, form){
     dl.appendChild(dt); dl.appendChild(dd);
   });
   d.appendChild(dl);
+  /* 같은 활용형이 두 동사에서 나오면 짚어 준다 — よんで 는 よむ 에서도 よぶ 에서도 나온다 */
+  var also = deconj(anyConj(v, form), VPOOL).filter(function(x){ return x.id !== v.id; });
+  if (also.length){
+    var n = document.createElement("span");
+    n.className = "sm";
+    n.style.marginTop = "3px";
+    n.textContent = "⚠ " + anyConj(v, form) + " 는 " +
+      also.map(function(x){ return x.kana + "(" + x.meaning[0] + ")"; }).join(", ") +
+      " 에서도 나옵니다 — 둘 다 정답입니다";
+    d.appendChild(n);
+  }
   return d;
 }
 
