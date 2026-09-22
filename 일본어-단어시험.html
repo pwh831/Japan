@@ -251,6 +251,10 @@ footer b{color:var(--ink-soft);font-weight:600}
         <span class="opt-nm">문항 수</span>
         <div class="seg" id="countSeg"></div>
       </div>
+      <div class="opt" id="refOpt">
+        <span class="opt-nm">참고 항목<span id="refHint"></span></span>
+        <div class="seg" id="refSeg"></div>
+      </div>
       <div class="opt" id="imeOpt">
         <span class="opt-nm">입력 방식<span>쓰기 문제에서 답을 넣는 법</span></span>
         <div class="seg" id="imeSeg"></div>
@@ -531,9 +535,12 @@ var WORDS = [
   { id:"w425", unit:"s4", pos:"명사", word:"サッカー", kana:"サッカー", meaning:["축구"] },
   { id:"w426", unit:"s4", pos:"명사", word:"やきゅう", kana:"やきゅう", meaning:["야구"] },
   { id:"w427", unit:"s4", pos:"い형용사", word:"おもしろい", kana:"おもしろい", meaning:["재미있다"] },
-  { id:"w428", unit:"s4", pos:"동사", word:"走る",     kana:"はしる",   meaning:["뛰다", "달리다"], note:"★ 예외 1류" },
-  { id:"w429", unit:"s4", pos:"동사", word:"知る",     kana:"しる",     meaning:["알다"], note:"★ 예외 1류" },
-  { id:"w430", unit:"s4", pos:"동사", word:"切る",     kana:"きる",     meaning:["자르다"], note:"★ 예외 1류" }
+  { id:"w428", unit:"s4", pos:"동사", word:"走る",     kana:"はしる",   meaning:["뛰다", "달리다"], note:"★ 예외 1류",
+    ref:"단어장 4쪽 <자주 나오는 예외 1류 동사> 상자에만 — 본문 어휘에는 없다" },
+  { id:"w429", unit:"s4", pos:"동사", word:"知る",     kana:"しる",     meaning:["알다"], note:"★ 예외 1류",
+    ref:"단어장 4쪽 <자주 나오는 예외 1류 동사> 상자에만 — 본문 어휘에는 없다" },
+  { id:"w430", unit:"s4", pos:"동사", word:"切る",     kana:"きる",     meaning:["자르다"], note:"★ 예외 1류",
+    ref:"단어장 4쪽 <자주 나오는 예외 1류 동사> 상자에만 — 본문 어휘에는 없다" }
 ];
 
 /* skip:true 인 항목은 출제에서 빠집니다 — 단어장에 두 번 나온 낱말(あらう·けす)의
@@ -566,6 +573,10 @@ var WORDS = [
  * ⚠️ 예외가 두 종류입니다. 섞이면 안 됩니다.
  *   tricky  — る 로 끝나 2류처럼 보이지만 1류. 단어장 4쪽에 다섯 개가 따로 실려 있습니다.
  *             かえる·はいる·はしる·しる·きる. 규칙만 믿으면 かえます 가 됩니다.
+ *
+ *             그중 かえる·はいる 만 본문 어휘에도 나옵니다(1·2쪽 ＊예외1류).
+ *             はしる·しる·きる 는 4쪽 상자에만 있어 수업에서 안 다뤘을 수 있습니다 —
+ *             ref 로 표시하고, 홈의 '참고 항목' 을 켤 때만 출제합니다.
  *   teIrreg — 음편만 예외. いく 는 1류 く 인데 いいて 가 아니라 いって 입니다(★ 촉음 예외).
  */
 
@@ -599,9 +610,12 @@ var VERBS = [
   /* ── 1류 · る 로 끝나는 예외 (단어장 4쪽) ── */
   { id:"v21", kana:"かえる", word:"帰る", group:1, tricky:true, meaning:["돌아가다", "돌아오다"] },
   { id:"v22", kana:"はいる", word:"入る", group:1, tricky:true, meaning:["들어가다", "들어오다"] },
-  { id:"v23", kana:"はしる", word:"走る", group:1, tricky:true, meaning:["뛰다", "달리다"] },
-  { id:"v24", kana:"しる",   word:"知る", group:1, tricky:true, meaning:["알다"] },
-  { id:"v25", kana:"きる",   word:"切る", group:1, tricky:true, meaning:["자르다"] },
+  { id:"v23", kana:"はしる", word:"走る", group:1, tricky:true, meaning:["뛰다", "달리다"],
+    ref:"단어장 4쪽 <자주 나오는 예외 1류 동사> 상자에만 — 본문 어휘에는 없다" },
+  { id:"v24", kana:"しる",   word:"知る", group:1, tricky:true, meaning:["알다"],
+    ref:"단어장 4쪽 <자주 나오는 예외 1류 동사> 상자에만 — 본문 어휘에는 없다" },
+  { id:"v25", kana:"きる",   word:"切る", group:1, tricky:true, meaning:["자르다"],
+    ref:"단어장 4쪽 <자주 나오는 예외 1류 동사> 상자에만 — 본문 어휘에는 없다" },
 
   /* ── 2류 (1단) ── */
   { id:"v26", kana:"おきる",     word:"起きる",   group:2, meaning:["일어나다"] },
@@ -1127,7 +1141,7 @@ var TESTS = [
     types:[ {k:"H",nm:"활용형 쓰기", sub:"기본형 → 활용형", w:60},
             {k:"I",nm:"그룹 고르기", sub:"1류·2류·3류",    w:25},
             {k:"J",nm:"기본형 되찾기",sub:"활용형 → 기본형", w:15} ],
-    master:"활용형을 각각 연속 3회 맞히면 숙달입니다. 규칙이 잡히면 평범한 것은 덜 나오고 예외(かえる·はいる·はしる·しる·きる·いく·いい)만 남습니다." },
+    master:"활용형을 각각 연속 3회 맞히면 숙달입니다. 규칙이 잡히면 평범한 것은 덜 나오고 예외만 남습니다." },
   { k:"phrase", nm:"표현", sub:"문장을 언제·어떻게 쓰나", ready:true,
     types:PFORMS,
     master:"헷갈리는 짝은 양쪽을 번갈아 냅니다. 한쪽만 3회 맞혀서는 숙달이 아닙니다 — 한쪽만 맞히면 가른 것이 아니니까요." }
@@ -1139,7 +1153,7 @@ var VPOOL = VERBS.concat(ADJS);
 var PPOOL = PHRASES;
 
 var cfg = {
-  test:"word", count:20, ime:"raw",
+  test:"word", count:20, ime:"raw", ref:false,   /* ref — 참고 상자에만 있는 항목까지 낼지 */
   word:{ range:{}, types:{ A:1, B:1, C:1 } },
   verb:{ range:{ 1:1, 2:1, 3:1, adj:1 }, types:{ H:1, I:1, J:1 } },
   phrase:{ range:{}, types:{ D:1, E:1, F:1, G:1 } }
@@ -1194,7 +1208,8 @@ function drawHome(){
     b.querySelector("b").textContent = t.nm;
     b.querySelector(".n span").textContent = t.sub;
     b.querySelector(".c").textContent =
-      (t.k === "word" ? POOL.length : t.k === "verb" ? VPOOL.length : PPOOL.length) + "항목";
+      (t.k === "word" ? POOL.filter(inScope).length :
+       t.k === "verb" ? VPOOL.filter(inScope).length : PPOOL.length) + "항목";
     if (t.ready) b.addEventListener("click", function(){ cfg.test = t.k; drawHome(); });
     pick.appendChild(b);
   });
@@ -1236,11 +1251,26 @@ function drawHome(){
 
   seg($("countSeg"), [10, 20, 30, 0], function(v){ return v ? String(v) : "전체"; },
       function(){ return cfg.count; }, function(v){ cfg.count = v; });
+  seg($("refSeg"), [0, 1], function(v){ return v ? "넣기" : "빼기"; },
+      function(){ return cfg.ref ? 1 : 0; },
+      function(v){ cfg.ref = !!v; drawHome(); });
+  $("refHint").textContent =
+    "단어장 4쪽 <자주 나오는 예외 1류 동사> 상자에만 있는 " +
+    POOL.concat(VPOOL).filter(function(x){ return x.ref; })
+        .map(function(x){ return x.word || x.kana; })
+        .filter(function(w, i, a){ return a.indexOf(w) === i; }).join("·") +
+    " — 본문 어휘에는 없습니다";
+
   seg($("imeSeg"), ["raw", "hira", "kata"],
       function(v){ return v === "raw" ? "직접" : v === "hira" ? "あ" : "ア"; },
       function(){ return cfg.ime; }, function(v){ cfg.ime = v; drawIme(); });
 
-  $("progNote").textContent = T().master;
+  /* 예외를 이름으로 적어 두면 참고 항목을 뺐을 때 거짓말이 된다 — 지금 범위에서 센다 */
+  var ex = cfg.test === "verb"
+    ? VPOOL.filter(inScope).filter(function(v){ return v.tricky || v.teIrreg || v.irregular; })
+           .map(function(v){ return v.kana; })
+    : [];
+  $("progNote").textContent = T().master + (ex.length ? " 지금 범위의 예외: " + ex.join("·") : "");
   drawProgress();
   refreshStart();
 }
@@ -1249,7 +1279,7 @@ function rangeItems(){
   if (cfg.test === "word")
     return UNITS.map(function(u){
       return { k:u.code, nm:u.title.replace("6과 · ", ""), note:u.pages,
-               n:POOL.filter(function(w){ return w.unit === u.code; }).length };
+               n:POOL.filter(function(w){ return w.unit === u.code && inScope(w); }).length };
     });
   if (cfg.test === "phrase")
     return PUNITS.map(function(u){
@@ -1257,7 +1287,7 @@ function rangeItems(){
                n:PPOOL.filter(function(x){ return x.unit === u.code; }).length };
     });
   var out = [1, 2, 3].map(function(g){
-    var vs = VERBS.filter(function(v){ return v.group === g; });
+    var vs = VERBS.filter(function(v){ return v.group === g && inScope(v); });
     return { k:String(g), nm:GROUP_NM[g], n:vs.length,
              note: vs.some(function(v){ return v.tricky || v.teIrreg; }) ? "예외 포함" : "" };
   });
@@ -1281,12 +1311,20 @@ function seg(box, vals, label, get, set){
   });
 }
 
+/* ref 가 붙은 항목은 단어장 표·상자에만 있고 본문 어휘에는 없다 — 수업에서
+   안 다뤘을 수 있어 기본으로 뺀다. 홈에서 켜면 다시 나온다. */
+function inScope(x){ return cfg.ref || !x.ref; }
 function selected(){
-  if (cfg.test === "word") return POOL.filter(function(w){ return cfg.word.range[w.unit]; });
+  if (cfg.test === "word")
+    return POOL.filter(function(w){ return cfg.word.range[w.unit] && inScope(w); });
   if (cfg.test === "phrase") return PPOOL.filter(function(x){ return cfg.phrase.range[x.unit]; });
   return VPOOL.filter(function(v){
-    return isAdj(v) ? cfg.verb.range.adj : cfg.verb.range[String(v.group)];
+    return (isAdj(v) ? cfg.verb.range.adj : cfg.verb.range[String(v.group)]) && inScope(v);
   });
+}
+/* 범위 칩의 개수도 같은 기준으로 센다 — 20개라 해 놓고 17개만 내면 안 된다 */
+function refCount(){
+  return POOL.concat(VPOOL).filter(function(x){ return x.ref; }).length;
 }
 
 function mastered(item){

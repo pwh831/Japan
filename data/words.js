@@ -201,9 +201,12 @@ var WORDS = [
   { id:"w425", unit:"s4", pos:"명사", word:"サッカー", kana:"サッカー", meaning:["축구"] },
   { id:"w426", unit:"s4", pos:"명사", word:"やきゅう", kana:"やきゅう", meaning:["야구"] },
   { id:"w427", unit:"s4", pos:"い형용사", word:"おもしろい", kana:"おもしろい", meaning:["재미있다"] },
-  { id:"w428", unit:"s4", pos:"동사", word:"走る",     kana:"はしる",   meaning:["뛰다", "달리다"], note:"★ 예외 1류" },
-  { id:"w429", unit:"s4", pos:"동사", word:"知る",     kana:"しる",     meaning:["알다"], note:"★ 예외 1류" },
-  { id:"w430", unit:"s4", pos:"동사", word:"切る",     kana:"きる",     meaning:["자르다"], note:"★ 예외 1류" }
+  { id:"w428", unit:"s4", pos:"동사", word:"走る",     kana:"はしる",   meaning:["뛰다", "달리다"], note:"★ 예외 1류",
+    ref:"단어장 4쪽 <자주 나오는 예외 1류 동사> 상자에만 — 본문 어휘에는 없다" },
+  { id:"w429", unit:"s4", pos:"동사", word:"知る",     kana:"しる",     meaning:["알다"], note:"★ 예외 1류",
+    ref:"단어장 4쪽 <자주 나오는 예외 1류 동사> 상자에만 — 본문 어휘에는 없다" },
+  { id:"w430", unit:"s4", pos:"동사", word:"切る",     kana:"きる",     meaning:["자르다"], note:"★ 예외 1류",
+    ref:"단어장 4쪽 <자주 나오는 예외 1류 동사> 상자에만 — 본문 어휘에는 없다" }
 ];
 
 /* skip:true 인 항목은 출제에서 빠집니다 — 단어장에 두 번 나온 낱말(あらう·けす)의

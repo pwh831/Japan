@@ -226,6 +226,20 @@ E.PHRASES.forEach(function(p){ E.sides(p).forEach(function(sd){
 eq(Object.keys(kos).length >= 6, true, "서로 다른 뜻 " + Object.keys(kos).length + "개 (오답 보기 4개 확보)");
 eq(Object.keys(jas).length >= 6, true, "서로 다른 문장 " + Object.keys(jas).length + "개");
 
+console.log("── 시험범위 — 본문 어휘와 참고 상자를 가른다 ──");
+/* 단어장 4쪽 <자주 나오는 예외 1류 동사> 상자에만 있고 본문 어휘에는 없는 것들.
+   수업에서 안 다뤘을 수 있어 기본으로 빼고, 홈에서 켤 때만 낸다.
+   かえる·はいる 는 1·2쪽 본문에도 ＊예외1류 로 나오므로 여기 들면 안 된다. */
+eq(E.WORDS.filter(function(w){ return w.ref; }).map(function(w){ return w.kana; }).sort().join(","),
+   "きる,しる,はしる", "단어 — 참고 상자에만 있는 것은 셋");
+eq(E.VERBS.filter(function(v){ return v.ref; }).map(function(v){ return v.kana; }).sort().join(","),
+   "きる,しる,はしる", "활용 — 참고 상자에만 있는 것은 셋");
+eq(E.VERBS.filter(function(v){ return v.tricky && !v.ref; }).map(function(v){ return v.kana; }).sort().join(","),
+   "かえる,はいる", "본문에도 나오는 예외 1류는 かえる·はいる");
+/* 참고 항목을 빼도 예외 규칙을 연습할 동사가 남아 있어야 한다 */
+eq(E.VERBS.filter(function(v){ return v.tricky && !v.ref; }).length >= 2, true,
+   "참고를 빼도 る 로 끝나는 1류 예외가 둘 남는다");
+
 console.log("── 문제가 답을 하나로 좁히는가 ──");
 /* 유형 B 는 뜻만 보여 준다. 두 낱말이 뜻을 나눠 가지면 맞게 써도 오답이 된다. */
 var live = E.WORDS.filter(function(w){ return !w.skip; }), clash = [];

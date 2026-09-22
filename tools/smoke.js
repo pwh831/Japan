@@ -70,8 +70,48 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   t(typed > 0, '타이핑 문제 ' + typed + '개 (H ' + checked.H + ' · J ' + checked.J + ')');
   t(right === typed, '엔진이 낸 정답이 앱 채점을 통과: ' + right + '/' + typed);
 
-  // 오답 경로: 일부러 틀리게 (예외 동사에 규칙만 적용한 답)
+  // 참고 항목 — 기본으로 빠져 있어야 하고, 켜면 돌아와야 한다
   await p.click('#homeBtn'); await p.waitForTimeout(150);
+  await p.evaluate(() => localStorage.clear());
+  await p.reload(); await p.waitForTimeout(400);
+  await p.click('.test >> nth=1'); await p.waitForTimeout(200);
+  const refOff = (await p.textContent('#startBtn')).match(/(\d+)항목/)[1] | 0;
+  t((await p.$eval('#refSeg button[aria-pressed="true"]', e => e.textContent.trim())) === '빼기',
+    '참고 항목은 기본으로 빠져 있다');
+  // 전부 다 풀어 보고 참고 항목이 한 번도 안 나오는지 본다
+  await p.click('#countSeg button >> nth=3');            // 전체
+  await p.click('#startBtn'); await p.waitForTimeout(250);
+  const seen = new Set();
+  for (let i = 0; i < 120; i++) {
+    if (await p.$eval('#result', e => !e.hidden)) break;
+    seen.add((await p.textContent('#qBody .q-main')).trim());
+    if (await p.$eval('#choices', e => !e.hidden)) {        // 고르기 문제
+      await p.click('#choices .choice >> nth=0'); await p.waitForTimeout(60);
+      await p.click('#fb .btn'); await p.waitForTimeout(60);
+    } else {                                                // 쓰기 문제
+      await p.click('#skipBtn'); await p.waitForTimeout(60);
+      await p.click('#submitBtn'); await p.waitForTimeout(60);
+    }
+  }
+  const refVs = E.VERBS.filter(v => v.ref);
+  const refKana = refVs.map(v => v.kana);
+  const refShown = new Set();                              // 기본형과 활용형 전부
+  refVs.forEach(v => { refShown.add(v.kana);
+    E.formsOf(v).forEach(f => refShown.add(E.anyConj(v, f.k))); });
+  const leaked = [...seen].filter(m => refShown.has(m));
+  t(leaked.length === 0, '참고 항목이 출제되지 않는다' + (leaked.length ? ' — 샌 것: ' + leaked : ''));
+  await p.click('#homeBtn'); await p.waitForTimeout(200);
+  await p.click('#refSeg button >> nth=1');              // 넣기
+  await p.waitForTimeout(150);
+  const refOn = (await p.textContent('#startBtn')).match(/(\d+)항목/)[1] | 0;
+  t(refOn === refOff + refKana.length,
+    '켜면 ' + refKana.length + '개가 돌아온다 (' + refOff + ' → ' + refOn + ')');
+  await p.click('#refSeg button >> nth=0'); await p.waitForTimeout(150);   // 다시 빼기
+
+  // 오답 경로: 일부러 틀리게 (예외 동사에 규칙만 적용한 답)
+  if (await p.$eval('#quiz', e => !e.hidden)) await p.click('#quitBtn');
+  else if (await p.$eval('#result', e => !e.hidden)) await p.click('#homeBtn');
+  await p.waitForTimeout(150);
   await p.evaluate(() => localStorage.clear());
   await p.reload(); await p.waitForTimeout(400);
   await p.click('.test >> nth=1'); await p.waitForTimeout(150);
