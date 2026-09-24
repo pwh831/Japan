@@ -7,7 +7,7 @@ docs/scripts/unit6.json 이고, 이 스크립트는 그걸 A4 로 찍기만 한�
 
 한국어 발음은 앱과 같은 함수(pron)로 만든다 — annotate-pdf.py 와 같은 이유.
 """
-import json, os, subprocess, sys
+import json, os, re, subprocess, sys
 
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
@@ -37,6 +37,8 @@ def pronounce(texts):
     r = subprocess.run(["node", "-e", js], input=json.dumps(texts, ensure_ascii=False).encode("utf-8"),
                        capture_output=True, check=True)
     return json.loads(r.stdout.decode("utf-8"))
+
+NUM = re.compile(r"^[\u2460-\u2473]\s*")    # 낱말 앞의 ①② 번호 — 발음에는 넣지 않는다
 
 def esc(s):
     return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
@@ -97,9 +99,10 @@ def line_block(spk, ja, pr, ko):
     return t
 
 def page_tag(sec):
-    note = "음성 %s" % sec["track"]
-    cells = [Paragraph("p.%s" % sec["page"], S["page"]), Paragraph(esc(note), S["sub"])]
-    widths = [16 * mm, 20 * mm]
+    cells, widths = [Paragraph("p.%s" % sec["page"], S["page"])], [16 * mm]
+    if sec.get("track"):                        # 정리하기 쪽은 음성이 없다
+        cells.append(Paragraph(esc("음성 %s" % sec["track"]), S["sub"]))
+        widths.append(20 * mm)
     if sec.get("audio_only"):
         cells.append(Paragraph("교과서에 없음 · 음성 전용", S["badge"]))
         widths.append(50 * mm)
@@ -119,7 +122,7 @@ def build(src, out):
     for sec in data["sections"]:
         for it in sec.get("items", []):
             for ln in it["lines"]: flat.append(ln[1])
-        for w in sec.get("words", []): flat.append(w[0].split(" ", 1)[-1])
+        for w in sec.get("words", []): flat.append(NUM.sub("", w[0]))
     prs = iter(pronounce(flat))
 
     story = [Paragraph(esc(data["unit"]), S["unit"]),
@@ -153,7 +156,9 @@ def build(src, out):
                                     ("LINEBELOW", (0, 0), (-1, -1), 0.3, colors.HexColor("#E3E6E4")),
                                     ("LEFTPADDING", (0, 0), (-1, -1), 0),
                                     ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3)]))
-            blocks.append([wt])
+            title = ([Spacer(1, 1 * mm), Paragraph(esc(sec["words_title"]), S["no"])]
+                     if sec.get("words_title") else [])
+            blocks.append(title + [wt])              # 제목과 표를 한 덩어리로
         # 제목이 쪽 끝에 홀로 남지 않게 첫 덩어리와 묶는다
         story.append(KeepTogether(head + (blocks[0] if blocks else [])))
         story += [KeepTogether(b) for b in blocks[1:]]
@@ -171,6 +176,11 @@ def build(src, out):
     doc.build(story)
     print(os.path.relpath(out, ROOT))
 
+# 원고 → PDF. 인자가 없으면 둘 다 만든다.
+JOBS = [("unit6.json", "6과-듣기대본.pdf"), ("unit6-honmun.json", "6과-본문.pdf")]
+
 if __name__ == "__main__":
-    build(os.path.join(ROOT, "docs", "scripts", "unit6.json"),
-          os.path.join(ROOT, "docs", "scripts", "6과-듣기대본.pdf"))
+    d = os.path.join(ROOT, "docs", "scripts")
+    jobs = [(a, b) for a, b in JOBS if len(sys.argv) < 2 or a in sys.argv[1:]]
+    for src, out in jobs:
+        build(os.path.join(d, src), os.path.join(d, out))
