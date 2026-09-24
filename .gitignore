@@ -25,3 +25,4 @@ skills-lock.json
 # 다시 받을 때는 npm i 만 하면 된다.
 node_modules/
 __pycache__/
+tools/fonts/

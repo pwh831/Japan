@@ -125,6 +125,8 @@ tools/annotate-pdf.py  시험범위 PDF 에 한국어 발음 깔기
 docs/PRD.md           요구사항 정의서
 docs/2026-일본어회화-…-단어장.pdf       시험범위 원본
 docs/2026-일본어회화-…-단어장-발음.pdf  ↑ 에 한국어 발음을 깐 사본
+docs/scripts/unit6.json               6과 듣기 대본 (교과서 음성 받아쓰기)
+docs/scripts/6과-듣기대본.pdf           ↑ 을 굿노트용 A4 로 찍은 것
 ```
 
 ## 고친 뒤
@@ -134,6 +136,7 @@ npm run build     # → 일본어-단어시험.html
 npm test          # 271항목
 npm run smoke     # 실제 브라우저로 앱을 열어 세션을 끝까지 풀어 본다
 npm run pdf       # → docs/…-단어장-발음.pdf
+npm run script-pdf  # → docs/scripts/6과-듣기대본.pdf  (글꼴: tools/fonts/ 에 ZenKakuGothicNew·NanumGothic)
 ```
 
 `npm run pdf` 는 발음 규칙을 다시 적지 않고 **앱의 `pron` 함수를 그대로 떼어 씁니다.**

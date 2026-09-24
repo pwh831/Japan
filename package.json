@@ -9,6 +9,7 @@
     "build": "python3 build.py",
     "test": "python3 tools/extract-engine.py > /tmp/engine.js && node tools/test-engine.js /tmp/engine.js",
     "smoke": "python3 build.py && node tools/smoke.js",
-    "pdf": "python3 tools/annotate-pdf.py"
+    "pdf": "python3 tools/annotate-pdf.py",
+    "script-pdf": "python3 tools/script-pdf.py"
   }
 }
