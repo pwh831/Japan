@@ -129,6 +129,8 @@ docs/scripts/unit6.json               6과 듣기 대본 (교과서 음성 받�
 docs/scripts/6과-듣기대본.pdf           ↑ 을 굿노트용 A4 로 찍은 것
 docs/scripts/unit6-honmun.json        6과 본문(104·106쪽) + 정리하기(105·107쪽), 교과서 글자 그대로
 docs/scripts/6과-본문.pdf               ↑ 을 굿노트용 A4 로 찍은 것
+docs/scripts/unit6-all.json           6과 전체 지문 — 위 둘을 쪽 순서로 합치고 지문마다 어휘를 붙인 것
+docs/scripts/6과-전체지문.pdf           ↑ 을 굿노트용 A4 로 (본문 한 줄 · 바로 밑에 해석)
 ```
 
 ## 고친 뒤
@@ -138,7 +140,7 @@ npm run build     # → 일본어-단어시험.html
 npm test          # 271항목
 npm run smoke     # 실제 브라우저로 앱을 열어 세션을 끝까지 풀어 본다
 npm run pdf       # → docs/…-단어장-발음.pdf
-npm run script-pdf  # → docs/scripts/6과-듣기대본.pdf · 6과-본문.pdf  (글꼴: tools/fonts/ 에 ZenKakuGothicNew·NanumGothic)
+npm run script-pdf  # → docs/scripts/6과-듣기대본.pdf · 6과-본문.pdf · 6과-전체지문.pdf  (글꼴: tools/fonts/ 에 ZenKakuGothicNew·NanumGothic)
 ```
 
 `npm run pdf` 는 발음 규칙을 다시 적지 않고 **앱의 `pron` 함수를 그대로 떼어 씁니다.**

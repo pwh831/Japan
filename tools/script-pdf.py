@@ -141,7 +141,9 @@ def build(src, out):
             b = []
             if it.get("no"): b.append(Paragraph(esc(it["no"]), S["no"]))
             for spk, ja, ko in it["lines"]:
-                b.append(line_block(spk, ja, next(prs), ko))
+                pr = next(prs)
+                # line_pron:false — 본문 바로 밑에 해석이 오게 한다(발음은 어휘 표에만)
+                b.append(line_block(spk, ja, pr if data.get("line_pron", True) else None, ko))
             if it.get("answer"): b.append(Paragraph(esc(it["answer"]), S["ans"]))
             b.append(Spacer(1, 2.5 * mm))
             blocks.append(b)                     # 날것의 목록 — KeepTogether 를 겹치면 쪽이 통째로 넘어간다
@@ -151,17 +153,27 @@ def build(src, out):
                 pr = next(prs)
                 rows.append([Paragraph(esc(ja), S["word"]),
                              Paragraph(esc(ko_punct(pr)), S["pr"]), Paragraph(esc(ko), S["wko"])])
-            wt = Table(rows, colWidths=[46 * mm, 34 * mm, W - 2 * M - NOTE - 80 * mm])
-            wt.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                                    ("LINEBELOW", (0, 0), (-1, -1), 0.3, colors.HexColor("#E3E6E4")),
-                                    ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                                    ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3)]))
-            title = ([Spacer(1, 1 * mm), Paragraph(esc(sec["words_title"]), S["no"])]
-                     if sec.get("words_title") else [])
-            blocks.append(title + [wt])              # 제목과 표를 한 덩어리로
-        # 제목이 쪽 끝에 홀로 남지 않게 첫 덩어리와 묶는다
-        story.append(KeepTogether(head + (blocks[0] if blocks else [])))
-        story += [KeepTogether(b) for b in blocks[1:]]
+            # 어휘 표는 쪽을 넘어가도 된다 — 통째로 넘기면 앞 쪽이 반쯤 빈다.
+            # 제목은 표의 첫 줄로 넣고 repeatRows 로 다음 쪽에서도 다시 찍는다.
+            head_row = 1 if sec.get("words_title") else 0
+            if head_row:
+                rows.insert(0, [Paragraph(esc(sec["words_title"]), S["no"]), "", ""])
+            wt = Table(rows, colWidths=[46 * mm, 34 * mm, W - 2 * M - NOTE - 80 * mm],
+                       repeatRows=head_row)
+            st = [("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                  ("LINEBELOW", (0, head_row), (-1, -1), 0.3, colors.HexColor("#E3E6E4")),
+                  ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                  ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3)]
+            if head_row: st.append(("SPAN", (0, 0), (-1, 0)))
+            wt.setStyle(TableStyle(st))
+            blocks.append(("split", [Spacer(1, 1 * mm), wt]))
+        # 제목이 쪽 끝에 홀로 남지 않게 첫 덩어리와 묶는다. 어휘 표("split")는 묶지 않는다.
+        def put(b, first):
+            if isinstance(b, tuple):
+                return (head if first else []) + b[1]
+            return [KeepTogether((head if first else []) + b)]
+        for i, b in enumerate(blocks or [[]]):
+            story += put(b, i == 0)
         story.append(Spacer(1, 8 * mm))
 
     story.append(Paragraph(esc(data["source"]), S["foot"]))
@@ -177,7 +189,8 @@ def build(src, out):
     print(os.path.relpath(out, ROOT))
 
 # 원고 → PDF. 인자가 없으면 둘 다 만든다.
-JOBS = [("unit6.json", "6과-듣기대본.pdf"), ("unit6-honmun.json", "6과-본문.pdf")]
+JOBS = [("unit6.json", "6과-듣기대본.pdf"), ("unit6-honmun.json", "6과-본문.pdf"),
+        ("unit6-all.json", "6과-전체지문.pdf")]
 
 if __name__ == "__main__":
     d = os.path.join(ROOT, "docs", "scripts")
