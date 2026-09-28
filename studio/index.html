@@ -1,0 +1,1383 @@
+<title>일본어 변형 출제실</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Zen+Old+Mincho:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+/* 원고지 청록(앱과 같은 색)과 채점용 주홍 펜. 문항은 시험지처럼 바탕체(한글 Gowun Batang + 일본어 Zen Old Mincho) */
+:root{
+  --bg:#EFF2EE; --surface:#FFFFFF; --surface-2:#F6F7F3; --sunken:#E7EBE6;
+  --line:#DDE3DC; --line-strong:#C4CEC5;
+  --ink:#1B2021; --text:#2B3432; --muted:#5E6966; --faint:#8C9591;
+  --accent:#3F7468; --accent-hover:#335F55; --accent-soft:#E1EDE9; --on-accent:#FFFFFF;
+  --ok:#2A7A55; --ok-soft:#E1F1E8; --bad:#C0442B; --bad-soft:#F9E7E2; --warn:#8C5A00; --warn-soft:#F8EFD8;
+  --paper:#FFFFFF;
+  --serif:"Gowun Batang","Zen Old Mincho","AppleMyungjo","Hiragino Mincho ProN","Batang",serif;
+  --sans:"IBM Plex Sans KR","Zen Kaku Gothic New",-apple-system,"Apple SD Gothic Neo","Hiragino Sans","Malgun Gothic",sans-serif;
+  --ja:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;
+  --r:12px; --r-sm:8px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;
+  --bg:#121716; --surface:#1A2120; --surface-2:#1F2725; --sunken:#151B1A;
+  --line:#2A3432; --line-strong:#394543;
+  --ink:#E9EEEC; --text:#D1D9D6; --muted:#98A6A1; --faint:#6E7B77;
+  --accent:#86C3B3; --accent-hover:#9DD0C3; --accent-soft:#213833; --on-accent:#0F1715;
+  --ok:#76CC9D; --ok-soft:#18302A; --bad:#F2917E; --bad-soft:#3B221D; --warn:#E6B45C; --warn-soft:#352A14;
+  --paper:#1C2322;}}
+:root[data-theme="dark"]{color-scheme:dark;
+  --bg:#121716; --surface:#1A2120; --surface-2:#1F2725; --sunken:#151B1A;
+  --line:#2A3432; --line-strong:#394543;
+  --ink:#E9EEEC; --text:#D1D9D6; --muted:#98A6A1; --faint:#6E7B77;
+  --accent:#86C3B3; --accent-hover:#9DD0C3; --accent-soft:#213833; --on-accent:#0F1715;
+  --ok:#76CC9D; --ok-soft:#18302A; --bad:#F2917E; --bad-soft:#3B221D; --warn:#E6B45C; --warn-soft:#352A14;
+  --paper:#1C2322;}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{background:var(--bg)}
+body{background:var(--bg);color:var(--text);font:15px/1.6 var(--sans);padding-inline:16px;padding-block:0 64px;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+.wrap{max-width:880px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.wrap.wide{max-width:1000px}
+h1,h2,h3{margin:0;color:var(--ink);text-wrap:balance}
+h1{font-family:var(--serif);font-weight:700;font-size:24px;line-height:1.2}
+h2{font-size:17px;font-weight:600}
+p{margin:0}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ja{font-family:var(--ja)}
+
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-block:28px 18px;border-bottom:1px solid var(--line)}
+.eyebrow{display:block;font-size:12px;color:var(--muted);letter-spacing:.04em;margin-bottom:4px}
+.status{font-size:13px;color:var(--muted);min-height:20px}
+.status.err{color:var(--bad);background:var(--bad-soft);padding:4px 10px;border-radius:99px}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.muted{color:var(--muted);font-size:13.5px}
+.btn{background:var(--accent);color:var(--on-accent);border:0;border-radius:var(--r-sm);padding:10px 18px;font-weight:600;min-height:44px;font-size:15px}
+.btn:hover:not(:disabled){background:var(--accent-hover)}
+.btn:disabled{opacity:.4;cursor:default}
+.ghost{background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--r-sm);padding:8px 14px;min-height:44px;color:var(--ink);font-size:14px}
+.ghost:hover:not(:disabled){background:var(--surface-2)}
+.ghost:disabled{opacity:.45;cursor:default}
+.ghost.danger{color:var(--bad)}
+.link{background:none;border:0;padding:4px 0;color:var(--muted);min-height:44px;font-size:14px}
+.link:hover{color:var(--ink)}
+.acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.small-btn{background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--r-sm);padding:4px 12px;min-height:34px;font-size:13px;color:var(--ink)}
+.small-btn:hover:not(:disabled){background:var(--surface-2)}
+.small-btn:disabled{opacity:.45;cursor:default}
+
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:0;padding:0;list-style:none;border:1px solid var(--line);border-radius:var(--r-sm);counter-reset:s}
+@media (max-width:620px){.steps{grid-template-columns:minmax(0,1fr)}}
+.steps li{padding:12px 14px;font-size:13.5px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+.steps li+li{border-left:1px solid var(--line)}
+@media (max-width:620px){.steps li+li{border-left:0;border-top:1px solid var(--line)}}
+.steps b{color:var(--ink);font-size:14.5px;font-weight:600}
+.steps b::before{counter-increment:s;content:counter(s) ". ";color:var(--accent);font-variant-numeric:tabular-nums}
+
+.src{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:var(--r-sm)}
+.src>div{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding:12px 14px}
+.src>div+div{border-top:1px solid var(--line)}
+@media (max-width:520px){.src>div{grid-template-columns:minmax(0,1fr) auto}.src .tag{grid-column:1 / -1;justify-self:start}}
+.src .tag{font-size:11.5px;font-weight:600;color:var(--accent);background:var(--accent-soft);border-radius:99px;padding:2px 9px;white-space:nowrap}
+.src b{font-size:14.5px;color:var(--ink);font-weight:600}
+.src small{display:block;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.units-note{display:flex;flex-wrap:wrap;gap:6px;grid-column:1 / -1}
+.unote{font-size:12.5px;border:1px solid var(--line-strong);border-radius:99px;padding:3px 10px;background:var(--surface);color:var(--muted);min-height:32px}
+.unote.has{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);font-weight:600}
+.engine{font-size:12.5px;color:var(--muted);border-left:3px solid var(--accent);padding:6px 12px;background:var(--surface-2);border-radius:0 var(--r-sm) var(--r-sm) 0}
+.engine b{color:var(--ink)}
+
+.sets{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.sets li+li .set{border-top:1px solid var(--line)}
+.set{width:100%;text-align:left;background:none;border:0;padding:12px 4px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;align-items:center}
+.set:hover .t{color:var(--accent)}
+.set .t{font-family:var(--serif);font-weight:700;color:var(--ink);font-size:16px;overflow-wrap:anywhere}
+.set .m{font-size:12.5px;color:var(--muted);grid-column:1}
+.set .r{grid-row:1 / span 2;grid-column:2;display:flex;align-items:center;gap:8px}
+.score-s{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;font-size:14px}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:2px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent);white-space:nowrap;font-weight:600}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.bad{background:var(--bad-soft);color:var(--bad)}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.empty{background:var(--surface-2);border-radius:var(--r-sm);padding:16px;font-size:13.5px;color:var(--muted);list-style:none}
+
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field>span{font-weight:600;color:var(--ink);font-size:14px}
+.field small{color:var(--muted);font-size:12.5px;font-weight:400}
+input[type=text],input[type=number],select,textarea{background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--r-sm);padding:9px 12px;min-height:44px;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+textarea{resize:vertical;line-height:1.65}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:620px){.grid4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.check{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--text);min-height:32px}
+.check input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);flex:none}
+.pick{display:flex;flex-wrap:wrap;gap:6px}
+.pk{border:1px solid var(--line-strong);border-radius:var(--r-sm);background:var(--surface);padding:7px 12px;min-height:44px;font-size:13.5px;color:var(--text);text-align:left}
+.pk small{display:block;font-size:11.5px;color:var(--muted);font-weight:400}
+.pk[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:600}
+.pk[aria-pressed="true"] small{color:var(--accent)}
+.err-box{background:var(--bad-soft);color:var(--bad);border-radius:var(--r-sm);padding:10px 12px;font-size:13.5px}
+.meter{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;text-align:right}
+.meter.over{color:var(--bad);font-weight:600}
+.msg{font-size:13px;color:var(--text);min-height:18px}
+.msg.bad{color:var(--bad)}
+
+.pages{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.pg{border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden;background:var(--surface-2);display:flex;flex-direction:column}
+.pg img{width:100%;aspect-ratio:3/4;object-fit:cover;background:var(--sunken);display:block}
+.pg .pb{padding:8px;display:flex;flex-direction:column;gap:6px;font-size:12.5px}
+.pg .pb input{min-height:34px;padding:4px 8px;font-size:13px;width:70px}
+.pg .st{color:var(--muted)}
+.pg .st.ok{color:var(--ok);font-weight:600}
+.pg .st.bad{color:var(--bad)}
+.drop{border:1.5px dashed var(--line-strong);border-radius:var(--r-sm);padding:16px;background:var(--surface-2);display:flex;flex-direction:column;gap:8px;align-items:center;text-align:center}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+
+.stepper{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:0;padding:0;list-style:none}
+.stepper li{display:flex;flex-direction:column;gap:6px;font-size:12.5px;color:var(--muted)}
+.stepper li i{height:4px;border-radius:99px;background:var(--sunken);display:block}
+.stepper li.on{color:var(--ink);font-weight:600}
+.stepper li.on i{background:var(--accent);animation:pulse 1.4s ease-in-out infinite}
+.stepper li.done i{background:var(--accent)}
+@keyframes pulse{50%{opacity:.45}}
+@media (prefers-reduced-motion:reduce){.stepper li.on i{animation:none}}
+.live{font-size:13.5px;color:var(--text);font-variant-numeric:tabular-nums}
+.log{margin:0;padding-left:18px;font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+.export{border-top:1px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:10px}
+
+.qs{display:flex;flex-direction:column;gap:14px;min-width:0}
+.q{background:var(--paper)}
+.q.excluded{opacity:.5}
+.qhead{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.qhead .n{font-family:var(--serif);font-weight:700;color:var(--ink);font-size:18px;position:relative;min-width:28px;text-align:center;font-variant-numeric:tabular-nums}
+.q.mark-o .qhead .n::after{content:"";position:absolute;left:50%;top:50%;width:34px;height:34px;transform:translate(-50%,-50%) rotate(-8deg);border:2px solid var(--bad);border-radius:50%}
+.q.mark-x .qhead .n::after{content:"";position:absolute;left:50%;top:50%;width:40px;height:2px;background:var(--bad);transform:translate(-50%,-50%) rotate(-55deg)}
+.qhead .sp{flex:1}
+.stem{font-family:var(--serif);font-size:16.5px;color:var(--ink);font-weight:700;line-height:1.6;white-space:pre-wrap}
+.stem .pts{font-family:var(--sans);font-weight:400;font-size:13px;color:var(--muted)}
+.box{border:1px solid var(--line-strong);border-radius:2px;padding:18px 14px 12px;position:relative;font-family:var(--serif);font-size:15.5px;line-height:1.85;background:var(--paper);white-space:pre-wrap;margin-top:6px;overflow-x:auto}
+.box::before{content:"〈보기〉";position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--paper);padding:0 8px;font-size:12.5px;color:var(--ink);font-family:var(--sans)}
+.choices{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
+.choice{width:100%;text-align:left;display:grid;grid-template-columns:24px minmax(0,1fr);gap:6px;align-items:start;background:transparent;border:1px solid transparent;border-radius:var(--r-sm);padding:8px 10px;min-height:44px;color:var(--text);font-family:var(--serif);font-size:16px;line-height:1.6}
+.choice .k{font-size:17px;color:var(--muted);line-height:1.45}
+.choice:hover:not(:disabled){background:var(--surface-2)}
+.choice[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.choice[aria-pressed="true"] .k{color:var(--accent)}
+.choice.right{background:var(--ok-soft);border-color:var(--ok)}
+.choice.right .k{color:var(--ok)}
+.choice.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.choice.wrong .k{color:var(--bad)}
+.choice:disabled{cursor:default}
+.ans-in{font-family:var(--ja);font-size:19px;letter-spacing:.04em}
+.explain{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.why{display:grid;grid-template-columns:24px minmax(0,1fr);gap:6px;font-size:13.5px;line-height:1.65}
+.why .k{font-family:var(--serif);font-size:16px;color:var(--faint)}
+.why .ox{font-weight:600;margin-right:6px;font-size:12.5px}
+.why .ox.o{color:var(--ok)} .why .ox.x{color:var(--bad)}
+.why .trap{color:var(--muted)}
+.why .eng{font-size:12px;color:var(--accent);font-weight:600;margin-left:4px}
+.why.is-ans .k{color:var(--accent)}
+.ref{border:0;background:var(--accent-soft);color:var(--accent);font-size:11.5px;font-weight:600;border-radius:99px;padding:1px 8px;min-height:24px;margin-left:4px;font-variant-numeric:tabular-nums}
+.refbox{font-size:13px;line-height:1.6;background:var(--surface-2);border-left:3px solid var(--accent);border-radius:0 var(--r-sm) var(--r-sm) 0;padding:8px 12px}
+.refbox b{color:var(--ink)}
+.refbox .n{font-variant-numeric:tabular-nums;color:var(--accent);font-weight:600;margin-right:4px}
+.note{font-size:13.5px;line-height:1.6;background:var(--surface-2);border-radius:var(--r-sm);padding:10px 12px}
+.note.warn{background:var(--warn-soft)}
+.note.bad{background:var(--bad-soft)}
+.note ul{margin:4px 0 0;padding-left:18px}
+.qfoot{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.result{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.big-score{font-family:var(--serif);font-weight:700;font-size:34px;color:var(--bad);line-height:1;font-variant-numeric:tabular-nums}
+.big-score small{font-size:16px;color:var(--muted)}
+.sticky-bar{position:sticky;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:2;box-shadow:0 8px 24px rgba(10,30,25,.12)}
+</style>
+
+<div class="wrap" id="root">
+  <header class="top">
+    <div><span class="eyebrow">일본어 · 2학기 1회고사 · 변형 문제</span><h1>일본어 변형 출제실</h1></div>
+    <div class="status" id="status" role="status">불러오는 중…</div>
+  </header>
+
+  <!-- 처음 화면 -->
+  <div id="home" class="wrap" style="max-width:none">
+    <section class="panel" aria-labelledby="h-how">
+      <div class="row"><h2 id="h-how">문제는 이렇게 만들어져요</h2><button class="btn" id="newSet" type="button">새 문제 만들기</button></div>
+      <ol class="steps">
+        <li><b>출제</b>단어장·교과서 문장마다 번호를 붙여 보내고, 선지마다 근거 번호를 달아 만들어요.</li>
+        <li><b>검수</b>정답을 가린 채 다른 검토 위원이 직접 풀어요. 답이 둘이거나 범위 밖 낱말이 나오면 걸러요.</li>
+        <li><b>수정</b>걸린 문항만 고치고 한 번 더 검수해요. 그래도 남은 문제는 표시해 둬요.</li>
+      </ol>
+      <p class="engine"><b>활용형은 앱이 한 번 더 계산해요.</b> 일본어 시험 앱과 같은 활용 규칙으로 선지의 ます·ましょう·たい·て형과 동사 그룹을 다시 만들어 보고, 출제자가 적은 정답과 다르면 그 문항을 걸러요. 서답형 가나 답도 앱과 같은 규칙(히라가나·가타카나 구분, 촉음·장음·탁점)으로 채점해요.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="h-src">
+      <div class="row"><h2 id="h-src">근거 자료</h2><span class="muted">문제는 이 자료 안에서만 근거를 찾아요</span></div>
+      <div class="src">
+        <div><span class="tag">단어장</span><div><b>선생님 단어장 (2학기 1회고사)</b><small id="srcWords"></small></div></div>
+        <div><span class="tag">교과서</span><div><b>6과 ハナちゃん、あぶない!</b><small id="srcText"></small></div></div>
+        <div><span class="tag">필기</span><div><b>선생님 필기</b><small>범위별로 필기 사진·PDF를 올리면 손글씨만 글로 옮겨 둬요. 자료와 다르면 필기를 따라요.</small></div><button class="small-btn" id="openNotes" type="button">필기 넣기</button>
+          <div class="units-note" id="unitNotes"></div></div>
+        <div><span class="tag">기출</span><div><b>기출 형식</b><small id="srcExam"></small></div><button class="small-btn" id="openExam" type="button">기출 예시 넣기</button></div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="h-sets">
+      <div class="row"><h2 id="h-sets">만든 문제</h2><span class="muted" id="setCount"></span></div>
+      <ul class="sets" id="sets"></ul>
+    </section>
+  </div>
+
+  <!-- 필기 -->
+  <section id="notes" class="panel" hidden aria-labelledby="h-notes">
+    <div class="row"><h2 id="h-notes">선생님 필기</h2><button class="ghost" id="nBack" type="button">목록으로</button></div>
+    <label class="field" for="nUnit"><span>범위</span><select id="nUnit"></select></label>
+    <div class="drop" id="nDrop">
+      <span class="muted">필기한 단어장·교과서 사진이나 PDF를 끌어다 놓거나 골라 주세요. 쪽 번호로 범위를 나눠 붙여요(단어장 1~4쪽, 교과서 98~111쪽).</span>
+      <button class="btn" id="nPick" type="button">사진·PDF 고르기</button>
+      <input type="file" id="nFile" accept="image/*,application/pdf" multiple hidden>
+    </div>
+    <div class="pages" id="nPages"></div>
+    <div class="acts"><button class="btn" id="nRead" type="button" disabled>글로 옮기기</button><button class="ghost" id="nStop" type="button" hidden>멈추기</button><span class="msg" id="nMsg" aria-live="polite"></span></div>
+    <label class="field" for="nText"><span>필기 내용 <small>직접 적거나 고쳐도 돼요. 예: [かえる] る로 끝나도 1류 — 꼭 나온다고 하심</small></span>
+      <textarea id="nText" rows="12"></textarea></label>
+    <div class="acts"><button class="btn" id="nSave" type="button">저장</button><span class="msg" id="nSaveMsg" aria-live="polite"></span></div>
+  </section>
+
+  <!-- 기출 예시 -->
+  <section id="exam" class="panel" hidden aria-labelledby="h-exam">
+    <div class="row"><h2 id="h-exam">기출 예시</h2><button class="ghost" id="eBack" type="button">목록으로</button></div>
+    <p class="muted">기출은 발문·선지 형식과 난이도를 맞추는 데만 써요. 내용 근거는 단어장·교과서·필기에서만 찾아요. 이 앱 안에만 저장돼요.</p>
+    <div class="acts"><button class="ghost" id="ePick" type="button">기출 사진 골라 글로 옮기기</button><span class="msg" id="eMsg" aria-live="polite"></span></div>
+    <input type="file" id="eFile" accept="image/*" multiple hidden>
+    <label class="field" for="eText"><span>예시 문항 <small>과년도 일본어 시험지 문항을 2~6개 정도 옮겨 두면 그 형식을 따라요.</small></span>
+      <textarea id="eText" rows="14" placeholder="예: 밑줄 친 동사의 ます형으로 알맞은 것은? ① かえます ② かえります …"></textarea></label>
+    <div class="acts"><button class="btn" id="eSave" type="button">저장</button><span class="msg" id="eSaveMsg" aria-live="polite"></span></div>
+  </section>
+
+  <!-- 만들기 -->
+  <form id="editor" class="panel" hidden novalidate aria-labelledby="h-ed">
+    <div class="row"><h2 id="h-ed">새 문제 만들기</h2><button class="ghost" id="edBack" type="button">목록으로</button></div>
+    <div class="field"><span>범위 <small>여러 개 고를 수 있어요.</small></span><div class="pick" id="fUnits"></div></div>
+    <div class="field"><span>문항 형식 <small>고른 것 위주로 만들어요. 아무것도 안 고르면 골고루 섞어요.</small></span><div class="pick" id="fTypes"></div></div>
+    <div class="grid4">
+      <label class="field" for="fMc"><span>선택형</span><input type="number" id="fMc" min="1" max="30" value="8"></label>
+      <label class="field" for="fEssay"><span>서답형</span><input type="number" id="fEssay" min="0" max="10" value="3"></label>
+      <label class="field" for="fLevel"><span>난이도</span><select id="fLevel"><option>하</option><option selected>중</option><option>상</option><option>중·상 섞기</option></select></label>
+      <label class="field" for="fTier"><span>출제 모델</span><select id="fTier"><option value="complex">가장 꼼꼼하게</option><option value="default">보통</option></select></label>
+    </div>
+    <label class="field" for="fMust"><span>꼭 다룰 것 <small>비워 두면 범위 전체에서 골고루 내요</small></span><input type="text" id="fMust" placeholder="예: 예외 1류 동사, て형 음편, どこか/どこが"></label>
+    <label class="check" for="fUseNote"><input type="checkbox" id="fUseNote" checked> 선생님 필기도 근거로 쓰기</label>
+    <label class="check" for="fUseRef"><input type="checkbox" id="fUseRef"> <span>참고 항목 넣기 <span class="muted">— 단어장 4쪽 예외 상자에만 있는 はしる·しる·きる (본문 어휘 아님)</span></span></label>
+    <div class="meter" id="meter"></div>
+    <div class="err-box" id="edErr" hidden></div>
+    <div class="acts"><button class="btn" id="edGo" type="submit">문제 만들기</button><span class="muted" id="etaInfo"></span></div>
+  </form>
+
+  <!-- 세트 보기 -->
+  <div id="view" hidden style="display:flex;flex-direction:column;gap:18px">
+    <div class="row">
+      <button class="link" id="vBack" type="button">← 목록으로</button>
+      <div class="acts">
+        <button class="btn" id="vPdf" type="button">PDF로 받기</button>
+        <button class="ghost" id="vAgain" type="button">같은 범위로 새로 만들기</button>
+        <button class="ghost danger" id="vDel" type="button">삭제</button>
+      </div>
+    </div>
+    <div class="note bad" id="delAsk" hidden><div class="row"><span>이 문제 세트를 지울까요? 되돌릴 수 없어요.</span><div class="acts"><button class="small-btn" id="delNo" type="button">그대로 두기</button><button class="small-btn" id="delYes" type="button">지우기</button></div></div></div>
+    <section class="panel">
+      <div class="row">
+        <div style="min-width:0"><h2 id="vTitle"></h2><div class="muted" id="vMeta"></div></div>
+        <div id="vChips"></div>
+      </div>
+      <div id="prog" hidden style="display:flex;flex-direction:column;gap:10px">
+        <ol class="stepper" id="stepper"><li><i></i>출제</li><li><i></i>검수</li><li><i></i>수정</li><li><i></i>다시 검수</li></ol>
+        <div class="row"><span class="live" id="live" aria-live="polite"></span><button class="ghost" id="stop" type="button">멈추기</button></div>
+        <ul class="log" id="log"></ul>
+      </div>
+      <div id="resume" hidden class="row"><span class="muted" id="resumeMsg"></span><button class="btn" id="resumeBtn" type="button">이어서 하기</button></div>
+      <div class="export" id="export" hidden>
+        <label class="check" for="xAns"><input type="checkbox" id="xAns" checked> 정답과 해설을 뒤에 붙이기</label>
+        <div class="acts"><button class="btn" id="xGo" type="button">PDF 만들기</button><span class="muted" id="xMsg" aria-live="polite"></span></div>
+      </div>
+      <div class="row">
+        <label class="check" for="reveal"><input type="checkbox" id="reveal"> 정답과 근거 먼저 보기 (검토용)</label>
+        <span class="muted" id="solveInfo"></span>
+      </div>
+    </section>
+    <div class="qs" id="qs"></div>
+    <section class="panel sticky-bar" id="gradeBar">
+      <div class="result">
+        <div id="scoreBox" class="muted"></div>
+        <div class="acts"><button class="ghost" id="resetSolve" type="button" hidden>다시 풀기</button><button class="btn" id="grade" type="button">채점하기</button></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script src="source.js"></script>
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+const CIRC=['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯','⑰','⑱','⑲','⑳'];
+const MAX_BYTES=63500;   // 한 번 부를 때 보낼 수 있는 글 (64 KiB)
+const MAT_MAX=42000;     // 근거 자료: 검수 때 문항과 함께 들어가야 해서 넉넉히 남긴다
+const GEN_BATCH=6;
+
+/* ---------- 근거 자료의 범위 (source.js — 앱과 같은 데이터) ---------- */
+const PARTS=[
+  ...UNITS.map(u=>({id:u.code,kind:'word',label:u.pages,title:u.title,pages:[Number(u.pages.replace(/\D/g,''))]})),
+  {id:'vb',kind:'verb',label:'활용표',title:'동사 · い형용사 활용',pages:[1,2,3,4]},
+  {id:'ph',kind:'phrase',label:'표현',title:'문형 · 헷갈리는 짝',pages:[1,2,3,4]},
+  {id:'t6',kind:'text',label:'교과서 6과',title:'본문 · 듣기 지문',pages:[98,99,100,101,102,103,104,105,106,107,108,109,110,111]}
+];
+const PART=Object.fromEntries(PARTS.map(p=>[p.id,p]));
+const VPOOL=VERBS.concat(ADJS);
+const REF_NAMES=[...new Set(WORDS.concat(VERBS).filter(x=>x.ref).map(x=>x.kana))];
+// 쪽 → 범위 (필기 사진을 붙일 곳)
+function pageUnit(p){p=Number(p);if(p>=98&&p<=111)return 't6';if(p>=1&&p<=4)return 's'+p;return ''}
+const SCOPE_PAGES=new Set([1,2,3,4,...PART.t6.pages]);
+const FORM_NM={masu:'ます형',mashou:'ましょう형',tai:'たい형',te:'て형',neg:'부정형(~くない)',past:'과거형(~かった)'};
+
+/* 기출 형식 — 이 학교 일본어 기출 원문은 아직 없다. 일반적인 고등학교 일본어 내신 형식과
+ * 선생님 단어장·교과서가 실제로 묻는 것(활용표, 헷갈리는 짝, 대화)에 맞춰 정했다.
+ * 사용자가 '기출 예시'에 실제 문항을 넣으면 그 형식을 먼저 따른다. */
+const EXAM_FORMS=[
+  {k:'meaning',label:'낱말·문장 뜻',hint:'일본어 → 우리말',text:'밑줄 친 낱말이나 짧은 문장의 뜻으로 알맞은 것을 우리말 선지로 고르게 한다. 오답은 같은 범위의 다른 낱말 뜻이나 헷갈리는 짝의 뜻으로 만든다.'},
+  {k:'word',label:'알맞은 낱말',hint:'뜻·빈칸 → 일본어',text:'우리말 뜻이나 문장의 빈칸에 들어갈 일본어를 고르게 한다. 선지는 가나. 오답은 탁점·촉음·장음 한 글자 차이나 뜻이 닮은 범위 안 낱말로 만든다.'},
+  {k:'conj',label:'활용형',hint:'ます·ましょう·たい·て, い형용사',text:'기본형과 활용 조건을 주고 바르게 활용한 것(또는 바르지 않은 것)을 고르게 한다. 선지는 "かえる → かえります"처럼 기본형과 활용형을 짝지어도 된다. 선지마다 why[].conj를 반드시 채운다. 오답은 예외 1류를 2류처럼 활용하기, 음편 섞기, いい → いくない.'},
+  {k:'group',label:'동사 그룹',hint:'1류·2류·3류, 예외 1류',text:'동사 다섯 개 가운데 그룹이 다른 하나를 고르거나 그룹을 바르게 짝지은 것을 고르게 한다. る로 끝나는 예외 1류를 꼭 섞는다. 선지마다 why[].group을 채운다.'},
+  {k:'dialog',label:'대화 빈칸',hint:'대화 속 빈칸에 알맞은 말',text:'교과서 본문·듣기 대화를 짧게 옮겨 <보기>에 두고 한 곳을 ____(밑줄 네 개)로 비워 알맞은 말을 고르게 한다. 대화 흐름과 문법으로 하나만 맞아야 한다.'},
+  {k:'reply',label:'알맞은 응답',hint:'묻는 말 → 대답',text:'A의 말을 주고 B의 대답으로 알맞은 것을 고르게 한다(예: どうやって いく? → バスで いくよ。).'},
+  {k:'content',label:'본문 내용',hint:'대화와 일치하는 것',text:'교과서 본문 대화를 <보기>에 주고 내용과 일치하는(일치하지 않는) 것을 우리말 선지로 고르게 한다.'},
+  {k:'vs',label:'헷갈리는 짝',hint:'どこか/どこが, から, はい/いいえ',text:'헷갈리는 짝 가운데 문맥에 맞는 것을 고르거나 쓰임이 바른 문장을 고르게 한다.'},
+  {k:'order',label:'순서',hint:'まず → それから, 대피 순서',text:'행동이나 대화의 순서를 바르게 늘어놓은 것을 고르게 한다. <보기>에 (가)~(라)를 두고 선지는 순서 조합.'},
+  {k:'kana',label:'서답형 가나 쓰기',hint:'뜻 → 가나로',text:'서답형. 우리말 뜻을 주고 낱말을 가나로 쓰게 한다(2점). 히라가나·가타카나 구분과 촉음·장음·탁점까지 채점한다.'},
+  {k:'conjw',label:'서답형 활용 쓰기',hint:'기본형 → 활용형',text:'서답형. 기본형과 활용 조건을 주고 활용형을 가나로 쓰게 한다(3점). conj를 반드시 채운다.'},
+  {k:'sent',label:'서답형 문장',hint:'빈칸·우리말 → 일본어',text:'서답형. 대화의 빈칸을 채우거나 짧은 우리말을 일본어로 옮기게 한다(4~5점). 범위 안 문형(～よていだ, ～ましょう, ～ませんか, どうやって … のかな)을 쓰게 하고 채점 요소를 2~3개로 나눈다.'},
+];
+const EXAM_STYLE=`- 이 학교 일본어 기출 원문은 아직 없다. 아래 '기출 예시'가 있으면 그 형식을 먼저 따른다.
+- 형식: 선택형 5지선다(발문은 우리말, 선지는 일본어나 우리말) + 서답형(가나로 쓰기, 활용형 쓰기, 짧은 문장).
+- 발문 예: "밑줄 친 부분의 뜻으로 알맞은 것은?", "빈칸에 들어갈 말로 알맞은 것은?", "동사를 ます형으로 바르게 바꾼 것은?", "동사의 활용이 바르지 않은 것은?", "동사의 종류가 나머지와 다른 것은?", "대화의 내용과 일치하는 것은?"
+- 시험은 히라가나·가타카나로 쓸 줄 알면 된다. 한자는 가나와 함께 나오므로 읽기만 알면 된다.
+- 선지는 단어장·교과서 표기(가나, 낱말 사이 띄어쓰기)를 그대로 쓰고, 오답은 한 곳만 바꿔 만든다.`;
+
+/* 헷갈리는 짝 — 단어장·교과서 정리하기가 나란히 놓은 것과 활용표의 예외 */
+const TRAPS=[
+  ['どこか ↔ どこが','どこか는 "어딘가"(정해지지 않은 곳), どこが는 "어디가"(고르는 대상)'],
+  ['～から 이유 ↔ ～から 출발','명사+だから는 이유(이니까), 장소+から는 출발·기점(에서)'],
+  ['はい、そうです ↔ いいえ、ちがいます','긍정과 부정'],
+  ['まず ↔ それから','순서의 처음과 다음'],
+  ['～で 수단 ↔ ～で 장소','バスで いく(버스로), うみで あそぶ(바다에서)'],
+  ['예외 1류 ↔ 2류','かえる·はいる(·はしる·しる·きる)는 る로 끝나지만 1류: かえります(O) かえます(X)'],
+  ['いく의 て형','いって(O) いいて(X) — 1류 く인데 음편만 예외'],
+  ['음편 섞기','う·つ·る→って, ぬ·む·ぶ→んで, く→いて, ぐ→いで, す→して. よむ·よぶ는 둘 다 よんで'],
+  ['3류','くる→きます·きて (くります X), する→します·して'],
+  ['いい의 활용','よくない·よくて·よかった(O), いくない(X)'],
+  ['한 글자 차이','촉음(きって/きて, がっこう/がこう), 장음(ぼうさい/ぼさい), 탁점(ぼうさい/ほうさい), 가나 종류(バス/ばす)'],
+];
+
+/* ---------- 상태 ---------- */
+let db=null,sample=null,assets=null,downloads=null,canImages=null;
+let sets=[],cur=null,running=null,runId=null;
+let notes={};        // 범위 id → {text, pages:[{no,asset,text}]}
+let examText='';
+let solve={answers:{},graded:false,essay:{}};
+
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function setStatus(t,err){const el=$('#status');el.textContent=t;el.className='status'+(err?' err':'')}
+function bytes(s){return new TextEncoder().encode(s).length}
+function fmtDate(iso){if(!iso)return '';const d=new Date(iso);return (d.getMonth()+1)+'월 '+d.getDate()+'일'}
+function arr(x){return Array.isArray(x)?x:[]}
+function nums(x){return arr(x).map(Number).filter(n=>Number.isInteger(n))}
+function store(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function load(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}}
+const inRef=useRef=>x=>useRef||!x.ref;
+const findV=base=>{const b=norm(base);return VPOOL.find(v=>norm(v.kana)===b||norm(v.word)===b)};
+
+/* ---------- 근거 자료 ----------
+ * 고른 범위의 문장에 1번부터 번호를 붙인다. 세트에 그대로 저장해 데이터가 바뀌어도
+ * 이미 만든 문제의 근거 번호는 그대로다. 활용형은 앱 엔진으로 계산해 넣는다. */
+function buildUnits(partIds,useRef){
+  const out=[],ok=inRef(useRef),seenEx=new Set();
+  const push=(part,head,t,k)=>out.push({part,head,t,k});
+  for(const P of PARTS.filter(p=>partIds.includes(p.id))){
+    if(P.kind==='word'){
+      for(const w of WORDS.filter(w=>w.unit===P.id&&!w.skip&&ok(w))){
+        push(P.id,'',`${w.word!==w.kana?w.word+'('+w.kana+')':w.kana} — ${w.meaning.join(', ')}${w.pos?' · '+w.pos:''}${w.note?' · '+w.note:''}`,'w');
+        for(const e of arr(w.examples))if(!seenEx.has(e.ja)){seenEx.add(e.ja);push(P.id,'',`(예문) ${e.ja} — ${e.ko}`,'e')}
+      }
+    }else if(P.kind==='verb'){
+      const R='활용 규칙 (단어장 1~4쪽 표)';
+      ['1류(5단): 어미 [u]단 → [i]단 + ます·ましょう·たい (いく → いきます)','2류(1단): る를 떼고 + ます·ましょう·たい (たべる → たべます)',
+       '3류: する → します, くる → きます','て형(음편): う·つ·る → って, ぬ·む·ぶ → んで, く → いて, ぐ → いで, す → して, 2류는 る 떼고 て, する → して, くる → きて',
+       '예외: る로 끝나지만 1류인 동사가 있다(단어장 4쪽 상자). いく의 て형은 いって',
+       'い형용사: 부정 ～くない, 연결 ～くて, 과거 ～かった. いい는 よくない·よくて·よかった'].forEach(t=>push(P.id,R,t,'r'));
+      for(const v of VERBS.filter(ok)){
+        const forms=FORMS.map(f=>`${f.nm} ${anyConj(v,f.k)}`).join(' · ');
+        push(P.id,'동사',`${v.kana}${v.word!==v.kana?'('+v.word+')':''} — ${v.meaning.join(', ')} · ${GROUP_NM[v.group]}${v.tricky?' (る로 끝나는 예외 1류)':''}${v.teIrreg?' (て형만 예외)':''} · ${forms}`,'v');
+      }
+      for(const a of ADJS){
+        push(P.id,'い형용사',`${a.kana}${a.word!==a.kana?'('+a.word+')':''} — ${a.meaning.join(', ')}${a.irregular?' (불규칙)':''} · ${ADJFORMS.map(f=>`${f.nm} ${anyConj(a,f.k)}`).join(' · ')}`,'v');
+      }
+    }else if(P.kind==='phrase'){
+      for(const p of PHRASES){
+        push(P.id,'',`${p.ja} — ${p.ko} · 쓰임: ${p.use} · 핵심: ${p.key}${p.made?' (범위 낱말로 만든 예문)':''}`,'p');
+        if(p.vs)push(P.id,'',`(짝) ${p.vs.ja} — ${p.vs.ko} · 핵심: ${p.vs.key} · 차이: ${p.vs.why}`,'p');
+      }
+    }else if(P.kind==='text'){
+      for(const s of TEXTS){
+        const head=`교과서 ${s.page}쪽 ${s.task}${s.audio_only?' (음성으로만 나오는 지문)':''}`;
+        if(!arr(s.items).length){for(const [ja,ko] of arr(s.words))push(P.id,head,`${ja} — ${ko}`,'t');continue}
+        for(const it of arr(s.items))for(const [spk,ja,ko] of arr(it.lines))
+          push(P.id,head,`${it.no&&!/^문제|^\d/.test(it.no)?it.no+' ':''}${spk?spk+': ':''}${ja} — ${ko}`,'t');
+      }
+    }
+  }
+  return out;
+}
+function sheetBlock(set){
+  let s='',lastP='',lastH='';
+  set.units.forEach((u,i)=>{
+    if(u.part!==lastP){const P=PART[u.part];s+=`\n## ${P.label} · ${P.title}\n`;lastP=u.part;lastH=''}
+    if(u.head&&u.head!==lastH){s+=`■ ${u.head}\n`;lastH=u.head}
+    s+=`[${i+1}] ${u.t}\n`;
+  });
+  return s.trim();
+}
+function noteBlock(set){
+  if(!set.useNote)return '없음';
+  const out=[...new Set(set.units.map(u=>u.part))].map(id=>{const n=notes[id];return n&&n.text&&n.text.trim()?`## ${PART[id].label} ${PART[id].title}\n${n.text.trim()}`:''}).filter(Boolean);
+  return out.length?out.join('\n\n'):'없음';
+}
+function materials(set){
+  return `# 근거 자료 (선생님 단어장과 교과서를 그대로 옮겼다. 활용형은 단어장 활용표의 규칙으로 계산한 것이다. 대괄호 번호는 근거를 댈 때 쓴다)
+${sheetBlock(set)}
+
+# 선생님 필기 (학생이 수업 중에 받아 적은 것. 자료와 다르게 말하면 필기를 따른다)
+${noteBlock(set)}
+
+# 헷갈리는 짝 (오답 선지를 만들 때 먼저 쓴다)
+${TRAPS.map(([a,b])=>`- ${a}: ${b}`).join('\n')}`;
+}
+
+/* ---------- 프롬프트 ---------- */
+const RULES=()=>`1. 모든 정답·오답 판단의 근거는 위 근거 자료와 선생님 필기(그리고 문항 안의 <보기>) 안에서만 찾는다. 범위 밖 낱말·문형·한자를 발문·<보기>·선지 어디에도 쓰지 않는다. 오답 선지의 일본어도 범위 안 낱말로 만든다.
+2. 일본어는 교과서처럼 가나로 쓰고 낱말 사이를 띄어 쓴다(ともだちと アニメを みる よていだよ。). 한자는 단어장에 한자로 실린 낱말만, 뒤에 괄호로 읽기를 붙여 쓴다: 駅(えき).
+3. 히라가나·가타카나 구분, 장음 ー, 촉음 っ, 탁점·반탁점은 단어장 표기 그대로 쓴다. 이것 하나가 정답과 오답을 가르는 문항이 많다.
+4. 선택형은 5지선다이고 정답은 하나뿐이다. 두 개 이상이 답이 될 여지가 있으면 그 문항은 버리고 다시 만든다. 대화 빈칸은 다른 선지가 문법·문맥상 들어갈 수 없는지 꼭 확인한다(예: "____ いく?"에는 どこか만, "____ いい?"에는 どこが만).
+5. 발문이 "옳지 않은 것·바르지 않은 것"류이면 정답 선지 하나만 틀리고 나머지 넷은 자료와 확실히 맞아야 한다. "옳은 것·알맞은 것"류이면 정답 선지 하나만 맞고 나머지 넷은 확실히 틀려야 한다.
+6. 오답은 한 곳만 바꿔 만든다: 헷갈리는 짝 맞바꾸기, 예외 1류를 2류처럼 활용하기, 음편 섞기, 한 글자(촉음·장음·탁점·가나 종류) 바꾸기, 같은 범위의 뜻이 다른 낱말. 바꾼 결과가 우연히 다른 자료와 맞아 참이 되지 않게 확인한다.
+7. 선지에 활용형이 나오면 그 선지의 why에 conj를 적는다. 동사 그룹을 말하는 선지에는 group을 적는다. 앱이 단어장 활용표 규칙으로 다시 계산해 보고, 적힌 참·거짓(fits)과 다르면 그 문항을 걸러 낸다.
+8. 서답형 모범 답안은 가나로만 쓴다(한자 금지). accept에는 같은 답으로 인정할 다른 표기만 적는다. 히라가나를 가타카나로 쓴 것처럼 가나 종류가 다른 답은 인정하지 않는다.
+9. 기출 예시가 있으면 발문 방식, 선지 길이, 난이도를 따라 한다.
+10. 정답 번호가 한쪽에 몰리지 않게 섞는다.
+11. 음성으로만 나오는 지문(교과서 101·103·111쪽)도 대화를 글로 제시해 출제해도 된다.${REF_NAMES.length?`
+12. ${REF_NAMES.join('·')}는 단어장 4쪽 예외 상자에만 있는 참고 항목이다. 근거 자료에 없으면 쓰지 않는다.`:''}`;
+
+const Q_SHAPE=`{"questions":[
+ {"id":1,"format":"선택형","type":"활용형","level":"중","stem":"동사를 ます형으로 바르게 바꾼 것은?","box":"","choices":["かえる → かえます","はいる → はいります","くる → くります","よむ → よます","でる → でります"],"answer":2,
+  "why":[{"fits":false,"refs":[40,52],"reason":"[52] かえる는 る로 끝나는 예외 1류라 かえります","trap":"예외 1류를 2류처럼 활용","conj":{"base":"かえる","form":"masu","shown":"かえます"}},{"fits":true,"refs":[53],"reason":"[53]과 같다","trap":"","conj":{"base":"はいる","form":"masu","shown":"はいります"}},{"fits":false,"refs":[42],"reason":"...","trap":"3류를 1류처럼","conj":{"base":"くる","form":"masu","shown":"くります"}},{"fits":false,"refs":[33],"reason":"...","trap":"어미를 [i]단으로 안 바꿈","conj":{"base":"よむ","form":"masu","shown":"よます"}},{"fits":false,"refs":[58],"reason":"...","trap":"2류를 1류처럼","conj":{"base":"でる","form":"masu","shown":"でります"}}],
+  "unique":"다른 선지가 답이 될 수 없는 이유 한두 문장","fromNote":false},
+ {"id":2,"format":"선택형","type":"동사 그룹","level":"중","stem":"동사의 종류가 나머지와 다른 것은?","box":"","choices":["のむ","はしる","かえる","たべる","あそぶ"],"answer":4,
+  "why":[{"fits":false,"refs":[31],"reason":"1류","trap":"","group":{"base":"のむ","group":1}},{"fits":false,"refs":[50],"reason":"예외 1류","trap":"","group":{"base":"はしる","group":1}},{"fits":false,"refs":[52],"reason":"예외 1류","trap":"","group":{"base":"かえる","group":1}},{"fits":true,"refs":[57],"reason":"2류라 나머지(1류)와 다르다","trap":"","group":{"base":"たべる","group":2}},{"fits":false,"refs":[37],"reason":"1류","trap":"","group":{"base":"あそぶ","group":1}}],"unique":"...","fromNote":false},
+ {"id":9,"format":"서답형","type":"활용 쓰기","level":"중","stem":"いく를 て형으로 바꾸어 히라가나로 쓰시오.","box":"","conj":{"base":"いく","form":"te"},"modelAnswer":"いって","accept":[],"criteria":["いって를 정확히 씀(촉음 っ 포함)"],"points":3,"refs":[44],"fromNote":false}
+]}
+- box: <보기>·대화·표가 없으면 빈 문자열. 대화는 한 줄에 한 사람씩 "A: …"로 쓴다. 빈칸은 발문·<보기> 어디서든 ____(밑줄 네 개)로 쓴다.
+- why: 선지 5개 각각. fits는 그 선지의 진술이 자료에 비추어 옳은지(true/false). refs는 근거가 된 자료 번호(하나 이상). trap은 fits가 false인 선지에만 적는다.
+- why[].conj: 선지에 활용형이 있으면 {"base":"기본형 가나","form":"masu|mashou|tai|te|neg|past","shown":"선지에 쓴 활용형"}. form은 동사 masu·mashou·tai·te, い형용사 neg·te·past. 활용형이 없는 선지는 생략.
+- why[].group: 선지가 동사 그룹을 말하거나 그룹을 가르는 문항이면 {"base":"기본형 가나","group":1|2|3}. fits는 그 선지가 발문이 찾는 조건에 맞는지로 적는다.
+- 서답형 conj: 활용형을 쓰게 하는 문항만 {"base","form"}, 아니면 null.
+- answer: 정답 선지 번호(1~5).`;
+
+function priorList(qs,len){return qs.map(q=>{const a=q.format==='선택형'&&q.choices[q.answer-1]?' / 정답: '+q.choices[q.answer-1]:(q.modelAnswer?' / 답: '+q.modelAnswer:'');return `${q.id}. [${q.type}·${q.level}] ${(q.stem+a).slice(0,len)}`}).join('\n')}
+function nextBatch(set){
+  const qs=set.questions||[],c=set.cond;
+  const remMc=Math.max(0,c.mc-qs.filter(q=>q.format==='선택형').length);
+  const remEs=Math.max(0,c.essay-qs.filter(q=>q.format==='서답형').length);
+  if(!remMc&&!remEs)return null;
+  const mc=Math.min(GEN_BATCH,remMc),essay=Math.min(GEN_BATCH-mc,remEs);
+  if(!mc&&!essay)return null;
+  return {from:qs.length+1,mc,essay};
+}
+function formsText(set){
+  const picked=EXAM_FORMS.filter(f=>set.cond.forms.includes(f.k));
+  const list=(picked.length?picked:EXAM_FORMS).map(f=>`- ${f.label}: ${f.text}`).join('\n');
+  return (picked.length?'고른 형식 위주로 만든다.\n':'골고루 섞는다(활용형·헷갈리는 짝·대화 문항을 가장 많이).\n')+list;
+}
+function examBlock(set){const own=(set.examples||'').trim();return own?`# 기출 예시 (발문·선지 형식과 난이도만 따른다. 같은 문항을 베끼지 않는다)\n${own}`:'# 기출 예시\n없음'}
+function genPrompt(set,batch){
+  const c=set.cond,b=batch||{from:1,mc:c.mc,essay:c.essay};
+  const prior=set.questions||[];
+  let priorText='';
+  if(prior.length)for(const len of [140,70,35]){priorText=priorList(prior,len);if(bytes(priorText)<8000)break}
+  const total=c.mc+c.essay;
+  return `너는 고등학교 일본어 내신(2학기 1회고사) 출제 위원이다. 아래 자료만을 근거로 변형 문제를 만든다.
+
+${materials(set)}
+
+# 시험 형식
+${EXAM_STYLE}
+
+${examBlock(set)}
+
+# 출제 조건
+- 이번에 만들 문항: 선택형 ${b.mc}개, 서답형 ${b.essay}개 (id는 ${b.from}부터 차례로)${total>b.mc+b.essay?`\n- 모두 ${total}문항(선택형 ${c.mc}, 서답형 ${c.essay})을 여러 번에 나눠 만드는 중이다.`:''}
+- 난이도: ${c.level}
+- 꼭 다룰 것: ${c.must||'자유. 고른 범위 전체에서 골고루'}
+- 문항 형식:
+${formsText(set)}
+${prior.length?`
+# 이미 만든 문항 (이것들과 묻는 낱말·근거 문장·발문이 겹치지 않게 한다. 아직 다루지 않은 것을 우선한다)
+${priorText}
+`:''}
+# 출제 규칙 (반드시 지킬 것)
+${RULES()}
+
+# 답 형식
+JSON 하나만 출력한다. 다른 글은 쓰지 않는다.
+${Q_SHAPE}`;
+}
+function blindText(q){
+  let s=`문항 ${q.id}. (${q.format} · ${q.type} · ${q.level})\n${q.stem}\n`;
+  if(q.box)s+=`<보기>\n${q.box}\n</보기>\n`;
+  if(q.format==='선택형')q.choices.forEach((c,i)=>{s+=`${CIRC[i]} ${c}\n`});
+  else s+=`[출제자의 모범 답안] ${q.modelAnswer}${q.accept.length?' (인정: '+q.accept.join(', ')+')':''}\n[채점 요소] ${q.criteria.join(' / ')}\n`;
+  return s;
+}
+function reviewPrompt(set,qs){
+  return `너는 고등학교 일본어 내신 시험의 검토 위원이다. 다른 출제자가 만든 문제를, 정답을 모르는 상태에서 직접 풀고 오류를 엄격하게 찾는다. 조금이라도 논란이 될 여지가 있으면 지적한다.
+
+${materials(set)}
+
+# 문제 (선택형 정답은 일부러 빼 두었다)
+${qs.map(blindText).join('\n')}
+
+# 검수 방법
+선택형은 문항마다
+1. 자료와 필기만 보고 직접 푼다.
+2. 네 답 말고도 답이라고 변호할 여지가 있는 선지가 있으면 모두 적는다.
+3. 다음을 확인한다. (가) 정답이 하나로 정해지는가 (나) 오답 선지 중 자료로 보아 맞을 수도 있는 것이 있는가 (다) 범위 밖 낱말·문형·한자가 있는가(발문·<보기>·선지 모두) (라) 필기와 어긋나는가 (마) 가나 표기(히라가나·가타카나, 촉음·장음·탁점)와 띄어쓰기가 자료와 같은가 (바) 대화 빈칸에 다른 선지도 문법·문맥상 들어갈 수 있는가 (사) 발문이 답을 드러내지 않는가, 우리말 맞춤법 오류는 없는가
+서답형은 모범 답안이 자료·필기와 맞는지, 가나로만 썼는지, 인정 답이 빠지지 않았는지, 채점 요소가 명확한지 확인한다.
+
+# 답 형식
+JSON 하나만 출력한다. 다른 글은 쓰지 않는다.
+{"reviews":[{"id":1,"myAnswer":3,"otherDefensible":[],"verdict":"통과","issues":[],"fix":""}]}
+- 위 문항 모두에 대해 하나씩 쓴다.
+- myAnswer: 네가 고른 답 번호(1~5). 서답형은 null.
+- otherDefensible: 네 답 말고도 답으로 변호할 수 있는 선지 번호 목록.
+- verdict: "통과", "수정", "폐기" 중 하나.
+- issues: 문제점을 짧은 문장으로. 없으면 빈 배열.
+- fix: 구체적인 수정 제안. 없으면 빈 문자열.`;
+}
+function stripQ(q){
+  const o={id:q.id,format:q.format,type:q.type,level:q.level,stem:q.stem,box:q.box,fromNote:q.fromNote};
+  if(q.format==='선택형')Object.assign(o,{choices:q.choices,answer:q.answer,why:q.why,unique:q.unique});
+  else Object.assign(o,{conj:q.conj,modelAnswer:q.modelAnswer,accept:q.accept,criteria:q.criteria,points:q.points,refs:q.refs});
+  return o;
+}
+function revisePrompt(set,flagged){
+  const items=flagged.map(q=>({question:stripQ(q),review:{issues:q.issues,fix:q.fixHint||''}}));
+  return `너는 이 범위로 변형 문제를 만든 출제 위원이다. 검토에서 아래 문항들이 지적을 받았다.
+
+${materials(set)}
+
+# 지적받은 문항 (정답·근거와 검토 의견. "앱 계산"으로 시작하는 지적은 단어장 활용표 규칙으로 다시 계산한 결과라 틀림없다)
+${JSON.stringify(items)}
+
+# 할 일
+- 지적을 반영해 문항을 고친다. 고칠 수 없으면 같은 형식·난이도로 새 문항을 만든다. id는 그대로 둔다.
+- 검토 의견이 틀렸다고 판단되면 문항을 그대로 다시 싣고, defenses에 자료 번호를 들어 이유를 적는다. 단 "앱 계산" 지적은 반박하지 말고 고친다.
+- 아래 출제 규칙을 그대로 지킨다.
+${RULES()}
+
+# 답 형식
+JSON 하나만 출력한다. 다른 글은 쓰지 않는다. questions에는 위 문항 모두를 담는다.
+${Q_SHAPE.replace('{"questions":[','{"defenses":[{"id":2,"reason":"..."}],"questions":[')}`;
+}
+function gradePrompt(set,q,ans){
+  return `고등학교 일본어 내신 서답형 답안을 채점한다. 자료와 필기, 모범 답안, 채점 요소만을 기준으로 삼는다. 가나 표기(히라가나·가타카나 구분, 촉음·장음·탁점)가 틀리면 그 요소는 충족하지 못한 것으로 본다.
+
+${materials(set)}
+
+# 문항
+${q.stem}${q.box?'\n<보기>\n'+q.box+'\n</보기>':''}
+
+# 모범 답안
+${q.modelAnswer}${q.accept.length?' (인정: '+q.accept.join(', ')+')':''}
+
+# 채점 요소 (배점 ${q.points}점)
+${q.criteria.map((c,i)=>(i+1)+'. '+c).join('\n')}
+
+# 학생 답안
+${ans}
+
+# 답 형식
+JSON 하나만 출력한다.
+{"met":[true,false],"score":2,"feedback":"빠진 요소와 고칠 점을 두세 문장으로"}
+- met: 채점 요소마다 충족했는지. score: 받을 점수(0~${q.points}).`;
+}
+
+/* ---------- 문항 정리와 자동 확인 ---------- */
+function normConj(c){if(!c||typeof c!=='object'||!c.base)return null;return {base:String(c.base),form:String(c.form||''),shown:c.shown!=null?String(c.shown):undefined}}
+function normQ(raw,fallbackId){
+  const r=raw&&typeof raw==='object'?raw:{};
+  const f=String(r.format||'');
+  const essay=f.includes('서답')||f.includes('서술')||(!Array.isArray(r.choices)&&!!r.modelAnswer);
+  const q={id:Number(r.id)||fallbackId,format:essay?'서답형':'선택형',type:String(r.type||''),level:String(r.level||''),stem:String(r.stem||''),box:String(r.box||''),fromNote:!!r.fromNote};
+  if(essay){q.conj=normConj(r.conj);q.modelAnswer=String(r.modelAnswer||'');q.accept=arr(r.accept).map(String);q.criteria=arr(r.criteria).map(String);q.points=Number(r.points)||3;q.refs=nums(r.refs)}
+  else{
+    q.choices=arr(r.choices).map(String);q.answer=Number(r.answer);
+    q.why=arr(r.why).map(w=>({fits:!!w&&w.fits===true,refs:nums(w&&w.refs),reason:String(w&&w.reason||''),trap:String(w&&w.trap||''),
+      conj:normConj(w&&w.conj),group:w&&w.group&&w.group.base?{base:String(w.group.base),group:Number(w.group.group)}:null}));
+    q.unique=String(r.unique||'');
+  }
+  return q;
+}
+// "나머지와 다른 것"은 부정 발문이 아니다 — 찾는 선지 하나가 fits:true 인 긍정형으로 본다
+const NEG=/(않은|않는|아닌|틀린|잘못된|거리가\s*먼|어긋나는|없는)\s*것/;
+/* 앱 엔진으로 활용·그룹을 다시 계산한다. 결과는 문항에 저장해 해설에도 보여 준다. */
+function engineCheck(q){
+  const p=[];
+  const formOk=(v,form)=>formsOf(v).some(f=>f.k===form);
+  if(q.format==='선택형'){
+    q.why.forEach((w,i)=>{
+      w.eng='';
+      if(w.conj){
+        const v=findV(w.conj.base);
+        if(!v){p.push(`앱 계산: ${CIRC[i]}의 ${w.conj.base}는 단어장 활용표에 없는 낱말이에요.`);return}
+        if(!formOk(v,w.conj.form)){p.push(`앱 계산: ${CIRC[i]}의 활용 조건(${w.conj.form})이 ${v.kana}에 맞지 않아요.`);return}
+        const exp=anyConj(v,w.conj.form),shown=w.conj.shown||'';
+        const right=norm(shown)===norm(exp);
+        w.eng=`앱 계산 ${v.kana} → ${exp}`;
+        if(shown&&!norm(q.choices[i]||'').includes(norm(shown)))p.push(`앱 계산: ${CIRC[i]} 선지에 적었다는 활용형 ${shown}이 선지에 없어요.`);
+        // fits 는 "이 선지의 진술이 옳은가"다(옳은 것·옳지 않은 것 발문 모두). 활용형이 맞으면 옳다.
+        // "나머지와 다른 것"류는 fits 가 '찾는 선지인가'라 활용의 옳고 그름과 따로 논다 — 건너뛴다.
+        if(right!==w.fits&&!/(그룹|종류|다른)/.test(q.stem))p.push(`앱 계산: ${CIRC[i]} ${v.kana}의 ${FORM_NM[w.conj.form]||w.conj.form}은 ${exp}인데 선지는 ${shown||'?'}이고, 출제자는 ${w.fits?'옳음':'틀림'}으로 표시했어요.`);
+      }
+      if(w.group){
+        const v=VERBS.find(x=>norm(x.kana)===norm(w.group.base));
+        if(!v){p.push(`앱 계산: ${CIRC[i]}의 ${w.group.base}는 단어장 활용표의 동사가 아니에요.`);return}
+        w.eng=(w.eng?w.eng+' · ':'')+`앱 계산 ${v.kana} ${GROUP_NM[v.group]}${v.tricky?'(예외)':''}`;
+        if(v.group!==w.group.group)p.push(`앱 계산: ${CIRC[i]} ${v.kana}는 ${GROUP_NM[v.group]}인데 출제자는 ${w.group.group}류로 적었어요.`);
+      }
+    });
+  }else{
+    if(hasKanji(q.modelAnswer))p.push('모범 답안에 한자가 있어요. 가나로만 써야 해요.');
+    q.accept.forEach(a=>{if(norm(a)!==norm(q.modelAnswer)&&toHira(norm(a))===toHira(norm(q.modelAnswer)))p.push(`인정 답 ${a}는 가나 종류만 다른 답이에요. 인정하지 않아요.`)});
+    if(q.conj){
+      const v=findV(q.conj.base);
+      if(!v)p.push(`앱 계산: ${q.conj.base}는 단어장 활용표에 없는 낱말이에요.`);
+      else if(!formOk(v,q.conj.form))p.push(`앱 계산: 활용 조건(${q.conj.form})이 ${v.kana}에 맞지 않아요.`);
+      else{const exp=anyConj(v,q.conj.form);q.eng=`앱 계산 ${v.kana} → ${exp}`;
+        if(judge(q.modelAnswer,{kana:exp,word:exp,jaAliases:[]}).code!=='ok')p.push(`앱 계산: ${v.kana}의 ${FORM_NM[q.conj.form]}은 ${exp}인데 모범 답안은 ${q.modelAnswer}이에요.`)}
+    }
+  }
+  return p;
+}
+function localCheck(q,n){
+  const p=[];
+  if(!q.stem.trim())p.push('발문이 비어 있어요.');
+  const badRef=r=>r<1||r>n;
+  if(q.format==='선택형'){
+    q.negKind=NEG.test(q.stem)&&!/(종류|그룹)/.test(q.stem);
+    if(q.choices.length!==5)p.push(`선지가 ${q.choices.length}개예요.`);
+    if(new Set(q.choices.map(norm)).size!==q.choices.length)p.push('똑같은 선지가 있어요.');
+    if(!(q.answer>=1&&q.answer<=5))p.push('정답 번호가 없어요.');
+    if(q.why.length!==5)p.push('선지별 근거가 5개가 아니에요.');
+    else{
+      const neg=q.negKind;
+      const odd=q.why.map(w=>neg?!w.fits:w.fits).map((v,i)=>v?i+1:0).filter(Boolean);
+      if(odd.length!==1)p.push(`발문이 ${neg?'"옳지 않은 것"':'"옳은 것"'}을 묻는데 그에 해당하는 선지가 ${odd.length}개로 표시됐어요 (${odd.map(k=>CIRC[k-1]).join(' ')||'없음'}).`);
+      else if(odd[0]!==q.answer)p.push(`근거 표시로는 ${CIRC[odd[0]-1]}이 답인데 정답은 ${CIRC[q.answer-1]||'?'}로 되어 있어요.`);
+      q.why.forEach((w,i)=>{if(!w.refs.length)p.push(`${CIRC[i]} 근거 번호가 없어요.`);if(w.refs.some(badRef))p.push(`${CIRC[i]} 근거 번호가 자료 범위를 벗어나요.`)});
+    }
+  }else{
+    if(!q.modelAnswer.trim())p.push('모범 답안이 없어요.');
+    if(!q.criteria.length)p.push('채점 요소가 없어요.');
+    if(q.refs.some(badRef))p.push('근거 번호가 자료 범위를 벗어나요.');
+  }
+  return p.concat(engineCheck(q));
+}
+
+/* ---------- Claude 호출 ---------- */
+function errCopy(e){
+  switch(e&&e.code){
+    case 'not_granted':return 'Claude 사용을 허용하지 않아서 진행할 수 없어요. 새로고침한 뒤 허용해 주세요.';
+    case 'sampling_disabled':return '이 계정에서는 앱에서 Claude를 부를 수 없어요.';
+    case 'rate_limited':return '사용량 한도에 걸렸어요. 잠시 뒤 이어서 하기를 눌러 주세요.';
+    case 'session_expired':return 'claude.ai에 다시 로그인한 뒤 이어서 하기를 눌러 주세요.';
+    case 'prompt_too_large':return '자료가 너무 길어요. 범위를 줄이거나 필기를 줄여 주세요.';
+    case 'invalid_json':return '답을 끝까지 읽지 못했어요. 이어서 하기를 눌러 주세요.';
+    case 'refused':return 'Claude가 이 요청을 거절했어요. 자료 내용을 확인해 주세요.';
+    case 'image_rejected':return '사진을 읽지 못했어요. 다른 사진으로 바꿔 주세요.';
+    case 'images_unavailable':return '이 화면에서는 사진을 보낼 수 없어요. 필기를 글로 적어 주세요.';
+    case 'empty_completion':return '답이 비어서 돌아왔어요. 다시 시도해 주세요.';
+    default:return '연결이 끊겼어요. 이어서 하기를 눌러 다시 시도해 주세요.';
+  }
+}
+function setLive(t){$('#live').textContent=t}
+async function ask(prompt,{tier,label}){
+  if(!sample)throw {code:'sampling_disabled'};
+  if(bytes(prompt)>MAX_BYTES)throw {code:'prompt_too_large'};
+  const ctl=new AbortController();running.ctl=ctl;
+  const t0=Date.now();let chars=0;
+  const tick=setInterval(()=>{if(!chars)setLive(label+' · 생각하는 중 '+Math.round((Date.now()-t0)/1000)+'초')},1000);
+  setLive(label+' · 생각하는 중');
+  try{return await sample.json(prompt,{signal:ctl.signal,modelTier:tier,cache:false,onText:({text})=>{chars=text.length;setLive(label+' · 쓰는 중 '+text.length.toLocaleString()+'자')}})}
+  finally{clearInterval(tick)}
+}
+
+/* ---------- 출제 → 검수 → 수정 → 다시 검수 ---------- */
+// 단계는 세트에 저장한다(stage). 멈추거나 창을 닫아도 마지막으로 끝난 단계부터 이어서 한다.
+function addLog(t){if(!cur||runId!==cur.id)return;const li=document.createElement('li');li.textContent=t;$('#log').append(li)}
+function chunkBy(items,build,maxN){
+  const out=[];let c=[];
+  for(const it of items){c.push(it);if(c.length>1&&(c.length>maxN||bytes(build(c))>MAX_BYTES)){c.pop();out.push(c);c=[it]}}
+  if(c.length)out.push(c);return out;
+}
+async function runPipeline(set){
+  if(running)return;
+  running={ctl:null};runId=set.id;
+  const tier=set.tier||'complex';
+  renderSet();
+  try{
+    if(set.stage==='new'){
+      const total=set.cond.mc+set.cond.essay;
+      if(!set.questions.length)addLog(total>GEN_BATCH?`출제를 시작했어요. ${total}문항을 ${GEN_BATCH}문항씩 나눠 만들어요`:'출제를 시작했어요');
+      let b;
+      while((b=nextBatch(set))){
+        const to=b.from+b.mc+b.essay-1;
+        const res=await ask(genPrompt(set,b),{tier,label:`문제 만드는 중 (${b.from}~${to}번 / ${total})`});
+        const got=arr(res&&res.questions).map((q,i)=>normQ(q,b.from+i));
+        let mcLeft=b.mc,esLeft=b.essay;
+        const keep=got.filter(q=>q.format==='선택형'?mcLeft-->0:esLeft-->0);
+        if(!keep.length)throw {code:'invalid_json'};
+        keep.forEach(q=>{q.id=set.questions.length+1;q.st='pending';q.issues=[];set.questions.push(q)});
+        await save(set);addLog(`${set.questions.length}/${total}문항을 만들었어요`);renderSet();
+      }
+      set.stage='generated';await save(set);renderSet();
+    }
+    if(set.stage==='generated'){await reviewRound(set,set.questions,1,tier);set.stage='reviewed';await save(set);renderSet()}
+    if(set.stage==='reviewed'){
+      const flagged=set.questions.filter(q=>q.st==='flag');
+      if(!flagged.length){set.stage='done';addLog('모든 문항이 검수를 통과했어요')}
+      else{
+        addLog(`${flagged.length}문항을 고치는 중이에요`);
+        const chunks=chunkBy(flagged,c=>revisePrompt(set,c),5);
+        for(const [ci,chunk] of chunks.entries()){
+          const res=await ask(revisePrompt(set,chunk),{tier,label:chunk.length+'문항 고치는 중'+(chunks.length>1?` (${ci+1}/${chunks.length})`:'')});
+          const back=arr(res&&res.questions),defs=arr(res&&res.defenses);
+          chunk.forEach(q=>{
+            const nq=back.find(x=>Number(x&&x.id)===q.id),d=defs.find(x=>Number(x&&x.id)===q.id);
+            if(!nq){q.st='check';q.issues=[...q.issues,'수정본이 오지 않았어요.'];return}
+            const n=normQ(nq,q.id);n.id=q.id;
+            Object.keys(q).forEach(k=>delete q[k]);Object.assign(q,n);
+            q.st='revised';q.issues=[];q.defense=d?String(d.reason||''):'';
+          });
+          await save(set);renderSet();
+        }
+        set.stage='revised';await save(set);renderSet();
+      }
+    }
+    if(set.stage==='revised'){const again=set.questions.filter(q=>q.st==='revised');if(again.length)await reviewRound(set,again,2,tier);set.stage='done'}
+    if(set.stage==='done'){
+      set.doneAt=new Date().toISOString();await save(set);
+      const n=set.questions.filter(q=>q.st==='check').length;
+      addLog(n?`끝났어요. ${n}문항은 직접 확인해 주세요`:'끝났어요');setStatus('');
+    }
+  }catch(e){
+    if(e&&e.code==='cancelled')addLog('멈췄어요. 이어서 하기로 다시 시작할 수 있어요');
+    else{addLog(errCopy(e));setStatus(errCopy(e),true)}
+  }finally{running=null;renderSet();renderHome()}
+}
+async function reviewRound(set,targets,round,tier){
+  addLog(round===1?`${targets.length}문항을 검수하는 중이에요`:`고친 ${targets.length}문항을 다시 검수하는 중이에요`);
+  const chunks=chunkBy(targets,c=>reviewPrompt(set,c),8);
+  const reviews=[];
+  for(const [ci,chunk] of chunks.entries()){
+    const res=await ask(reviewPrompt(set,chunk),{tier,label:(round===1?'검수하는 중':'다시 검수하는 중')+(chunks.length>1?` (${ci+1}/${chunks.length})`:'')});
+    reviews.push(...arr(res&&res.reviews));
+  }
+  let bad=0,engBad=0;
+  targets.forEach(q=>{
+    const r=reviews.find(x=>Number(x&&x.id)===q.id);
+    const p=localCheck(q,set.units.length);
+    if(p.some(s=>s.startsWith('앱 계산')))engBad++;
+    let fixHint='';
+    if(!r)p.push('검토 위원의 의견이 빠졌어요.');
+    else{
+      arr(r.issues).map(String).filter(Boolean).forEach(s=>p.push(s));
+      if(q.format==='선택형'){
+        const my=Number(r.myAnswer);
+        if(my!==q.answer)p.push(`검토 위원은 ${CIRC[my-1]||'다른 선지'}을 답으로 골랐어요 (출제 답 ${CIRC[q.answer-1]||'?'}).`);
+        const other=nums(r.otherDefensible).filter(n=>n!==q.answer&&n>=1&&n<=5);
+        if(other.length)p.push(`${other.map(n=>CIRC[n-1]).join(' ')}도 답으로 볼 여지가 있다고 했어요.`);
+      }
+      const v=String(r.verdict||'');
+      if(v&&v!=='통과'&&!p.length)p.push(`검토 위원 판정: ${v}`);
+      fixHint=String(r.fix||'');
+    }
+    if(p.length){bad++;q.issues=p;q.fixHint=fixHint;q.st=round===1?'flag':'check'}
+    else{q.issues=[];q.fixHint='';q.st=round===1?'pass':'fixed'}
+  });
+  addLog(bad?`${targets.length}문항 중 ${bad}문항이 걸렸어요${engBad?` (그중 ${engBad}문항은 앱 활용 계산에서)`:''}`:`${targets.length}문항 모두 통과했어요`);
+}
+
+/* ---------- 저장 ---------- */
+async function save(set){
+  if(!db)return;
+  const {id,...body}=set;
+  try{await db.doc('sets/'+id).set(JSON.parse(JSON.stringify(body)))}
+  catch(e){setStatus(e&&e.code==='quota_exceeded'?'저장 공간이 가득 찼어요. 안 쓰는 세트를 지워 주세요.':'저장하지 못했어요. 새로고침 전에 다시 시도해 주세요.',true)}
+}
+async function saveNote(pid){
+  if(!db)return false;
+  try{await db.doc('notes/'+pid).set(JSON.parse(JSON.stringify(notes[pid]||{text:'',pages:[]})));return true}
+  catch(e){return false}
+}
+
+function show(id){['#home','#editor','#view','#notes','#exam'].forEach(s=>$(s).hidden=s!==id);$('#root').classList.toggle('wide',id==='#view');window.scrollTo(0,0)}
+
+/* ---------- 처음 화면 ---------- */
+function setSummary(s){
+  if(s.stage!=='done'){
+    if(running&&runId===s.id)return '<span class="chip">만드는 중</span>';
+    return s.questions&&s.questions.length?'<span class="chip warn">검수 멈춤</span>':'<span class="chip warn">출제 멈춤</span>';
+  }
+  const chk=s.questions.filter(q=>q.st==='check'&&!q.excluded).length;
+  return chk?`<span class="chip warn">직접 확인 ${chk}</span>`:'<span class="chip ok">검수 완료</span>';
+}
+function renderHome(){
+  const nw=WORDS.filter(w=>!w.skip&&!w.ref).length,nv=VERBS.filter(v=>!v.ref).length;
+  $('#srcWords').textContent=`단어장 1~4쪽 · 낱말 ${nw}개 · 활용 동사 ${nv}개와 い형용사 ${ADJS.length}개 · 표현 ${PHRASES.length}개`;
+  const nt=TEXTS.reduce((a,s)=>a+arr(s.items).reduce((b,it)=>b+arr(it.lines).length,0)+(arr(s.items).length?0:arr(s.words).length),0);
+  $('#srcText').textContent=`교과서 98~111쪽 · 본문과 듣기 지문 ${TEXTS.length}묶음 ${nt}줄 (음성으로만 나오는 지문 포함)`;
+  $('#unitNotes').innerHTML=PARTS.map(p=>{const t=(notes[p.id]&&notes[p.id].text||'').trim();return `<button type="button" class="unote${t?' has':''}" data-u="${p.id}">${esc(p.label)}${t?' · '+t.length.toLocaleString()+'자':''}</button>`}).join('');
+  $('#srcExam').textContent=examText.trim()?`직접 넣은 기출 예시 ${examText.trim().length.toLocaleString()}자 — 그 형식을 따라요`:'아직 없어요. 일반적인 일본어 내신 형식으로 내요.';
+  const list=sets.slice().sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)));
+  $('#setCount').textContent=list.length?list.length+'세트':'';
+  if(!list.length){$('#sets').innerHTML='<li class="empty">아직 만든 문제가 없어요. “새 문제 만들기”로 범위를 골라 보세요.</li>';return}
+  $('#sets').innerHTML=list.map(s=>{
+    const qn=(s.questions||[]).length,last=(s.attempts||[]).slice(-1)[0];
+    return `<li><button type="button" class="set" data-id="${esc(s.id)}"><span class="t">${esc(s.title||'제목 없음')}</span>
+      <span class="m">${fmtDate(s.createdAt)}${qn?' · '+qn+'문항':''}${s.hadNote?' · 필기 반영':''}</span>
+      <span class="r">${setSummary(s)}${last?`<span class="score-s">${last.right}/${last.total}</span>`:''}</span></button></li>`}).join('');
+}
+
+/* ---------- 필기 ---------- */
+let noteUnit=PARTS[0].id,pending=[],noteRun=null;
+const PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+function loadScript(src){return new Promise((res,rej)=>{const el=document.createElement('script');el.src=src;el.onload=res;el.onerror=()=>rej(new Error('script'));document.head.append(el)})}
+let pdfLib=null;
+async function getPdfLib(){if(pdfLib)return pdfLib;await loadScript(PDFJS+'pdf.worker.min.js');await loadScript(PDFJS+'pdf.min.js');pdfLib=window.pdfjsLib;pdfLib.GlobalWorkerOptions.workerSrc=PDFJS+'pdf.worker.min.js';return pdfLib}
+function nMsg(t,bad){const el=$('#nMsg');el.textContent=t;el.className='msg'+(bad?' bad':'')}
+function partLabel(id){const p=PART[id];return p?`${p.label} ${p.title}`:'범위 밖'}
+function openNotes(pid){
+  noteUnit=pid||noteUnit;
+  $('#nUnit').innerHTML=PARTS.map(p=>`<option value="${p.id}">${esc(p.label)} · ${esc(p.title)}</option>`).join('');
+  $('#nUnit').value=noteUnit;
+  pending=[];loadNoteUnit();nMsg('');$('#nSaveMsg').textContent='';
+  const canPhoto=!!(assets&&canImages&&sample);
+  $('#nDrop').hidden=!canPhoto;
+  if(!canPhoto)nMsg(!sample?'claude.ai에서 열어야 사진을 글로 옮길 수 있어요. 필기는 아래 칸에 직접 적어도 돼요.':'이 화면에서는 사진을 올릴 수 없어요. 필기를 아래 칸에 직접 적어 주세요.');
+  show('#notes');
+}
+function loadNoteUnit(){const n=notes[noteUnit]||{text:'',pages:[]};$('#nText').value=n.text||'';renderPages()}
+function allPages(){const n=notes[noteUnit]||{pages:[]};return [...arr(n.pages).map(p=>({...p,saved:true})),...pending]}
+function renderPages(){
+  const ps=allPages();
+  $('#nPages').innerHTML=ps.map((p,i)=>`<div class="pg"><img alt="필기 ${i+1}" src="${esc(p.saved?'/_blob/'+p.asset:p.url)}">
+    <div class="pb"><label class="check" style="min-height:0"><input type="number" min="0" max="120" value="${esc(p.no||'')}" data-i="${i}" ${p.saved?'disabled':''} aria-label="쪽"> 쪽</label>
+    <span class="st ${p.text?'ok':p.err?'bad':''}">${p.text?(p.saved?'옮겨 저장함':'글로 옮김'):p.err?esc(p.err):p.busy?'읽는 중…':'아직 안 옮김'}</span>
+    ${!p.saved&&!p.text?`<span class="muted" style="font-size:12px">${esc(partLabel(pageUnit(p.no)))}에 붙어요</span>`:''}</div></div>`).join('');
+  $('#nRead').disabled=!pending.some(p=>!p.text)||!!noteRun;
+}
+async function addFiles(files){
+  const list=[...files];if(!list.length)return;
+  const first=PART[noteUnit].pages[0]||1;
+  const guessNo=()=>{const ps=allPages();const last=ps[ps.length-1];return last&&last.no?Number(last.no)+1:first};
+  for(const f of list){
+    if(f.type==='application/pdf'||/\.pdf$/i.test(f.name)){
+      nMsg('PDF를 쪽마다 그림으로 바꾸는 중…');
+      try{
+        const pl=await getPdfLib();const doc=await pl.getDocument({data:new Uint8Array(await f.arrayBuffer()),isEvalSupported:false}).promise;
+        const base=guessNo()-1;
+        for(let i=1;i<=doc.numPages;i++){
+          const page=await doc.getPage(i);const vp=page.getViewport({scale:1});const scale=Math.min(2.2,1700/Math.max(vp.width,vp.height));
+          const v=page.getViewport({scale});const cv=document.createElement('canvas');cv.width=Math.round(v.width);cv.height=Math.round(v.height);
+          await page.render({canvasContext:cv.getContext('2d'),viewport:v}).promise;
+          const blob=await new Promise(r=>cv.toBlob(r,'image/jpeg',.85));
+          pending.push({blob,url:URL.createObjectURL(blob),no:base+i});
+          nMsg(`PDF ${i}/${doc.numPages}쪽을 그림으로 바꿨어요`);renderPages();
+        }
+        nMsg(`${doc.numPages}쪽을 넣었어요. 쪽 번호가 단어장·교과서 쪽과 다르면 고친 뒤 “글로 옮기기”를 눌러 주세요. 범위 밖 쪽은 0으로 두면 건너뛰어요.`);
+      }catch(e){nMsg('PDF를 열지 못했어요. 다른 파일로 해 주세요.',true)}
+    }else if(/^image\//.test(f.type)){pending.push({blob:f,url:URL.createObjectURL(f),no:guessNo()});renderPages()}
+  }
+  renderPages();
+}
+async function transcribe(){
+  if(!sample||!assets)return;
+  const todo=pending.filter(p=>!p.text&&SCOPE_PAGES.has(Number(p.no)));
+  const skipped=pending.filter(p=>!p.text&&!SCOPE_PAGES.has(Number(p.no))).length;
+  if(!todo.length){nMsg(skipped?'시험 범위(단어장 1~4쪽, 교과서 98~111쪽) 안의 쪽이 없어요. 쪽 번호를 확인해 주세요.':'옮길 쪽이 없어요.',!!skipped);return}
+  noteRun=new AbortController();$('#nStop').hidden=false;renderPages();
+  let done=0,failed=0;
+  try{
+    for(const p of todo){
+      if(noteRun.signal.aborted)break;
+      const no=Number(p.no),pid=pageUnit(no),P=PART[pid],what=no>=98?`교과서 ${no}쪽(6과 ハナちゃん、あぶない!)`:`선생님 단어장 ${no}쪽`;
+      p.busy=true;renderPages();nMsg(`${done+failed+1}/${todo.length} · ${what} 필기를 읽는 중… (쪽마다 30초~1분)`);
+      try{
+        const res=await sample.json(`이 사진은 고등학교 일본어 수업의 ${what}에 학생이 선생님 설명을 받아 적은 필기본이다.
+인쇄된 글자(일본어 본문, 인쇄된 뜻)는 옮기지 않는다. 학생이 손으로 쓴 필기와 표시(밑줄·동그라미·별표·화살표로 강조한 인쇄 문구)만 옮긴다.
+필기마다 인쇄된 어느 낱말·문장에 달린 것인지 앞에 대괄호로 적는다(예: [かえる]). 강조 표시만 있으면 "[위치] (강조) 강조한 인쇄 문구"로 적는다.
+손글씨 일본어는 적힌 그대로의 가나로 옮긴다. 읽기 어려운 글자는 [?]로 둔다. 추측으로 채우지 않는다.
+JSON 하나만 출력한다: {"notes":["[かえる] る로 끝나도 1류 — 시험에 꼭 나옴", "..."]}
+필기가 전혀 없으면 {"notes":[]}.`,{images:p.blob,modelTier:'default',cache:false,signal:noteRun.signal});
+        const lines=arr(res&&res.notes).map(String).map(s=>s.trim()).filter(Boolean);
+        const up=await assets.upload(p.blob,{type:p.blob.type&&/^image\/(jpeg|png|webp|gif)$/.test(p.blob.type)?p.blob.type:'image/jpeg'});
+        const text=lines.length?lines.map(l=>'- '+l).join('\n'):'(필기 없음)';
+        notes[pid]=notes[pid]||{text:'',pages:[]};
+        notes[pid].pages=[...arr(notes[pid].pages),{no,asset:up.id,text}];
+        if(lines.length)notes[pid].text=((notes[pid].text||'').trim()+`\n\n[${no>=98?'교과서':'단어장'} ${no}쪽 필기]\n`+text).trim();
+        await saveNote(pid);
+        pending=pending.filter(x=>x!==p);
+        if(pid===noteUnit)$('#nText').value=notes[pid].text;
+        done++;
+      }catch(e){
+        p.busy=false;
+        if(e&&e.code==='cancelled')break;
+        p.err=errCopy(e);failed++;
+        if(['not_granted','sampling_disabled','images_unavailable','rate_limited','session_expired','not_declared'].includes(e&&e.code)){nMsg(errCopy(e),true);break}
+      }
+      renderPages();
+    }
+    if(done)nMsg(`${done}쪽을 글로 옮겨 범위별 필기에 붙이고 저장했어요.${failed?` ${failed}쪽은 읽지 못했어요.`:''}${skipped?` 범위 밖 ${skipped}쪽은 건너뛰었어요.`:''} 옮긴 글을 읽어 보고 틀린 곳은 고쳐 저장해 주세요.`);
+  }finally{noteRun=null;$('#nStop').hidden=true;renderPages();renderHome()}
+}
+
+/* ---------- 기출 예시 ---------- */
+async function readExamPhotos(files){
+  const list=[...files].filter(f=>/^image\//.test(f.type));if(!list.length)return;
+  const m=t=>{$('#eMsg').textContent=t};
+  if(!sample||!canImages){m('이 화면에서는 사진을 읽을 수 없어요. 문항을 직접 적어 주세요.');return}
+  try{
+    for(const [i,f] of list.entries()){
+      m(`${i+1}/${list.length} 사진을 읽는 중…`);
+      const {text}=await sample(`이 사진은 학생이 가진 고등학교 일본어 과년도 시험지의 일부다. 문항 번호, 발문, <보기>, 선지를 사진에 적힌 그대로 옮긴다. 일본어는 가나·한자를 적힌 그대로 옮긴다. 그림은 [그림: 무엇]처럼 한 줄로 적는다. 다른 설명은 쓰지 않는다.`,{images:f,modelTier:'default',cache:false});
+      $('#eText').value=($('#eText').value.trim()+'\n\n'+text.trim()).trim();
+    }
+    m('옮겼어요. 확인한 뒤 저장해 주세요.');
+  }catch(e){m(errCopy(e))}
+}
+
+/* ---------- 만들기 ---------- */
+function openEditor(from){
+  const d=from||load('draft')||{};
+  const us=arr(d.unitIds).length?d.unitIds:['vb','ph','t6'];
+  $('#fUnits').innerHTML=PARTS.map(p=>`<button type="button" class="pk" data-u="${p.id}" aria-pressed="${us.includes(p.id)}">${esc(p.label)}<small>${esc(p.title)}${notes[p.id]&&notes[p.id].text?' · 필기 있음':''}</small></button>`).join('');
+  const fs=arr(d.cond&&d.cond.forms);
+  $('#fTypes').innerHTML=EXAM_FORMS.map(f=>`<button type="button" class="pk" data-f="${f.k}" aria-pressed="${fs.includes(f.k)}">${esc(f.label)}<small>${esc(f.hint)}</small></button>`).join('');
+  const c=d.cond||{};
+  $('#fMc').value=c.mc||8;$('#fEssay').value=c.essay!=null?c.essay:3;if(c.level)$('#fLevel').value=c.level;$('#fMust').value=c.must||'';$('#fTier').value=d.tier||'complex';
+  $('#fUseNote').checked=d.useNote!==false;$('#fUseRef').checked=!!d.useRef;
+  $('#edErr').hidden=true;$('#h-ed').textContent=from?'같은 범위로 새로 만들기':'새 문제 만들기';
+  show('#editor');edUpdate();
+}
+function readEditor(){
+  return {unitIds:$$('#fUnits .pk[aria-pressed="true"]').map(b=>b.dataset.u),useNote:$('#fUseNote').checked,useRef:$('#fUseRef').checked,tier:$('#fTier').value,
+    cond:{forms:$$('#fTypes .pk[aria-pressed="true"]').map(b=>b.dataset.f),mc:Math.max(1,Math.min(30,Number($('#fMc').value)||8)),essay:Math.max(0,Math.min(10,Number($('#fEssay').value)||0)),level:$('#fLevel').value,must:$('#fMust').value.trim()}};
+}
+function probeSet(d){return {...d,units:buildUnits(d.unitIds,d.useRef),examples:examText,questions:[]}}
+function edUpdate(){
+  const d=readEditor();store('draft',d);
+  const probe=probeSet(d);
+  const mb=probe.units.length?bytes(materials(probe)):0;
+  const b=probe.units.length?bytes(genPrompt(probe)):0;
+  const m=$('#meter');
+  m.textContent=mb?`근거 자료 ${probe.units.length}줄 · 분량 ${Math.round(mb/MAT_MAX*100)}%`:'범위를 하나 이상 골라 주세요';
+  m.classList.toggle('over',mb>MAT_MAX||b>MAX_BYTES-4000);
+  const total=d.cond.mc+d.cond.essay;
+  $('#etaInfo').textContent=`${total}문항${total>GEN_BATCH?`을 ${GEN_BATCH}문항씩 ${Math.ceil(total/GEN_BATCH)}번에 나눠 만들어요.`:'.'} 검수까지 ${Math.max(3,Math.round(total*.5))}~${total+3}분쯤 걸려요.`;
+}
+async function submitEditor(e){
+  e.preventDefault();
+  const d=readEditor();
+  const err=m=>{$('#edErr').textContent=m;$('#edErr').hidden=false};
+  if(!sample)return err('claude.ai에서 이 앱을 열어야 문제를 만들 수 있어요.');
+  if(!db)return err('저장소에 연결되지 않았어요. claude.ai에서 열어 주세요.');
+  if(running)return err('다른 세트를 만드는 중이에요. 끝난 뒤에 시작해 주세요.');
+  if(!d.unitIds.length)return err('범위를 하나 이상 골라 주세요.');
+  const probe=probeSet(d);
+  if(bytes(materials(probe))>MAT_MAX)return err('근거 자료가 100%를 넘었어요. 범위를 줄이거나 필기 없이 만들어 주세요.');
+  if(bytes(genPrompt(probe))>MAX_BYTES-1000)return err('기출 예시까지 넣으면 너무 길어요. 기출 예시를 줄여 주세요.');
+  const names=PARTS.filter(p=>d.unitIds.includes(p.id)).map(p=>p.label);
+  const set={...probe,title:names.join(' · ')+' 변형',id:db.collection('sets').doc().id,stage:'new',questions:[],attempts:[],
+    hadNote:d.useNote&&d.unitIds.some(u=>notes[u]&&notes[u].text&&notes[u].text.trim()),createdAt:new Date().toISOString()};
+  sets.push(set);await save(set);
+  openSet(set.id);runPipeline(set);
+}
+
+/* ---------- 세트 보기 ---------- */
+function openSet(id){
+  cur=sets.find(s=>s.id===id);if(!cur)return;
+  solve={answers:{},graded:false,essay:{}};$('#reveal').checked=false;$('#export').hidden=true;$('#delAsk').hidden=true;
+  $('#log').innerHTML='';show('#view');renderSet();
+}
+function refChips(q,refs){return refs.map(r=>`<button type="button" class="ref" data-q="${q.id}" data-r="${r}">[${r}]</button>`).join('')}
+function renderSet(){
+  const s=cur;if(!s)return;
+  $('#vTitle').textContent=s.title;
+  const on=s.questions.filter(q=>!q.excluded);
+  $('#vMeta').textContent=`${fmtDate(s.createdAt)} · 선택형 ${on.filter(q=>q.format==='선택형').length} · 서답형 ${on.filter(q=>q.format==='서답형').length}${s.useNote?(s.hadNote?' · 필기 반영':' · 필기 없음'):''}${s.useRef?' · 참고 항목 포함':''}`;
+  $('#vChips').innerHTML=setSummary(s);
+  const isRun=!!(running&&runId===s.id);
+  $('#prog').hidden=!isRun&&!$('#log').children.length;
+  const idx={new:0,generated:1,reviewed:2,revised:3,done:4}[s.stage]??0;
+  $$('#stepper li').forEach((li,i)=>{li.className=i<idx?'done':(i===idx&&isRun?'on':'')});
+  $('#stop').hidden=!isRun;
+  $('#resume').hidden=isRun||s.stage==='done';
+  $('#resumeMsg').textContent=s.questions.length?`${s.questions.length}문항까지 만들었어요. 남은 단계를 이어서 할 수 있어요.`:'아직 문항이 없어요.';
+  if(!isRun)setLive('');
+  $('#vPdf').disabled=!s.questions.length||isRun;
+  const reveal=$('#reveal').checked||solve.graded;
+  $('#solveInfo').textContent=s.questions.length?`${on.length}문항`:'';
+  let no=0;
+  $('#qs').innerHTML=s.questions.map(q=>{
+    const n=q.excluded?'–':++no;
+    const mine=solve.answers[q.id];
+    const ev=solve.essay[q.id]||{};
+    const mark=solve.graded&&!q.excluded?(q.format==='선택형'?(mine===q.answer?' mark-o':' mark-x'):(ev.ok!=null?(ev.ok?' mark-o':' mark-x'):'')):'';
+    let chips=`<span class="chip">${esc(q.type||q.format)}</span>`;
+    if(q.level)chips+=`<span class="chip">${esc(q.level)}</span>`;
+    if(q.fromNote)chips+=`<span class="chip warn">필기 근거</span>`;
+    if(q.st==='check')chips+=`<span class="chip bad">직접 확인</span>`;
+    else if(q.st==='fixed')chips+=`<span class="chip ok">고친 뒤 통과</span>`;
+    else if(q.st==='pending'||q.st==='flag'||q.st==='revised')chips+=`<span class="chip warn">검수 전</span>`;
+    let body=`<div class="stem">${esc(q.stem)}${q.format==='서답형'?` <span class="pts">[${q.points}점]</span>`:''}</div>`;
+    if(q.box)body+=`<div class="box">${esc(q.box)}</div>`;
+    if(q.format==='선택형'){
+      body+=`<ul class="choices">${q.choices.map((c,i)=>{
+        const k=i+1;let cls='';
+        if(solve.graded&&!q.excluded){if(k===q.answer)cls=' right';else if(mine===k)cls=' wrong'}
+        else if(reveal&&k===q.answer)cls=' right';
+        return `<li><button type="button" class="choice${cls}" data-q="${q.id}" data-k="${k}" aria-pressed="${mine===k}" ${solve.graded||q.excluded?'disabled':''}><span class="k">${CIRC[i]}</span><span>${esc(c)}</span></button></li>`}).join('')}</ul>`;
+    }else{
+      const short=isKanaAnswer(q);
+      body+=`<label class="field" for="ea${q.id}"><span class="muted" style="font-weight:400">답안${short?' (가나로)':''}</span>${short
+        ?`<input type="text" id="ea${q.id}" class="ans-in" lang="ja" autocomplete="off" autocapitalize="off" spellcheck="false" data-q="${q.id}" value="${esc(ev.text||'')}" ${solve.graded?'readonly':''}>`
+        :`<textarea id="ea${q.id}" class="ans-in" lang="ja" rows="2" data-q="${q.id}" ${solve.graded?'readonly':''}>${esc(ev.text||'')}</textarea>`}</label>`;
+      if(solve.graded&&ev.ok!=null)body+=`<div class="note ${ev.ok?'':'bad'}">${esc(ev.msg||'')}</div>`;
+    }
+    if(reveal&&!q.excluded){
+      let ex='<div class="explain">';
+      if(q.format==='선택형'){
+        ex+=q.why.map((w,i)=>`<div class="why${i+1===q.answer?' is-ans':''}"><span class="k">${CIRC[i]}</span><div><span class="ox ${w.fits?'o':'x'}">${w.fits?'옳음':'틀림'}</span>${esc(w.reason)}${refChips(q,w.refs)}${w.trap?` <span class="trap">· ${esc(w.trap)}</span>`:''}${w.eng?`<span class="eng">· ${esc(w.eng)}</span>`:''}</div></div>`).join('');
+        if(q.unique)ex+=`<div class="note"><b>정답이 하나인 이유</b> ${esc(q.unique)}</div>`;
+      }else{
+        ex+=`<div class="note"><b>모범 답안</b> <span class="ja">${esc(q.modelAnswer)}</span>${q.accept.length?` <span class="muted">(인정: ${esc(q.accept.join(', '))})</span>`:''}${refChips(q,q.refs)}${q.eng?` <span class="muted">· ${esc(q.eng)}</span>`:''}<ul>${q.criteria.map(c=>`<li>${esc(c)}</li>`).join('')}</ul></div>`;
+        if(solve.graded&&!ev.auto)ex+=`<div class="qfoot"><button class="small-btn" type="button" data-grade="${q.id}">Claude에게 채점받기</button><span class="muted" id="gm${q.id}"></span></div>`;
+      }
+      ex+=`<div id="rb${q.id}"></div>`;
+      if(q.defense)ex+=`<div class="note"><b>출제자 해명</b> ${esc(q.defense)}</div>`;
+      if(q.issues&&q.issues.length&&q.st==='check')ex+=`<div class="note bad"><b>검수에서 남은 지적</b><ul>${q.issues.map(i=>`<li>${esc(i)}</li>`).join('')}</ul></div>`;
+      ex+='</div>';body+=ex;
+    }
+    body+=`<div class="qfoot"><button class="small-btn" type="button" data-ex="${q.id}">${q.excluded?'다시 넣기':'이 문항 빼기'}</button></div>`;
+    return `<section class="panel q${q.excluded?' excluded':''}${mark}" id="q${q.id}"><div class="qhead"><span class="n">${n}</span><span class="sp"></span>${chips}</div>${body}</section>`;
+  }).join('')||(isRun?'<div class="empty">문항을 만드는 중이에요. 한 묶음이 끝날 때마다 여기에 나타나요.</div>':'');
+  $('#gradeBar').hidden=!s.questions.length;
+  $('#grade').disabled=solve.graded||isRun;$('#resetSolve').hidden=!solve.graded;
+  renderScore();
+}
+function renderScore(){
+  const s=cur;
+  if(!s||!solve.graded){$('#scoreBox').textContent='다 풀었으면 채점해요. 가나로 쓰는 서답형은 앱 규칙으로 바로 채점하고, 문장은 Claude에게 채점받을 수 있어요.';$('#scoreBox').className='muted';return}
+  const mc=s.questions.filter(q=>!q.excluded&&q.format==='선택형');
+  const right=mc.filter(q=>solve.answers[q.id]===q.answer).length;
+  const es=s.questions.filter(q=>!q.excluded&&q.format==='서답형'&&solve.essay[q.id]&&solve.essay[q.id].auto);
+  const esRight=es.filter(q=>solve.essay[q.id].ok).length;
+  $('#scoreBox').className='';
+  $('#scoreBox').innerHTML=`<span class="big-score">${right}<small> / ${mc.length}</small></span> <span class="muted">선택형</span>${es.length?` <span class="big-score" style="margin-left:12px">${esRight}<small> / ${es.length}</small></span> <span class="muted">가나 쓰기</span>`:''}`;
+}
+function showRef(qid,r){
+  const u=cur.units[r-1],box=$('#rb'+qid);if(!box)return;
+  const P=u&&PART[u.part];
+  box.innerHTML=u?`<div class="refbox"><span class="n">[${r}]</span>${esc(u.t)}<div class="muted" style="font-size:12px">${P?esc(P.label+' · '+P.title):''}${u.head?' · '+esc(u.head):''}</div></div>`:`<div class="refbox">[${r}]번 문장을 찾지 못했어요.</div>`;
+}
+// 낱말·활용형 하나를 가나로 쓰는 답이면 앱 규칙으로 바로 채점한다
+const isKanaAnswer=q=>q.format==='서답형'&&!hasKanji(q.modelAnswer)&&norm(q.modelAnswer).length>0&&norm(q.modelAnswer).length<=14&&q.criteria.length<=2&&!/[。．.]$/.test(q.modelAnswer.trim());
+function gradeAll(){
+  const s=cur;
+  $$('#qs [data-q].ans-in').forEach(t=>{const id=Number(t.dataset.q);solve.essay[id]={...(solve.essay[id]||{}),text:t.value}});
+  s.questions.filter(q=>!q.excluded&&isKanaAnswer(q)).forEach(q=>{
+    const v=solve.essay[q.id]||{text:''};
+    const j=judge(v.text,{kana:q.modelAnswer,word:q.modelAnswer,jaAliases:q.accept});
+    const ok=j.code==='ok';
+    const msg=ok?'맞았어요.':j.code==='empty'?`비워 뒀어요. 정답: ${q.modelAnswer}`:j.code==='kana'?`가나 종류가 달라요. 정답: ${q.modelAnswer}`
+      :j.code==='near'?`한 글자가 달라요. 정답: ${q.modelAnswer}`:j.code==='confuse'?`${j.pair.typed}와 ${j.pair.want}가 달라요. 정답: ${q.modelAnswer}`:`정답: ${q.modelAnswer}`;
+    solve.essay[q.id]={...v,auto:true,ok,msg};
+  });
+  solve.graded=true;
+  const mc=s.questions.filter(q=>!q.excluded&&q.format==='선택형');
+  const right=mc.filter(q=>solve.answers[q.id]===q.answer).length;
+  s.attempts=[...(s.attempts||[]),{at:new Date().toISOString(),right,total:mc.length}];save(s);
+  renderSet();renderHome();window.scrollTo({top:0,behavior:'smooth'});
+}
+async function aiGrade(qid){
+  const q=cur.questions.find(x=>x.id===qid),v=solve.essay[qid]||{},m=$('#gm'+qid);
+  if(!sample){m.textContent='claude.ai에서 열어야 채점받을 수 있어요.';return}
+  if(!String(v.text||'').trim()){m.textContent='답안이 비어 있어요.';return}
+  m.textContent='채점하는 중…';
+  try{
+    const r=await sample.json(gradePrompt(cur,q,v.text),{modelTier:'default',cache:false});
+    const sc=Number(r&&r.score);
+    solve.essay[qid]={...v,ok:sc>=q.points,msg:`${isNaN(sc)?'?':sc} / ${q.points}점 · ${String(r&&r.feedback||'')}`};
+    renderSet();$('#q'+qid).scrollIntoView({block:'nearest'});
+  }catch(e){m.textContent=errCopy(e)}
+}
+
+/* ---------- 시험지 PDF ---------- */
+// pdf-lib로 글자를 벡터 그대로 넣는다 (굿노트에서 확대해도 선명하고 검색된다).
+// 한글은 나눔고딕, 일본어는 Zen Kaku Gothic New — 글자마다 그 글자를 가진 글꼴을 고른다.
+const PDF_LIBS=['https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js','https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js'];
+const FONT_FILES={KR:'KoR',KB:'KoB',JR:'JaR',JB:'JaB'};
+const fontBytes={};
+async function fontFile(name){if(!fontBytes[name]){const r=await fetch('fonts/'+name+'.ttf');if(!r.ok)throw new Error('font');fontBytes[name]=await r.arrayBuffer()}return fontBytes[name]}
+async function loadPdfTools(){if(!window.PDFLib)await loadScript(PDF_LIBS[0]);if(!window.fontkit)await loadScript(PDF_LIBS[1])}
+const MM=72/25.4;
+const PAGE={w:595.28,h:841.89,mx:15*MM,top:14*MM,bottom:16*MM,gutter:7*MM};
+const INK=[.11,.13,.13],MUTED=[.37,.41,.40],ACCENT=[.25,.45,.41],RULE=[.77,.81,.77],FAINT=[.87,.89,.87],RED=[.75,.27,.17];
+const isJa=ch=>/[\u3000-\u303f\u3040-\u30ff\u3400-\u9fff\uff01-\uff60]/.test(ch);   // 가나(ー・ 포함)·한자·일본어 문장부호
+
+async function buildExamPdf(set,opt,say){
+  await loadPdfTools();
+  const {PDFDocument,rgb}=window.PDFLib;const col=c=>rgb(c[0],c[1],c[2]);
+  const qs=set.questions.filter(q=>!q.excluded);
+  const no=new Map(qs.map((q,i)=>[q.id,i+1]));
+  say('글꼴 준비 중…');
+  const doc=await PDFDocument.create();doc.registerFontkit(window.fontkit);
+  doc.setTitle(set.title||'일본어 변형 문제');doc.setCreator('일본어 변형 출제실');
+  const F={},fk={};let missing=0;
+  for(const [k,base] of Object.entries(FONT_FILES)){const b=await fontFile(base);fk[k]=window.fontkit.create(b);F[k]=await doc.embedFont(b,{subset:false})}
+  // 글자 하나하나에 글꼴을 고른다: 가나·한자는 일본어 글꼴, 나머지는 한글 글꼴. 둘 다 없으면 □
+  const has=(k,ch)=>fk[k].hasGlyphForCodePoint(ch.codePointAt(0));
+  function pieces(text,w){
+    const out=[];const t=String(text||'').replace(/\r/g,'').replace(/\t/g,' ');
+    for(const ch of t){
+      let k=(isJa(ch)?'J':'K')+w;
+      if(ch!==' '&&!has(k,ch)){const o=(k[0]==='J'?'K':'J')+w;if(has(o,ch))k=o;else{missing++;out.push({k:'K'+w,t:'□'});continue}}
+      const last=out[out.length-1];if(last&&last.k===k)last.t+=ch;else out.push({k,t:ch});
+    }
+    return out;
+  }
+  const W=f=>f==='B'?'B':'R';
+  function wrap(runs,width,indent=0,hang=0){
+    const groups=[];let g=null,space=null;
+    for(const r of runs){
+      for(const part of String(r.text||'').split(/(\s+)/)){
+        if(!part)continue;
+        if(/^\s+$/.test(part)){if(g){groups.push(g);g=null}space=r;continue}
+        if(!g){g={pieces:[],space};space=null}
+        for(const p of pieces(part,W(r.f)))g.pieces.push({...r,f:p.k,text:p.t});
+      }
+    }
+    if(g)groups.push(g);
+    const wOf=p=>F[p.f].widthOfTextAtSize(p.text,p.size);
+    const lines=[];let line=[],x=indent;
+    const push=()=>{lines.push(line);line=[];x=hang};
+    for(const gr of groups){
+      const gw=gr.pieces.reduce((a,p)=>a+wOf(p),0);
+      const sw=line.length&&gr.space?F['K'+W(gr.space.f)].widthOfTextAtSize(' ',gr.space.size):0;
+      if(line.length&&x+sw+gw>width)push();
+      if(line.length)x+=sw;
+      if(x+gw<=width){for(const p of gr.pieces){line.push({...p,x});x+=wOf(p)}}
+      else for(const p of gr.pieces)for(const ch of [...p.text]){const cw=F[p.f].widthOfTextAtSize(ch,p.size);if(line.length&&x+cw>width)push();line.push({...p,text:ch,x});x+=cw}
+    }
+    if(line.length)lines.push(line);return lines;
+  }
+  const run=(text,f='R',size=9.6,color=INK,rise=0)=>({text,f,size,color,rise});
+  function drawLine(page,line,x,y){for(const p of line)page.drawText(p.text,{x:x+p.x,y:y+(p.rise||0),size:p.size,font:F[p.f],color:col(p.color)})}
+  // 한 줄짜리 글(머리글·표 칸)을 그리고 너비를 잰다
+  const strW=(t,f,size)=>pieces(t,W(f)).reduce((a,p)=>a+F[p.k].widthOfTextAtSize(p.t,size),0);
+  function drawStr(page,t,{x,y,size,f='R',color=INK}){let xx=x;for(const p of pieces(t,W(f))){page.drawText(p.t,{x:xx,y,size,font:F[p.k],color:col(color)});xx+=F[p.k].widthOfTextAtSize(p.t,size)}}
+  const items=[];
+  const add=(h,draw,o={})=>items.push({h,draw,gap:o.gap||0,keep:!!o.keep,brk:!!o.brk});
+  const colW=(PAGE.w-2*PAGE.mx-PAGE.gutter)/2;
+  function textItems(runs,{size=9.6,lead=1.7,indent=0,hang=0,gap=0,keep=false}={}){
+    const lines=wrap(runs,colW,indent,hang);const lh=size*lead;
+    lines.forEach((ln,i)=>add(lh,(pg,x,y)=>drawLine(pg,ln,x,y+lh*.28),{gap:i===0?gap:0,keep:keep||i<lines.length-1&&lines.length<=3}));
+  }
+  function blockItem(text){
+    const size=9.2,lh=size*1.7,pad=7,label='〈보기〉',inner=colW-2*pad;
+    const lines=String(text).split('\n').flatMap(t=>wrap([run(t,'R',size)],inner));
+    const h=lines.length*lh+2*pad+4;
+    add(h,(pg,x,y)=>{
+      pg.drawRectangle({x,y,width:colW,height:h-2,borderColor:col(RULE),borderWidth:.7});
+      const lw=strW(label,'R',8);pg.drawRectangle({x:x+colW/2-lw/2-4,y:y+h-6,width:lw+8,height:8,color:rgb(1,1,1)});drawStr(pg,label,{x:x+colW/2-lw/2,y:y+h-5,size:8});
+      let yy=y+h-pad-4-lh;for(const ln of lines){drawLine(pg,ln,x+pad,yy+lh*.3);yy-=lh}
+    },{gap:6});
+  }
+  say('문항 배치 중…');
+  for(const q of qs){
+    const n=no.get(q.id);const tag=q.format==='서답형'?` [서답형 ${q.points}점]`:'';
+    textItems([run(`${n}. `,'B',9.8),run(q.stem+tag,'B',9.6)],{gap:14,keep:true,hang:12,lead:1.65});
+    if(q.box)blockItem(q.box);
+    if(q.format==='선택형'){
+      q.choices.forEach((c,i)=>{const lines=wrap([run(CIRC[i]+' ','R',9.6),run(c,'R',9.6)],colW-4,0,11);const lh=9.6*1.62;
+        lines.forEach((ln,li)=>add(lh,(pg,x,y)=>drawLine(pg,ln,x+4,y+lh*.28),{gap:li===0?(i===0?5:2.5):0,keep:li<lines.length-1}))});
+    }else{
+      const L=isKanaAnswer(q)?1:Math.max(2,Math.min(5,Math.ceil(q.modelAnswer.length/24)+1));
+      add(L*24+4,(pg,x,y)=>{for(let k=1;k<=L;k++){const yy=y+(L*24+4)-k*24;pg.drawLine({start:{x,y:yy},end:{x:x+colW,y:yy},thickness:.5,color:col(FAINT)})}},{gap:6});
+    }
+  }
+  if(opt.answers&&qs.length){
+    add(0,()=>{},{brk:true});
+    textItems([run('정답과 해설','B',13)],{lead:1.6,keep:true});
+    const per=5,rows=Math.ceil(qs.length/per),cw=colW/per,rh=17;
+    add(rows*rh*2,(pg,x,y)=>{qs.forEach((q,i)=>{
+      const r=Math.floor(i/per),c=i%per,cx=x+c*cw,cy=y+rows*rh*2-(r+1)*rh*2;
+      pg.drawRectangle({x:cx,y:cy,width:cw,height:rh*2,borderColor:col(RULE),borderWidth:.5});
+      pg.drawRectangle({x:cx,y:cy+rh,width:cw,height:rh,color:rgb(.95,.97,.96)});
+      const a=String(no.get(q.id)),b=q.format==='선택형'?(CIRC[q.answer-1]||'?'):'서답';
+      drawStr(pg,a,{x:cx+cw/2-strW(a,'R',8)/2,y:cy+rh+5,size:8,color:MUTED});
+      drawStr(pg,b,{x:cx+cw/2-strW(b,'R',10)/2,y:cy+5,size:10,color:ACCENT})})},{gap:6});
+    qs.forEach(q=>{
+      const n=no.get(q.id);
+      textItems([run(`${n}. `,'B',9.6),run(q.format==='선택형'?`정답 ${CIRC[q.answer-1]||'?'}`:'모범 답안','B',9.6,ACCENT),run(`  ${q.type}${q.level?' · '+q.level:''}`,'R',7.6,MUTED)],{gap:12,keep:true,lead:1.7});
+      if(q.st==='check')textItems([run('검수에서 논란이 남은 문항이에요. 단어장·교과서로 직접 확인하세요.','R',7.6,RED)],{keep:true,lead:1.6});
+      if(q.format==='선택형'){
+        q.why.forEach((w,i)=>{const r=[run(CIRC[i]+' ','R',8.8,i+1===q.answer?ACCENT:INK),run(w.fits?'옳음 ':'틀림 ','R',7.6,w.fits?[.16,.48,.33]:RED),run(w.reason,'R',8.8)];
+          if(w.refs.length)r.push(run(' ['+w.refs.join(', ')+']','R',7.4,ACCENT));if(w.trap)r.push(run(' · '+w.trap,'R',7.4,MUTED));if(w.eng)r.push(run(' · '+w.eng,'R',7.4,ACCENT));textItems(r,{hang:11,gap:2,lead:1.6,size:8.8})});
+      }else{
+        textItems([run(q.modelAnswer+(q.accept.length?` (인정: ${q.accept.join(', ')})`:''),'R',9.4)],{gap:2,lead:1.62,size:9.4});
+        q.criteria.forEach((c,i)=>textItems([run(`채점 ${i+1}  `,'R',7.6,MUTED),run(c,'R',8.6)],{gap:i?1:3,lead:1.58,size:8.6}));
+      }
+      const rs=[...new Set(q.format==='선택형'?q.why.flatMap(w=>w.refs):q.refs)].sort((a,b)=>a-b).slice(0,6);
+      rs.forEach(r=>{const u=set.units[r-1];if(u)textItems([run(`[${r}] `,'R',7.4,ACCENT),run(u.t,'R',7.8,MUTED)],{hang:14,gap:1,lead:1.5,size:7.8})});
+    });
+  }
+  say('쪽 나누는 중…');
+  const pages=[];let page,colIdx,y,colTop;const bottomY=PAGE.bottom+10;
+  const d=new Date(),dstr=`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+  function header(first){
+    const x0=PAGE.mx,x1=PAGE.w-PAGE.mx;let yy=PAGE.h-PAGE.top;
+    if(first){
+      drawStr(page,'일본어 · 2학기 1회고사 대비 변형 문제',{x:x0,y:yy-8,size:8,color:MUTED});
+      const t=set.title||'';let ts=17;while(strW(t,'B',ts)>x1-x0-170&&ts>11)ts-=.5;
+      drawStr(page,t,{x:x0,y:yy-30,size:ts,f:'B'});
+      const mc=qs.filter(q=>q.format==='선택형').length,es=qs.length-mc;
+      drawStr(page,`선택형 ${mc}문항${es?' + 서답형 '+es:''} · ${dstr}`,{x:x0,y:yy-46,size:8,color:MUTED});
+      const bw=76,bh=26,bx=x1-bw*2-6,by=yy-44;
+      [['이름',''],['점수',`/ ${mc}`]].forEach(([l,s],i)=>{const xx=bx+i*(bw+6);page.drawRectangle({x:xx,y:by,width:bw,height:bh,borderColor:col(RULE),borderWidth:.7});
+        drawStr(page,l,{x:xx+6,y:by+bh-10,size:6.8,color:MUTED});if(s)drawStr(page,s,{x:xx+bw-6-strW(s,'R',8),y:by+5,size:8,color:MUTED})});
+      yy-=56;page.drawLine({start:{x:x0,y:yy},end:{x:x1,y:yy},thickness:1.6,color:col(INK)});page.drawLine({start:{x:x0,y:yy-2.6},end:{x:x1,y:yy-2.6},thickness:.5,color:col(INK)});
+      return yy-14;
+    }
+    drawStr(page,set.title||'',{x:x0,y:yy-7,size:7.6,color:MUTED});
+    page.drawLine({start:{x:x0,y:yy-12},end:{x:x1,y:yy-12},thickness:.5,color:col(RULE)});return yy-24;
+  }
+  function newPage(){page=doc.addPage([PAGE.w,PAGE.h]);pages.push(page);const t=header(pages.length===1);colIdx=0;y=t;colTop=t;page._top=t}
+  const colX=i=>PAGE.mx+i*(colW+PAGE.gutter);
+  function nextCol(){if(colIdx===0){colIdx=1;y=colTop}else newPage()}
+  newPage();
+  for(let i=0;i<items.length;i++){
+    const it=items[i];
+    if(it.brk){if(!(colIdx===0&&y===colTop))newPage();continue}
+    const atTop=y===colTop;let chain=(atTop?0:it.gap)+it.h,j=i;
+    while(items[j]&&items[j].keep&&items[j+1]&&chain<320){j++;chain+=items[j].gap+items[j].h}
+    if(y-chain<bottomY&&!atTop)nextCol();
+    if(y-(y===colTop?0:it.gap)-it.h<bottomY&&y!==colTop)nextCol();
+    y-=(y===colTop?0:it.gap)+it.h;it.draw(page,colX(colIdx),y);
+  }
+  pages.forEach((pg,i)=>{const mid=PAGE.mx+colW+PAGE.gutter/2;pg.drawLine({start:{x:mid,y:pg._top+4},end:{x:mid,y:PAGE.bottom+6},thickness:.5,color:col(RULE)});
+    const s=`${i+1} / ${pages.length}`;drawStr(pg,s,{x:PAGE.w/2-strW(s,'R',7.6)/2,y:PAGE.bottom-8,size:7.6,color:MUTED})});
+  say('파일 만드는 중…');
+  return {bytes:await doc.save(),pages:pages.length,missing};
+}
+async function exportPdf(){
+  const s=cur;if(!s)return;const msg=t=>{$('#xMsg').textContent=t};
+  if(!downloads){msg('이 화면에서는 파일을 받을 수 없어요. claude.ai에서 열어 주세요.');return}
+  if(!s.questions.some(q=>!q.excluded)){msg('PDF로 만들 문항이 없어요.');return}
+  $('#xGo').disabled=true;
+  try{
+    const out=await buildExamPdf(s,{answers:$('#xAns').checked},msg);
+    msg(`${out.pages}쪽짜리 PDF를 만들었어요. 저장할지 묻는 창이 떠요.`);
+    await downloads.save({filename:(s.title||'일본어 변형 문제').replace(/[\\/:*?"<>|]/g,' ').trim().slice(0,60)+'.pdf',data:new Blob([out.bytes],{type:'application/pdf'})});
+    msg(`저장했어요 · ${out.pages}쪽`+(out.missing?` · 글꼴에 없는 글자 ${out.missing}개는 □로 표시했어요`:''));
+  }catch(e){const c=e&&e.code;msg(c==='declined'?'저장을 취소했어요.':c==='rate_limited'?'이미 저장 창이 열려 있어요. 그 창을 먼저 닫아 주세요.':c?'파일을 저장하지 못했어요. 다시 시도해 주세요.':(e&&e.message==='font'?'글꼴 파일을 불러오지 못했어요. 새로고침한 뒤 다시 시도해 주세요.':'PDF를 만들지 못했어요. 새로고침한 뒤 다시 시도해 주세요.'))}
+  finally{$('#xGo').disabled=false}
+}
+
+/* ---------- 이벤트 ---------- */
+$('#newSet').addEventListener('click',()=>openEditor());
+$('#openNotes').addEventListener('click',()=>openNotes());
+$('#unitNotes').addEventListener('click',e=>{const b=e.target.closest('.unote');if(b)openNotes(b.dataset.u)});
+$('#openExam').addEventListener('click',()=>{$('#eText').value=examText;$('#eMsg').textContent='';$('#eSaveMsg').textContent='';$('#ePick').hidden=!sample||!canImages;show('#exam')});
+$('#sets').addEventListener('click',e=>{const b=e.target.closest('.set');if(b)openSet(b.dataset.id)});
+['#nBack','#eBack','#edBack','#vBack'].forEach(s=>$(s).addEventListener('click',()=>{show('#home');renderHome()}));
+$('#nUnit').addEventListener('change',()=>{noteUnit=$('#nUnit').value;pending=[];loadNoteUnit()});
+$('#nPick').addEventListener('click',()=>$('#nFile').click());
+$('#nFile').addEventListener('change',e=>{addFiles(e.target.files);e.target.value=''});
+const drop=$('#nDrop');
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over')});
+drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
+drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('over');addFiles(e.dataTransfer.files)});
+$('#nPages').addEventListener('change',e=>{const i=e.target.dataset.i;if(i==null)return;const p=allPages()[Number(i)];if(p&&!p.saved){p.no=Number(e.target.value)||0;renderPages()}});
+$('#nRead').addEventListener('click',transcribe);
+$('#nStop').addEventListener('click',()=>noteRun&&noteRun.abort());
+$('#nSave').addEventListener('click',async()=>{notes[noteUnit]={...(notes[noteUnit]||{pages:[]}),text:$('#nText').value,updatedAt:new Date().toISOString()};
+  const ok=await saveNote(noteUnit);$('#nSaveMsg').textContent=ok?'저장했어요':'저장하지 못했어요. claude.ai에서 열어 주세요.';renderHome()});
+$('#ePick').addEventListener('click',()=>$('#eFile').click());
+$('#eFile').addEventListener('change',e=>{readExamPhotos(e.target.files);e.target.value=''});
+$('#eSave').addEventListener('click',async()=>{examText=$('#eText').value;let ok=false;if(db){try{await db.doc('examples/main').set({text:examText,updatedAt:new Date().toISOString()});ok=true}catch(e){}}
+  $('#eSaveMsg').textContent=ok?'저장했어요':'저장하지 못했어요. claude.ai에서 열어 주세요.';renderHome()});
+$('#editor').addEventListener('submit',submitEditor);
+$('#editor').addEventListener('input',edUpdate);
+['#fUnits','#fTypes'].forEach(s=>$(s).addEventListener('click',e=>{const b=e.target.closest('.pk');if(!b)return;b.setAttribute('aria-pressed',String(b.getAttribute('aria-pressed')!=='true'));edUpdate()}));
+$('#stop').addEventListener('click',()=>running&&running.ctl&&running.ctl.abort());
+$('#resumeBtn').addEventListener('click',()=>{if(cur){$('#log').innerHTML='';runPipeline(cur)}});
+$('#vAgain').addEventListener('click',()=>{if(cur)openEditor({unitIds:[...new Set(cur.units.map(u=>u.part))],cond:cur.cond,tier:cur.tier,useNote:cur.useNote,useRef:cur.useRef})});
+$('#vDel').addEventListener('click',()=>{$('#delAsk').hidden=false});
+$('#delNo').addEventListener('click',()=>{$('#delAsk').hidden=true});
+$('#delYes').addEventListener('click',async()=>{if(!cur)return;if(running&&runId===cur.id&&running.ctl)running.ctl.abort();try{await db.doc('sets/'+cur.id).delete()}catch(e){}
+  sets=sets.filter(s=>s!==cur);cur=null;show('#home');renderHome()});
+$('#vPdf').addEventListener('click',()=>{const x=$('#export');x.hidden=!x.hidden;$('#xMsg').textContent=''});
+$('#xGo').addEventListener('click',exportPdf);
+$('#reveal').addEventListener('change',renderSet);
+$('#grade').addEventListener('click',gradeAll);
+$('#resetSolve').addEventListener('click',()=>{solve={answers:{},graded:false,essay:{}};renderSet()});
+$('#qs').addEventListener('click',e=>{
+  const c=e.target.closest('.choice');
+  if(c&&!solve.graded){const q=Number(c.dataset.q),k=Number(c.dataset.k);solve.answers[q]=solve.answers[q]===k?undefined:k;
+    $$(`.choice[data-q="${q}"]`).forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.k)===solve.answers[q])));return}
+  const r=e.target.closest('.ref');if(r){showRef(Number(r.dataset.q),Number(r.dataset.r));return}
+  const x=e.target.closest('[data-ex]');if(x){const q=cur.questions.find(q=>q.id===Number(x.dataset.ex));if(q){q.excluded=!q.excluded;save(cur);renderSet()}return}
+  const g=e.target.closest('[data-grade]');if(g)aiGrade(Number(g.dataset.grade));
+});
+$('#qs').addEventListener('input',e=>{const t=e.target.closest('[data-q].ans-in');if(t){const id=Number(t.dataset.q);solve.essay[id]={...(solve.essay[id]||{}),text:t.value}}});
+
+/* ---------- 시작 ---------- */
+async function boot(){
+  renderHome();
+  const c=window.claude;
+  if(!c||!c.use){setStatus('claude.ai에서 열면 문제를 만들 수 있어요.');return}
+  [db,sample,assets,downloads]=await Promise.all(['db','sample','assets','downloads'].map(n=>Promise.resolve(c.use(n)).catch(()=>null)));
+  if(sample){try{const l=await sample.limits();canImages=l&&l.images||null}catch(e){canImages=null}}
+  if(!db){setStatus(sample?'저장소에 연결되지 않았어요. 새로고침해 주세요.':'claude.ai에서 열면 문제를 만들 수 있어요.',!!sample);return}
+  try{
+    const [ss,ns,ex]=await Promise.all([db.collection('sets').get(),db.collection('notes').get(),db.doc('examples/main').get()]);
+    sets=ss.docs.map(d=>({id:d.id,...JSON.parse(JSON.stringify(d.data()))}));
+    ns.docs.forEach(d=>{notes[d.id]=JSON.parse(JSON.stringify(d.data()))});
+    examText=ex.exists?String(ex.data().text||''):'';
+    setStatus(sample?'':'이 화면에서는 Claude를 부를 수 없어요. 만든 문제는 풀 수 있어요.');
+  }catch(e){setStatus('저장된 자료를 불러오지 못했어요. 새로고침해 주세요.',true)}
+  renderHome();
+}
+if(/^(localhost|127\.0\.0\.1)$/.test(location.hostname))window.__studio={buildUnits,materials,genPrompt,reviewPrompt,normQ,localCheck,isKanaAnswer,buildExamPdf,PARTS,MAT_MAX,MAX_BYTES,bytes};
+boot();
+})();
+</script>
