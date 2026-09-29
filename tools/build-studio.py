@@ -4,7 +4,7 @@
     python3 tools/build-studio.py            # studio/source.js
     python3 tools/build-studio.py --fonts    # + studio/fonts/*.ttf (PDF 받기용)
 
-source.js — 앱과 같은 데이터(단어장·활용표·표현)와 앱의 채점·활용 엔진, 교과서 전체 지문(3과·6과).
+source.js — 앱과 같은 데이터(단어장·활용표·표현)와 앱의 채점·활용 엔진, 교과서 전체 지문(3과·4과·6과).
   출제실은 이 엔진으로 Claude가 낸 활용형 정답을 다시 계산해 맞는지 본다.
   엔진을 두 벌로 적지 않으려고 index.html 에서 그대로 잘라 온다(extract-engine.py 와 같은 구간).
 
@@ -32,11 +32,11 @@ def source():
                       else [ruby(x) for x in o] if isinstance(o, list)
                       else {k: ruby(v) for k, v in o.items()} if isinstance(o, dict) else o)
     keep = []
-    for unit, fn in (("t3", "unit3-all.json"), ("t6", "unit6-all.json")):
+    for unit, fn in (("t3", "unit3-all.json"), ("t4", "unit4-all.json"), ("t6", "unit6-all.json")):
         texts = json.load(io.open(os.path.join(ROOT, "docs", "scripts", fn), encoding="utf-8"))
         keep += [dict(unit=unit, **{k: ruby(s[k]) for k in ("page", "track", "task", "sub", "audio_only", "items", "words") if k in s})
                  for s in texts["sections"]]
-    parts.append("/* 교과서 전체 지문 — docs/scripts/unit3-all.json · unit6-all.json */\nvar TEXTS = "
+    parts.append("/* 교과서 전체 지문 — docs/scripts/unit3-all.json · unit4-all.json · unit6-all.json */\nvar TEXTS = "
                  + json.dumps(keep, ensure_ascii=False) + ";\n")
     os.makedirs(OUT, exist_ok=True)
     p = os.path.join(OUT, "source.js")

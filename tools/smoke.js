@@ -168,10 +168,10 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   t(await p.$eval('#home', e => !e.hidden), '홈으로 돌아왔다');
   await p.click('.test >> nth=2'); await p.waitForTimeout(200);
   const pRange = await p.$$eval('#rangeChips .chip span:first-child', e => e.map(x => x.textContent));
-  t(pRange.length === 4, '표현 범위 4개 (3과 포함) (교재 쪽): ' + pRange.join(' '));
+  t(pRange.length === 5, '표현 범위 5개 (3·4과 포함) (교재 쪽): ' + pRange.join(' '));
   const pTypes = await p.$$eval('#typeChips .chip span:first-child', e => e.map(x => x.textContent));
   t(pTypes.join(',') === '대비 고르기,뜻 고르기,상황 → 표현,핵심어 쓰기', '표현 유형 4개');
-  t(/표현 2\d항목/.test(await p.textContent('#startBtn')), '시작: ' + await p.textContent('#startBtn'));
+  t(/표현 3\d항목/.test(await p.textContent('#startBtn')), '시작: ' + await p.textContent('#startBtn'));
 
   await p.click('#startBtn'); await p.waitForTimeout(250);
   const pk = {}; let blanks = 0, dSeen = 0;

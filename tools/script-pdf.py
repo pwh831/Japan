@@ -207,7 +207,8 @@ def build(src, out):
 
 # 원고 → PDF. 인자가 없으면 둘 다 만든다.
 JOBS = [("unit6.json", "6과-듣기대본.pdf"), ("unit6-honmun.json", "6과-본문.pdf"),
-        ("unit6-all.json", "6과-전체지문.pdf"), ("unit3-all.json", "3과-전체지문.pdf")]
+        ("unit6-all.json", "6과-전체지문.pdf"), ("unit3-all.json", "3과-전체지문.pdf"),
+        ("unit4-all.json", "4과-전체지문.pdf")]
 
 if __name__ == "__main__":
     d = os.path.join(ROOT, "docs", "scripts")

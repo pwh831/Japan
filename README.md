@@ -99,7 +99,7 @@
 npm run studio   # studio/source.js · studio/fonts/ 를 만들고 브라우저로 점검 (14항목)
 ```
 
-`source.js` 는 `data/*.js` 와 `index.html` 의 엔진 구간, `docs/scripts/unit3-all.json`·`unit6-all.json` 을 묶은 것이다.
+`source.js` 는 `data/*.js` 와 `index.html` 의 엔진 구간, `docs/scripts/unit3-all.json`·`unit4-all.json`·`unit6-all.json` 을 묶은 것이다.
 단어장이나 엔진을 고치면 다시 만들어 함께 발행한다. PDF 글꼴은 원본(`tools/fonts/`)에서 쓰는 글자만 남겨 만든다 —
 원본도 산출물도 저장소에는 넣지 않는다.
 
@@ -138,7 +138,7 @@ npm run studio   # studio/source.js · studio/fonts/ 를 만들고 브라우저�
 ```
 index.html            앱 전체 (UI + 퀴즈 엔진 + 로마자 변환기)
 data/words.js         시험 1 · 단어 135항목
-data/phrases.js       시험 2 · 표현 23항목 (3과 58~61쪽 7항목 포함)
+data/phrases.js       시험 2 · 표현 32항목 (3과 58~61쪽 7항목, 4과 72~75쪽 9항목 포함)
 data/verbs.js         시험 3 · 동사 35 + い형용사 6 (group 한 글자씩)
 build.py              데이터를 인라인해 단일 HTML 생성
 일본어-단어시험.html    배포용 단일 파일 (build.py 산출물)
@@ -157,6 +157,8 @@ docs/scripts/unit6-all.json           6과 전체 지문 — 위 둘을 쪽 순�
 docs/scripts/6과-전체지문.pdf           ↑ 을 굿노트용 A4 로 (본문 한 줄 · 바로 밑에 해석)
 docs/scripts/unit3-all.json           3과 58~61쪽 전체 지문 (본문 59쪽) — 후리가나는 「日本{にほん}」로 적는다
 docs/scripts/3과-전체지문.pdf           ↑ 을 같은 모양으로
+docs/scripts/unit4-all.json           4과 72~75쪽 전체 지문 (본문 73쪽, 74쪽 て형 표)
+docs/scripts/4과-전체지문.pdf           ↑ 을 같은 모양으로
 ```
 
 ## 고친 뒤
@@ -166,7 +168,7 @@ npm run build     # → 일본어-단어시험.html
 npm test          # 271항목
 npm run smoke     # 실제 브라우저로 앱을 열어 세션을 끝까지 풀어 본다
 npm run pdf       # → docs/…-단어장-발음.pdf
-npm run script-pdf  # → docs/scripts/6과-듣기대본.pdf · 6과-본문.pdf · 6과-전체지문.pdf · 3과-전체지문.pdf  (글꼴: tools/fonts/ 에 ZenKakuGothicNew·NanumGothic)
+npm run script-pdf  # → docs/scripts/6과-듣기대본.pdf · 6과-본문.pdf · 6과-전체지문.pdf · 3과-전체지문.pdf · 4과-전체지문.pdf  (글꼴: tools/fonts/ 에 ZenKakuGothicNew·NanumGothic)
 ```
 
 `npm run pdf` 는 발음 규칙을 다시 적지 않고 **앱의 `pron` 함수를 그대로 떼어 씁니다.**

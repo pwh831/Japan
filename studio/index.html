@@ -233,7 +233,7 @@ textarea{resize:vertical;line-height:1.65}
     <div class="row"><h2 id="h-notes">선생님 필기</h2><button class="ghost" id="nBack" type="button">목록으로</button></div>
     <label class="field" for="nUnit"><span>범위</span><select id="nUnit"></select></label>
     <div class="drop" id="nDrop">
-      <span class="muted">필기한 단어장·교과서 사진이나 PDF를 끌어다 놓거나 골라 주세요. 쪽 번호로 범위를 나눠 붙여요(단어장 1~4쪽, 교과서 3과 58~61쪽·6과 98~111쪽).</span>
+      <span class="muted">필기한 단어장·교과서 사진이나 PDF를 끌어다 놓거나 골라 주세요. 쪽 번호로 범위를 나눠 붙여요(단어장 1~4쪽, 교과서 3과 58~61쪽·4과 72~75쪽·6과 98~111쪽).</span>
       <button class="btn" id="nPick" type="button">사진·PDF 고르기</button>
       <input type="file" id="nFile" accept="image/*,application/pdf" multiple hidden>
     </div>
@@ -323,7 +323,7 @@ const $=s=>document.querySelector(s);
 const $$=s=>[...document.querySelectorAll(s)];
 const CIRC=['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯','⑰','⑱','⑲','⑳'];
 const MAX_BYTES=63500;   // 한 번 부를 때 보낼 수 있는 글 (64 KiB)
-const MAT_MAX=42000;     // 근거 자료: 검수 때 문항과 함께 들어가야 해서 넉넉히 남긴다
+const MAT_MAX=47000;     // 근거 자료: 출제 프롬프트(규칙·형식 약 12KB)와 합쳐 MAX_BYTES-4000 안에 들어가게
 const GEN_BATCH=6;
 
 /* ---------- 근거 자료의 범위 (source.js — 앱과 같은 데이터) ---------- */
@@ -332,14 +332,15 @@ const PARTS=[
   {id:'vb',kind:'verb',label:'활용표',title:'동사 · い형용사 활용',pages:[1,2,3,4]},
   {id:'ph',kind:'phrase',label:'표현',title:'문형 · 헷갈리는 짝',pages:[1,2,3,4]},
   {id:'t3',kind:'text',label:'교과서 3과',title:'본문 59쪽 · 날짜·희망·권유',pages:[58,59,60,61]},
+  {id:'t4',kind:'text',label:'교과서 4과',title:'본문 73쪽 · 방법·상황·비교',pages:[72,73,74,75]},
   {id:'t6',kind:'text',label:'교과서 6과',title:'본문 · 듣기 지문',pages:[98,99,100,101,102,103,104,105,106,107,108,109,110,111]}
 ];
 const PART=Object.fromEntries(PARTS.map(p=>[p.id,p]));
 const VPOOL=VERBS.concat(ADJS);
 const REF_NAMES=[...new Set(WORDS.concat(VERBS).filter(x=>x.ref).map(x=>x.kana))];
 // 쪽 → 범위 (필기 사진을 붙일 곳)
-function pageUnit(p){p=Number(p);if(p>=98&&p<=111)return 't6';if(p>=58&&p<=61)return 't3';if(p>=1&&p<=4)return 's'+p;return ''}
-const SCOPE_PAGES=new Set([1,2,3,4,...PART.t3.pages,...PART.t6.pages]);
+function pageUnit(p){p=Number(p);if(p>=98&&p<=111)return 't6';if(p>=58&&p<=61)return 't3';if(p>=72&&p<=75)return 't4';if(p>=1&&p<=4)return 's'+p;return ''}
+const SCOPE_PAGES=new Set([1,2,3,4,...PART.t3.pages,...PART.t4.pages,...PART.t6.pages]);
 const FORM_NM={masu:'ます형',mashou:'ましょう형',tai:'たい형',te:'て형',neg:'부정형(~くない)',past:'과거형(~かった)'};
 
 /* 기출 형식 — 이 학교 일본어 기출 원문은 아직 없다. 일반적인 고등학교 일본어 내신 형식과
@@ -362,7 +363,8 @@ const EXAM_FORMS=[
 ];
 const EXAM_STYLE=`- 선생님 시험 안내(2학기 1회고사): 객관식 21문항 50점 + 서답형 9문항 50점(단답형 20점, 서술형 30점). 문화 문제는 없다.
 - 동사를 확실히 묻는다: 동사 구분 객관식 2문항, 동사 활용 객관식 2문항 이상(～たい, 음편 ～て형), 동사 구분 및 활용 단답형 4문항(각 4점 = 구분 2점 + 활용 2점, 예: ある(있다) → 1류, あって).
-- 각 과의 본문이 가장 중요하다. 객관식뿐 아니라 서술형이 본문에 몰려 배점이 높다. 6과 본문은 104쪽(읽고 쓰기 1)과 106쪽(읽고 쓰기 2), 3과 본문은 59쪽(きいて はなそう 2 — 날짜·～たい·～ませんか), 4과 본문은 73쪽(자료를 아직 받지 못했다).
+- 각 과의 본문이 가장 중요하다. 객관식뿐 아니라 서술형이 본문에 몰려 배점이 높다. 6과 본문은 104쪽(읽고 쓰기 1)과 106쪽(읽고 쓰기 2), 3과 본문은 59쪽(きいて はなそう 2 — 날짜·～たい·～ませんか), 4과 본문은 73쪽(きいて はなそう 2 — 수단＋で, ～て(いって), ～て いる, ～より ～の ほうが). 4과 74쪽 て형 표(かく·およぐ·はいる·やすむ·はなす·いく·みる·たべる·くる·する)는 동사 구분·활용 문항의 근거다.
+- 학교 시험 범위표: 10월 8일(목) 1교시, 일본어 6과 + 일본어회화 3과~4과. 선생님 안내의 세부 쪽(6과 98~111, 3과 58~61, 4과 72~75)을 따른다.
 - 서답형은 부분 점수가 있고 조사 하나도 1점으로 인정한다. '일본어로 쓰시오'는 히라가나·가타카나·한자 모두 써도 되지만 한자가 틀리면 오답이다.
 - 이 학교 일본어 기출 원문은 아직 없다. 아래 '기출 예시'가 있으면 발문·선지 형식은 그것을 따른다.
 - 형식: 선택형 5지선다(발문은 우리말, 선지는 일본어나 우리말) + 서답형(단답형: 가나 쓰기·동사 구분과 활용, 서술형: 본문 대화 문장 쓰기).
@@ -429,16 +431,25 @@ function buildUnits(partIds,useRef){
         push(P.id,'い형용사',`${a.kana}${a.word!==a.kana?'('+a.word+')':''} — ${a.meaning.join(', ')}${a.irregular?' (불규칙)':''} · ${ADJFORMS.map(f=>`${f.nm} ${anyConj(a,f.k)}`).join(' · ')}`,'v');
       }
     }else if(P.kind==='phrase'){
+      // 3·4과 표현은 교과서 문장 그대로다 — 그 과 지문도 골랐으면 문장·해석은 지문 쪽에 있으니 요점만 둔다
+      const inText=p=>(partIds.includes('t3')&&/교과서 3과/.test(p.note||''))||(partIds.includes('t4')&&/교과서 4과/.test(p.note||''));
       for(const p of PHRASES){
+        if(inText(p)){
+          push(P.id,'',`(요점 · ${p.note}) ${p.key}: ${p.use}${p.vs?` — 짝 ${p.vs.key}: ${p.vs.why}`:''}`,'p');
+          continue;
+        }
         push(P.id,'',`${p.ja} — ${p.ko} · 쓰임: ${p.use} · 핵심: ${p.key}${p.made?' (범위 낱말로 만든 예문)':''}`,'p');
         if(p.vs)push(P.id,'',`(짝) ${p.vs.ja} — ${p.vs.ko} · 핵심: ${p.vs.key} · 차이: ${p.vs.why}`,'p');
       }
     }else if(P.kind==='text'){
+      // 바꿔 말하기 연습은 같은 문장(묻는 말, かくにん 의 본문 되풀이)이 여러 번 나온다 — 처음 나온 곳에만 둔다.
+      // 교과서 쪽 번호는 머리글에 남으므로 어디서 나왔는지는 그대로 보인다.
+      const seenT=new Set();
       for(const s of TEXTS.filter(s=>s.unit===P.id)){
         const head=`교과서 ${s.page}쪽 ${s.task}${s.audio_only?' (음성으로만 나오는 지문)':''}`;
         if(!arr(s.items).length){for(const [ja,ko] of arr(s.words))push(P.id,head,`${ja} — ${ko}`,'t');continue}
         for(const it of arr(s.items))for(const [spk,ja,ko] of arr(it.lines))
-          push(P.id,head,`${it.no&&!/^문제|^\d/.test(it.no)?it.no+' ':''}${spk?spk+': ':''}${ja} — ${ko}`,'t');
+          if(!seenT.has(ja.replace(/\([^)]*\)|\s|^[①-⑳]/g,''))&&seenT.add(ja.replace(/\([^)]*\)|\s|^[①-⑳]/g,'')))push(P.id,head,`${it.no&&!/^문제|^\d/.test(it.no)?it.no+' ':''}${spk?spk+': ':''}${ja} — ${ko}`,'t');
         for(const it of arr(s.items))if(!arr(it.lines).length&&it.no)push(P.id,head,`${it.no} — ${it.answer||''}`,'t');
       }
     }
@@ -479,7 +490,7 @@ const RULES=()=>`1. 모든 정답·오답 판단의 근거는 위 근거 자료�
 6. 오답은 한 곳만 바꿔 만든다: 헷갈리는 짝 맞바꾸기, 예외 1류를 2류처럼 활용하기, 음편 섞기, 한 글자(촉음·장음·탁점·가나 종류) 바꾸기, 같은 범위의 뜻이 다른 낱말. 바꾼 결과가 우연히 다른 자료와 맞아 참이 되지 않게 확인한다.
 7. 선지에 활용형이 나오면 그 선지의 why에 conj를 적는다. 동사 그룹을 말하는 선지에는 group을 적는다. 앱이 단어장 활용표 규칙으로 다시 계산해 보고, 적힌 참·거짓(fits)과 다르면 그 문항을 걸러 낸다.
 8. 서답형 모범 답안은 가나로 쓴다(한자 금지). 학생은 히라가나·가타카나·한자를 섞어 써도 되고 앱이 단어장의 한자 표기와 맞춰 받아 주므로, accept에는 가나 표기가 다른 인정 답만 적는다. 히라가나를 가타카나로 쓴 것처럼 가나 종류가 다른 답은 인정하지 않는다(선생님 기준: 교과서에 히라가나·가타카나 두 가지로 다 적힌 어휘만 아무 쪽이나 인정 — 지금 범위에는 그런 어휘가 없다).
-   서술형은 채점 요소를 조사·낱말 단위로 잘게 나눈다(조사 하나도 1점). 본문 대화(6과 104·106쪽, 3과 59쪽)의 문장을 쓰게 하는 문항을 우선한다.
+   서술형은 채점 요소를 조사·낱말 단위로 잘게 나눈다(조사 하나도 1점). 본문 대화(6과 104·106쪽, 3과 59쪽, 4과 73쪽)의 문장을 쓰게 하는 문항을 우선한다.
 9. 기출 예시가 있으면 발문 방식, 선지 길이, 난이도를 따라 한다.
 10. 정답 번호가 한쪽에 몰리지 않게 섞는다.
 11. 음성으로만 나오는 지문(교과서 101·103·111쪽)도 대화를 글로 제시해 출제해도 된다.${REF_NAMES.length?`
@@ -536,7 +547,7 @@ ${examBlock(set)}
 - 이번에 만들 문항: 선택형 ${b.mc}개, 서답형 ${b.essay}개 (id는 ${b.from}부터 차례로)${total>b.mc+b.essay?`\n- 모두 ${total}문항(선택형 ${c.mc}, 서답형 ${c.essay})을 여러 번에 나눠 만드는 중이다.`:''}
 - 난이도: ${c.level}
 - 꼭 다룰 것: ${c.must||'자유. 고른 범위 전체에서 골고루'}${c.real?`
-- 실제 시험 배분을 따른다(전체 기준, 이미 만든 문항을 보고 모자란 것부터 채운다): 객관식 21문항 중 동사 구분 2, 동사 활용 2 이상(～たい, て형), 본문(6과 104·106쪽, 3과 59쪽) 문항을 가장 많이. 서답형 9문항 = 단답형 5(동사 구분 + 활용 4문항 각 4점, 가나 쓰기 1문항 4점) + 서술형 4(합 30점, 본문 대화 문장 쓰기 중심, 배점 7~8점).`:''}
+- 실제 시험 배분을 따른다(전체 기준, 이미 만든 문항을 보고 모자란 것부터 채운다): 객관식 21문항 중 동사 구분 2, 동사 활용 2 이상(～たい, て형), 본문(6과 104·106쪽, 3과 59쪽, 4과 73쪽) 문항을 가장 많이. 서답형 9문항 = 단답형 5(동사 구분 + 활용 4문항 각 4점, 가나 쓰기 1문항 4점) + 서술형 4(합 30점, 본문 대화 문장 쓰기 중심, 배점 7~8점).`:''}
 - 문항 형식:
 ${formsText(set)}
 ${prior.length?`
@@ -875,7 +886,7 @@ function renderHome(){
   const nw=WORDS.filter(w=>!w.skip&&!w.ref).length,nv=VERBS.filter(v=>!v.ref).length;
   $('#srcWords').textContent=`단어장 1~4쪽 · 낱말 ${nw}개 · 활용 동사 ${nv}개와 い형용사 ${ADJS.length}개 · 표현 ${PHRASES.length}개`;
   const nt=TEXTS.reduce((a,s)=>a+arr(s.items).reduce((b,it)=>b+arr(it.lines).length,0)+(arr(s.items).length?0:arr(s.words).length),0);
-  $('#srcText').textContent=`교과서 3과 58~61쪽 · 6과 98~111쪽 · 본문과 듣기 지문 ${TEXTS.length}묶음 ${nt}줄 (음성으로만 나오는 지문 포함)`;
+  $('#srcText').textContent=`교과서 3과 58~61쪽 · 4과 72~75쪽 · 6과 98~111쪽 · 본문과 듣기 지문 ${TEXTS.length}묶음 ${nt}줄 (음성으로만 나오는 지문 포함)`;
   $('#unitNotes').innerHTML=PARTS.map(p=>{const t=(notes[p.id]&&notes[p.id].text||'').trim();return `<button type="button" class="unote${t?' has':''}" data-u="${p.id}">${esc(p.label)}${t?' · '+t.length.toLocaleString()+'자':''}</button>`}).join('');
   $('#srcExam').textContent=examText.trim()?`직접 넣은 기출 예시 ${examText.trim().length.toLocaleString()}자 — 그 형식을 따라요`:'아직 없어요. 일반적인 일본어 내신 형식으로 내요.';
   const list=sets.slice().sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)));
@@ -944,7 +955,7 @@ async function transcribe(){
   if(!sample||!assets)return;
   const todo=pending.filter(p=>!p.text&&SCOPE_PAGES.has(Number(p.no)));
   const skipped=pending.filter(p=>!p.text&&!SCOPE_PAGES.has(Number(p.no))).length;
-  if(!todo.length){nMsg(skipped?'시험 범위(단어장 1~4쪽, 교과서 3과 58~61쪽·6과 98~111쪽) 안의 쪽이 없어요. 쪽 번호를 확인해 주세요.':'옮길 쪽이 없어요.',!!skipped);return}
+  if(!todo.length){nMsg(skipped?'시험 범위(단어장 1~4쪽, 교과서 3과 58~61쪽·4과 72~75쪽·6과 98~111쪽) 안의 쪽이 없어요. 쪽 번호를 확인해 주세요.':'옮길 쪽이 없어요.',!!skipped);return}
   noteRun=new AbortController();$('#nStop').hidden=false;renderPages();
   let done=0,failed=0;
   try{
@@ -999,7 +1010,7 @@ async function readExamPhotos(files){
 /* ---------- 만들기 ---------- */
 function openEditor(from){
   const d=from||load('draft')||{};
-  const us=arr(d.unitIds).length?d.unitIds:['vb','ph','t3','t6'];
+  const us=arr(d.unitIds).length?d.unitIds:['vb','ph','t3','t4','t6'];
   $('#fUnits').innerHTML=PARTS.map(p=>`<button type="button" class="pk" data-u="${p.id}" aria-pressed="${us.includes(p.id)}">${esc(p.label)}<small>${esc(p.title)}${notes[p.id]&&notes[p.id].text?' · 필기 있음':''}</small></button>`).join('');
   const fs=arr(d.cond&&d.cond.forms);
   $('#fTypes').innerHTML=EXAM_FORMS.map(f=>`<button type="button" class="pk" data-f="${f.k}" aria-pressed="${fs.includes(f.k)}">${esc(f.label)}<small>${esc(f.hint)}</small></button>`).join('');

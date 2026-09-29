@@ -43,8 +43,23 @@ const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; ch
     const one = ids => { const set = { unitIds: ids, useNote: false, useRef: false, cond: { forms: [], mc: 8, essay: 3, level: "중", must: "" },
       units: S.buildUnits(ids, false), examples: "", questions: [] };
       return { lines: set.units.length, mat: S.bytes(S.materials(set)), gen: S.bytes(S.genPrompt(set)) }; };
-    return { all: one(all), def: one(["vb", "ph", "t3", "t6"]), max: S.MAT_MAX, cap: S.MAX_BYTES };
+    return { all: one(all), def: one(["vb", "ph", "t3", "t4", "t6"]), max: S.MAT_MAX, cap: S.MAX_BYTES };
   });
+  const S_MAX = sizes.cap;
+  const per = await p.evaluate(() => { const S = window.__studio;
+    return S.PARTS.map(x => x.id + " " + S.bytes(S.materials({ unitIds: [x.id], useNote: false, useRef: false,
+      units: S.buildUnits([x.id], false), examples: "", questions: [], cond: {} })) + "B").join(" · "); });
+  console.log("  범위별: " + per);
+  // 검수는 문항을 나눠 보내지만, 범위를 다 골랐을 때 문항 하나와 함께라도 한 번에 들어가야 한다
+  const rev = await p.evaluate(() => { const S = window.__studio, ids = S.PARTS.map(x => x.id);
+    const set = { unitIds: ids, useNote: false, useRef: false, cond: { forms: [], mc: 21, essay: 9, level: "중", must: "", real: true },
+      units: S.buildUnits(ids, false), examples: "", questions: [] };
+    const q = S.normQ({ format: "선택형", type: "대화 빈칸", level: "중", stem: "대화의 빈칸에 들어갈 말로 알맞은 것은?",
+      box: "A: ここから どうやって (   )?\nB: まず、バスで おおさかえきまで いって、それから でんしゃに のりかえるよ。",
+      choices: ["いくの", "くるの", "いきたい", "いって", "いきませんか"], answer: 1,
+      why: [1, 2, 3, 4, 5].map(i => ({ fits: i === 1, refs: [1], reason: "근거 문장과 같다", trap: "헷갈리는 짝" })), unique: "" }, 1);
+    q.id = 1; return S.bytes(S.reviewPrompt(set, [q, q, q].map((x, i) => ({ ...x, id: i + 1 })))); });
+  t(rev <= S_MAX, `검수 프롬프트 (범위 전부 + 문항 3개) ${rev}B (한도 ${S_MAX}B)`);
   t(sizes.all.mat <= sizes.max, `범위를 다 골라도 근거 자료 ${sizes.all.lines}줄 · ${sizes.all.mat}B (한도 ${sizes.max}B)`);
   t(sizes.all.gen <= sizes.cap - 4000, `출제 프롬프트 ${sizes.all.gen}B (한도 ${sizes.cap}B)`);
 
