@@ -602,6 +602,8 @@ var VERBS = [
   { id:"v17", kana:"かう",     word:"かう",   group:1, meaning:["사다"],       note:"음편 예시 う→って" },
   { id:"v18", kana:"かく",     word:"かく",   group:1, meaning:["쓰다"],       note:"음편 예시 く→いて" },
   { id:"v19", kana:"およぐ",   word:"およぐ", group:1, meaning:["헤엄치다"],   note:"음편 예시 ぐ→いで" },
+  /* 단어장 1쪽 「ある 있다 (1류)」. 선생님 시험 안내의 단답형 예시가 바로 이것이다: ある → 1류, あって */
+  { id:"v36", kana:"ある",     word:"ある",   group:1, meaning:["있다"],       note:"시험 안내 예시 — 1류, て형 あって" },
 
   /* ── 1류 · 음편 예외 ── */
   { id:"v20", kana:"いく", word:"行く", group:1, meaning:["가다"], teIrreg:"いって",
@@ -829,10 +831,31 @@ function confusablePair(a, b){
   return null;
 }
 
+/* 한자와 가나를 섞어 써도 맞다 — 선생님 시험 안내: '일본어로 쓰시오'는 히라가나·가타카나·한자
+   모두 써도 된다(下の名前 · 下のなまえ · したのなまえ). 단어장이 한자로 적은 자리마다 그 한자나
+   그 읽기 어느 쪽이든 받는다. 단어장에 없는 한자는 맞는지 확인할 수 없어 받지 않는다
+   (한자 표기가 틀리면 오답이라는 안내와 같은 쪽으로 기운다). */
+var KANJI_RUN = /[\u3400-\u9fff\u3005]+/g;
+function escRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+function mixedOk(a, w){
+  var word = norm(w.word || ""), kana = norm(w.kana || "");
+  var runs = word.match(KANJI_RUN);
+  if (!runs || !kana) return false;
+  var lits = word.split(KANJI_RUN);                       /* 한자 덩어리 사이의 가나 */
+  var re = "^" + lits.map(escRe).join("(.+?)") + "$";
+  var m = new RegExp(re).exec(kana);                      /* 읽기를 한자 자리에 맞춰 나눈다 */
+  if (!m) return false;
+  var alt = "^" + lits.map(escRe).reduce(function(acc, lit, i){
+    return i === 0 ? lit : acc + "(?:" + escRe(runs[i - 1]) + "|" + escRe(m[i]) + ")" + lit;
+  }, "") + "$";
+  return new RegExp(alt).test(a);
+}
+
 function judge(input, w){
   var a = norm(input), keys = [w.kana].concat(w.jaAliases || []).concat([w.word]), i;
   if (!a) return { code:"empty" };
   for (i = 0; i < keys.length; i++) if (a === norm(keys[i])) return { code:"ok" };
+  if (mixedOk(a, w)) return { code:"ok" };
   var b = norm(w.kana);
   if (toHira(a) === toHira(b)) return { code:"kana" };
   var cp = confusablePair(a, b);

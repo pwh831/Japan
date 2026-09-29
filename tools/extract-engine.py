@@ -23,7 +23,7 @@ out.append(js[a:b])
 out.append("module.exports={judge:judge,toKana:toKana,norm:norm,"
            "stem:stem,conj:conj,deconj:deconj,verbDataErrors:verbDataErrors,"
            "WORDS:WORDS,UNITS:UNITS,VERBS:VERBS,FORMS:FORMS,ADJS:ADJS,ADJFORMS:ADJFORMS,"
-           "koParticle:koParticle,toKo:toKo,teForm:teForm,adjConj:adjConj,anyConj:anyConj,formsOf:formsOf,isAdj:isAdj,adjDataErrors:adjDataErrors,"
+           "mixedOk:mixedOk,koParticle:koParticle,toKo:toKo,teForm:teForm,adjConj:adjConj,anyConj:anyConj,formsOf:formsOf,isAdj:isAdj,adjDataErrors:adjDataErrors,"
            "PHRASES:PHRASES,PUNITS:PUNITS,PFORMS:PFORMS,"
            "hasKanji:hasKanji,pron:pron,sideOf:sideOf,sides:sides,gOk:gOk,phraseDataErrors:phraseDataErrors};\n")
 

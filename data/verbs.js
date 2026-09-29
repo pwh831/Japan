@@ -52,6 +52,8 @@ var VERBS = [
   { id:"v17", kana:"かう",     word:"かう",   group:1, meaning:["사다"],       note:"음편 예시 う→って" },
   { id:"v18", kana:"かく",     word:"かく",   group:1, meaning:["쓰다"],       note:"음편 예시 く→いて" },
   { id:"v19", kana:"およぐ",   word:"およぐ", group:1, meaning:["헤엄치다"],   note:"음편 예시 ぐ→いで" },
+  /* 단어장 1쪽 「ある 있다 (1류)」. 선생님 시험 안내의 단답형 예시가 바로 이것이다: ある → 1류, あって */
+  { id:"v36", kana:"ある",     word:"ある",   group:1, meaning:["있다"],       note:"시험 안내 예시 — 1류, て형 あって" },
 
   /* ── 1류 · 음편 예외 ── */
   { id:"v20", kana:"いく", word:"行く", group:1, meaning:["가다"], teIrreg:"いって",

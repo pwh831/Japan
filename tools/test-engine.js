@@ -240,6 +240,21 @@ eq(E.VERBS.filter(function(v){ return v.tricky && !v.ref; }).map(function(v){ re
 eq(E.VERBS.filter(function(v){ return v.tricky && !v.ref; }).length >= 2, true,
    "참고를 빼도 る 로 끝나는 1류 예외가 둘 남는다");
 
+console.log("── 시험 안내 (2학기 1회고사) ──");
+/* '일본어로 쓰시오'는 히라가나·가타카나·한자 모두 된다. 단, 한자가 틀리면 오답. */
+var Wd = function(id){ return E.WORDS.filter(function(w){ return w.id === id; })[0]; };
+eq(E.judge("下のなまえで", Wd("w313")).code, "ok", "한자+가나 섞기: 下のなまえで");
+eq(E.judge("したのなまえで", Wd("w313")).code, "ok", "가나만: したのなまえで");
+eq(E.judge("ともだちと遊ぶ", Wd("w117")).code, "ok", "뒤쪽만 한자: ともだちと遊ぶ");
+eq(E.judge("友だちとあそぶ", Wd("w117")).code, "ok", "앞쪽만 한자: 友だちとあそぶ");
+eq(E.judge("友だちと游ぶ", Wd("w117")).code === "ok", false, "한자가 틀리면 오답: 游ぶ");
+eq(E.judge("したの名前で", Wd("w313")).code === "ok", false, "단어장에 없는 한자는 확인할 수 없어 받지 않는다");
+/* 단답형 예시가 ある → 1류, あって. ある 가 활용 데이터에 있어야 한다. */
+var aru = E.VERBS.filter(function(v){ return v.kana === "ある"; })[0];
+eq(!!aru && aru.group, 1, "ある 는 1류");
+eq(aru && E.conj(aru, "te"), "あって", "ある 의 て형은 あって (선생님 예시)");
+eq(aru && E.conj(aru, "masu"), "あります", "ある 의 ます형은 あります");
+
 console.log("── 문제가 답을 하나로 좁히는가 ──");
 /* 유형 B 는 뜻만 보여 준다. 두 낱말이 뜻을 나눠 가지면 맞게 써도 오답이 된다. */
 var live = E.WORDS.filter(function(w){ return !w.skip; }), clash = [];

@@ -266,6 +266,7 @@ textarea{resize:vertical;line-height:1.65}
       <label class="field" for="fLevel"><span>난이도</span><select id="fLevel"><option>하</option><option selected>중</option><option>상</option><option>중·상 섞기</option></select></label>
       <label class="field" for="fTier"><span>출제 모델</span><select id="fTier"><option value="complex">가장 꼼꼼하게</option><option value="default">보통</option></select></label>
     </div>
+    <div class="acts"><button class="ghost" id="fReal" type="button">실제 시험처럼 채우기</button><span class="muted">객관식 21 · 서답형 9 (구분+활용 4문항 포함) · 선생님 안내 배분 · 30~40분쯤 걸려요</span></div>
     <label class="field" for="fMust"><span>꼭 다룰 것 <small>비워 두면 범위 전체에서 골고루 내요</small></span><input type="text" id="fMust" placeholder="예: 예외 1류 동사, て형 음편, どこか/どこが"></label>
     <label class="check" for="fUseNote"><input type="checkbox" id="fUseNote" checked> 선생님 필기도 근거로 쓰기</label>
     <label class="check" for="fUseRef"><input type="checkbox" id="fUseRef"> <span>참고 항목 넣기 <span class="muted">— 단어장 4쪽 예외 상자에만 있는 はしる·しる·きる (본문 어휘 아님)</span></span></label>
@@ -354,11 +355,16 @@ const EXAM_FORMS=[
   {k:'vs',label:'헷갈리는 짝',hint:'どこか/どこが, から, はい/いいえ',text:'헷갈리는 짝 가운데 문맥에 맞는 것을 고르거나 쓰임이 바른 문장을 고르게 한다.'},
   {k:'order',label:'순서',hint:'まず → それから, 대피 순서',text:'행동이나 대화의 순서를 바르게 늘어놓은 것을 고르게 한다. <보기>에 (가)~(라)를 두고 선지는 순서 조합.'},
   {k:'kana',label:'서답형 가나 쓰기',hint:'뜻 → 가나로',text:'서답형. 우리말 뜻을 주고 낱말을 가나로 쓰게 한다(2점). 히라가나·가타카나 구분과 촉음·장음·탁점까지 채점한다.'},
+  {k:'gconj',label:'서답형 구분 + 활용',hint:'ある → 1류, あって (4점)',text:'단답형(4점 = 동사 구분 2점 + 활용 2점). 기본형(뜻)을 주고 동사의 종류와 활용형을 함께 쓰게 한다(예: "ある(있다)의 동사 종류와 て형을 쓰시오" → 1류, あって). 활용은 ～たい나 て형(음편)을 가장 많이 묻는다. conj와 group을 모두 채우고, modelAnswer는 "1류, あって"처럼 쓴다.'},
   {k:'conjw',label:'서답형 활용 쓰기',hint:'기본형 → 활용형',text:'서답형. 기본형과 활용 조건을 주고 활용형을 가나로 쓰게 한다(3점). conj를 반드시 채운다.'},
   {k:'sent',label:'서답형 문장',hint:'빈칸·우리말 → 일본어',text:'서답형. 대화의 빈칸을 채우거나 짧은 우리말을 일본어로 옮기게 한다(4~5점). 범위 안 문형(～よていだ, ～ましょう, ～ませんか, どうやって … のかな)을 쓰게 하고 채점 요소를 2~3개로 나눈다.'},
 ];
-const EXAM_STYLE=`- 이 학교 일본어 기출 원문은 아직 없다. 아래 '기출 예시'가 있으면 그 형식을 먼저 따른다.
-- 형식: 선택형 5지선다(발문은 우리말, 선지는 일본어나 우리말) + 서답형(가나로 쓰기, 활용형 쓰기, 짧은 문장).
+const EXAM_STYLE=`- 선생님 시험 안내(2학기 1회고사): 객관식 21문항 50점 + 서답형 9문항 50점(단답형 20점, 서술형 30점). 문화 문제는 없다.
+- 동사를 확실히 묻는다: 동사 구분 객관식 2문항, 동사 활용 객관식 2문항 이상(～たい, 음편 ～て형), 동사 구분 및 활용 단답형 4문항(각 4점 = 구분 2점 + 활용 2점, 예: ある(있다) → 1류, あって).
+- 각 과의 본문이 가장 중요하다. 객관식뿐 아니라 서술형이 본문에 몰려 배점이 높다. 6과 본문은 104쪽(읽고 쓰기 1)과 106쪽(읽고 쓰기 2).
+- 서답형은 부분 점수가 있고 조사 하나도 1점으로 인정한다. '일본어로 쓰시오'는 히라가나·가타카나·한자 모두 써도 되지만 한자가 틀리면 오답이다.
+- 이 학교 일본어 기출 원문은 아직 없다. 아래 '기출 예시'가 있으면 발문·선지 형식은 그것을 따른다.
+- 형식: 선택형 5지선다(발문은 우리말, 선지는 일본어나 우리말) + 서답형(단답형: 가나 쓰기·동사 구분과 활용, 서술형: 본문 대화 문장 쓰기).
 - 발문 예: "밑줄 친 부분의 뜻으로 알맞은 것은?", "빈칸에 들어갈 말로 알맞은 것은?", "동사를 ます형으로 바르게 바꾼 것은?", "동사의 활용이 바르지 않은 것은?", "동사의 종류가 나머지와 다른 것은?", "대화의 내용과 일치하는 것은?"
 - 시험은 히라가나·가타카나로 쓸 줄 알면 된다. 한자는 가나와 함께 나오므로 읽기만 알면 된다.
 - 선지는 단어장·교과서 표기(가나, 낱말 사이 띄어쓰기)를 그대로 쓰고, 오답은 한 곳만 바꿔 만든다.`;
@@ -470,7 +476,8 @@ const RULES=()=>`1. 모든 정답·오답 판단의 근거는 위 근거 자료�
 5. 발문이 "옳지 않은 것·바르지 않은 것"류이면 정답 선지 하나만 틀리고 나머지 넷은 자료와 확실히 맞아야 한다. "옳은 것·알맞은 것"류이면 정답 선지 하나만 맞고 나머지 넷은 확실히 틀려야 한다.
 6. 오답은 한 곳만 바꿔 만든다: 헷갈리는 짝 맞바꾸기, 예외 1류를 2류처럼 활용하기, 음편 섞기, 한 글자(촉음·장음·탁점·가나 종류) 바꾸기, 같은 범위의 뜻이 다른 낱말. 바꾼 결과가 우연히 다른 자료와 맞아 참이 되지 않게 확인한다.
 7. 선지에 활용형이 나오면 그 선지의 why에 conj를 적는다. 동사 그룹을 말하는 선지에는 group을 적는다. 앱이 단어장 활용표 규칙으로 다시 계산해 보고, 적힌 참·거짓(fits)과 다르면 그 문항을 걸러 낸다.
-8. 서답형 모범 답안은 가나로만 쓴다(한자 금지). accept에는 같은 답으로 인정할 다른 표기만 적는다. 히라가나를 가타카나로 쓴 것처럼 가나 종류가 다른 답은 인정하지 않는다.
+8. 서답형 모범 답안은 가나로 쓴다(한자 금지). 학생은 히라가나·가타카나·한자를 섞어 써도 되고 앱이 단어장의 한자 표기와 맞춰 받아 주므로, accept에는 가나 표기가 다른 인정 답만 적는다. 히라가나를 가타카나로 쓴 것처럼 가나 종류가 다른 답은 인정하지 않는다.
+   서술형은 채점 요소를 조사·낱말 단위로 잘게 나눈다(조사 하나도 1점). 본문 대화(104·106쪽)의 문장을 쓰게 하는 문항을 우선한다.
 9. 기출 예시가 있으면 발문 방식, 선지 길이, 난이도를 따라 한다.
 10. 정답 번호가 한쪽에 몰리지 않게 섞는다.
 11. 음성으로만 나오는 지문(교과서 101·103·111쪽)도 대화를 글로 제시해 출제해도 된다.${REF_NAMES.length?`
@@ -488,7 +495,8 @@ const Q_SHAPE=`{"questions":[
 - why: 선지 5개 각각. fits는 그 선지의 진술이 자료에 비추어 옳은지(true/false). refs는 근거가 된 자료 번호(하나 이상). trap은 fits가 false인 선지에만 적는다.
 - why[].conj: 선지에 활용형이 있으면 {"base":"기본형 가나","form":"masu|mashou|tai|te|neg|past","shown":"선지에 쓴 활용형"}. form은 동사 masu·mashou·tai·te, い형용사 neg·te·past. 활용형이 없는 선지는 생략.
 - why[].group: 선지가 동사 그룹을 말하거나 그룹을 가르는 문항이면 {"base":"기본형 가나","group":1|2|3}. fits는 그 선지가 발문이 찾는 조건에 맞는지로 적는다.
-- 서답형 conj: 활용형을 쓰게 하는 문항만 {"base","form"}, 아니면 null.
+- 서답형 conj: 활용형을 쓰게 하는 문항만 {"base","form"}, 아니면 null. 서답형 group: 동사 종류를 쓰게 하는 문항만 {"base","group"}, 아니면 null.
+- 동사 구분 + 활용 단답형: type "구분 + 활용", points 4, conj와 group을 모두 채우고 criteria는 ["동사 종류(2점)","활용형(2점)"].
 - answer: 정답 선지 번호(1~5).`;
 
 function priorList(qs,len){return qs.map(q=>{const a=q.format==='선택형'&&q.choices[q.answer-1]?' / 정답: '+q.choices[q.answer-1]:(q.modelAnswer?' / 답: '+q.modelAnswer:'');return `${q.id}. [${q.type}·${q.level}] ${(q.stem+a).slice(0,len)}`}).join('\n')}
@@ -525,7 +533,8 @@ ${examBlock(set)}
 # 출제 조건
 - 이번에 만들 문항: 선택형 ${b.mc}개, 서답형 ${b.essay}개 (id는 ${b.from}부터 차례로)${total>b.mc+b.essay?`\n- 모두 ${total}문항(선택형 ${c.mc}, 서답형 ${c.essay})을 여러 번에 나눠 만드는 중이다.`:''}
 - 난이도: ${c.level}
-- 꼭 다룰 것: ${c.must||'자유. 고른 범위 전체에서 골고루'}
+- 꼭 다룰 것: ${c.must||'자유. 고른 범위 전체에서 골고루'}${c.real?`
+- 실제 시험 배분을 따른다(전체 기준, 이미 만든 문항을 보고 모자란 것부터 채운다): 객관식 21문항 중 동사 구분 2, 동사 활용 2 이상(～たい, て형), 본문(104·106쪽) 문항을 가장 많이. 서답형 9문항 = 단답형 5(동사 구분 + 활용 4문항 각 4점, 가나 쓰기 1문항 4점) + 서술형 4(합 30점, 본문 대화 문장 쓰기 중심, 배점 7~8점).`:''}
 - 문항 형식:
 ${formsText(set)}
 ${prior.length?`
@@ -597,7 +606,8 @@ JSON 하나만 출력한다. 다른 글은 쓰지 않는다. questions에는 위
 ${Q_SHAPE.replace('{"questions":[','{"defenses":[{"id":2,"reason":"..."}],"questions":[')}`;
 }
 function gradePrompt(set,q,ans){
-  return `고등학교 일본어 내신 서답형 답안을 채점한다. 자료와 필기, 모범 답안, 채점 요소만을 기준으로 삼는다. 가나 표기(히라가나·가타카나 구분, 촉음·장음·탁점)가 틀리면 그 요소는 충족하지 못한 것으로 본다.
+  return `고등학교 일본어 내신 서답형 답안을 채점한다. 자료와 필기, 모범 답안, 채점 요소만을 기준으로 삼는다.
+선생님 채점 기준: 부분 점수가 있고 조사 하나도 1점으로 인정한다. 히라가나·가타카나·한자를 섞어 써도 되지만 한자가 틀리면 그 부분은 오답이다. 가나 표기(촉음·장음·탁점)가 틀리면 그 요소는 충족하지 못한 것으로 본다.
 
 ${materials(set)}
 
@@ -626,7 +636,7 @@ function normQ(raw,fallbackId){
   const f=String(r.format||'');
   const essay=f.includes('서답')||f.includes('서술')||(!Array.isArray(r.choices)&&!!r.modelAnswer);
   const q={id:Number(r.id)||fallbackId,format:essay?'서답형':'선택형',type:String(r.type||''),level:String(r.level||''),stem:String(r.stem||''),box:String(r.box||''),fromNote:!!r.fromNote};
-  if(essay){q.conj=normConj(r.conj);q.modelAnswer=String(r.modelAnswer||'');q.accept=arr(r.accept).map(String);q.criteria=arr(r.criteria).map(String);q.points=Number(r.points)||3;q.refs=nums(r.refs)}
+  if(essay){q.conj=normConj(r.conj);q.group=r.group&&r.group.base?{base:String(r.group.base),group:Number(r.group.group)}:null;q.modelAnswer=String(r.modelAnswer||'');q.accept=arr(r.accept).map(String);q.criteria=arr(r.criteria).map(String);q.points=Number(r.points)||3;q.refs=nums(r.refs)}
   else{
     q.choices=arr(r.choices).map(String);q.answer=Number(r.answer);
     q.why=arr(r.why).map(w=>({fits:!!w&&w.fits===true,refs:nums(w&&w.refs),reason:String(w&&w.reason||''),trap:String(w&&w.trap||''),
@@ -671,7 +681,17 @@ function engineCheck(q){
       if(!v)p.push(`앱 계산: ${q.conj.base}는 단어장 활용표에 없는 낱말이에요.`);
       else if(!formOk(v,q.conj.form))p.push(`앱 계산: 활용 조건(${q.conj.form})이 ${v.kana}에 맞지 않아요.`);
       else{const exp=anyConj(v,q.conj.form);q.eng=`앱 계산 ${v.kana} → ${exp}`;
-        if(judge(q.modelAnswer,{kana:exp,word:exp,jaAliases:[]}).code!=='ok')p.push(`앱 계산: ${v.kana}의 ${FORM_NM[q.conj.form]}은 ${exp}인데 모범 답안은 ${q.modelAnswer}이에요.`)}
+        const said=isGconj(q)?gconjParts(q.modelAnswer).form:q.modelAnswer;
+        if(judge(said,{kana:exp,word:exp,jaAliases:[]}).code!=='ok')p.push(`앱 계산: ${v.kana}의 ${FORM_NM[q.conj.form]}은 ${exp}인데 모범 답안은 ${said}이에요.`)}
+    }
+    if(q.group){
+      const v=VERBS.find(x=>norm(x.kana)===norm(q.group.base));
+      if(!v)p.push(`앱 계산: ${q.group.base}는 단어장 활용표의 동사가 아니에요.`);
+      else{
+        q.eng=(q.eng?q.eng+' · ':'')+`${GROUP_NM[v.group]}${v.tricky?'(예외)':''}`;
+        if(v.group!==q.group.group)p.push(`앱 계산: ${v.kana}는 ${GROUP_NM[v.group]}인데 출제자는 ${q.group.group}류로 적었어요.`);
+        if(isGconj(q)&&gconjParts(q.modelAnswer).group!==v.group)p.push(`앱 계산: 모범 답안의 동사 종류가 ${GROUP_NM[v.group]}와 달라요.`);
+      }
     }
   }
   return p;
@@ -983,13 +1003,13 @@ function openEditor(from){
   $('#fTypes').innerHTML=EXAM_FORMS.map(f=>`<button type="button" class="pk" data-f="${f.k}" aria-pressed="${fs.includes(f.k)}">${esc(f.label)}<small>${esc(f.hint)}</small></button>`).join('');
   const c=d.cond||{};
   $('#fMc').value=c.mc||8;$('#fEssay').value=c.essay!=null?c.essay:3;if(c.level)$('#fLevel').value=c.level;$('#fMust').value=c.must||'';$('#fTier').value=d.tier||'complex';
-  $('#fUseNote').checked=d.useNote!==false;$('#fUseRef').checked=!!d.useRef;
+  $('#fUseNote').checked=d.useNote!==false;$('#fUseRef').checked=!!d.useRef;if(c.real)$('#fReal').dataset.on='1';else delete $('#fReal').dataset.on;
   $('#edErr').hidden=true;$('#h-ed').textContent=from?'같은 범위로 새로 만들기':'새 문제 만들기';
   show('#editor');edUpdate();
 }
 function readEditor(){
   return {unitIds:$$('#fUnits .pk[aria-pressed="true"]').map(b=>b.dataset.u),useNote:$('#fUseNote').checked,useRef:$('#fUseRef').checked,tier:$('#fTier').value,
-    cond:{forms:$$('#fTypes .pk[aria-pressed="true"]').map(b=>b.dataset.f),mc:Math.max(1,Math.min(30,Number($('#fMc').value)||8)),essay:Math.max(0,Math.min(10,Number($('#fEssay').value)||0)),level:$('#fLevel').value,must:$('#fMust').value.trim()}};
+    cond:{real:!!$('#fReal').dataset.on&&Number($('#fMc').value)===21&&Number($('#fEssay').value)===9,forms:$$('#fTypes .pk[aria-pressed="true"]').map(b=>b.dataset.f),mc:Math.max(1,Math.min(30,Number($('#fMc').value)||8)),essay:Math.max(0,Math.min(10,Number($('#fEssay').value)||0)),level:$('#fLevel').value,must:$('#fMust').value.trim()}};
 }
 function probeSet(d){return {...d,units:buildUnits(d.unitIds,d.useRef),examples:examText,questions:[]}}
 function edUpdate(){
@@ -1067,7 +1087,10 @@ function renderSet(){
         return `<li><button type="button" class="choice${cls}" data-q="${q.id}" data-k="${k}" aria-pressed="${mine===k}" ${solve.graded||q.excluded?'disabled':''}><span class="k">${CIRC[i]}</span><span>${esc(c)}</span></button></li>`}).join('')}</ul>`;
     }else{
       const short=isKanaAnswer(q);
-      body+=`<label class="field" for="ea${q.id}"><span class="muted" style="font-weight:400">답안${short?' (가나로)':''}</span>${short
+      if(isGconj(q)){
+        body+=`<div class="row" style="justify-content:flex-start"><span class="muted">동사 종류</span><div class="pick" role="group" aria-label="동사 종류">${[1,2,3].map(g=>`<button type="button" class="pk gpick" data-q="${q.id}" data-g="${g}" aria-pressed="${Number(ev.g)===g}" ${solve.graded?'disabled':''}>${g}류</button>`).join('')}</div></div>
+        <label class="field" for="ea${q.id}"><span class="muted" style="font-weight:400">${esc(FORM_NM[q.conj.form]||'활용형')}</span><input type="text" id="ea${q.id}" class="ans-in" lang="ja" autocomplete="off" autocapitalize="off" spellcheck="false" data-q="${q.id}" value="${esc(ev.text||'')}" ${solve.graded?'readonly':''}></label>`;
+      }else body+=`<label class="field" for="ea${q.id}"><span class="muted" style="font-weight:400">답안${short?' (가나로)':''}</span>${short
         ?`<input type="text" id="ea${q.id}" class="ans-in" lang="ja" autocomplete="off" autocapitalize="off" spellcheck="false" data-q="${q.id}" value="${esc(ev.text||'')}" ${solve.graded?'readonly':''}>`
         :`<textarea id="ea${q.id}" class="ans-in" lang="ja" rows="2" data-q="${q.id}" ${solve.graded?'readonly':''}>${esc(ev.text||'')}</textarea>`}</label>`;
       if(solve.graded&&ev.ok!=null)body+=`<div class="note ${ev.ok?'':'bad'}">${esc(ev.msg||'')}</div>`;
@@ -1098,28 +1121,44 @@ function renderScore(){
   if(!s||!solve.graded){$('#scoreBox').textContent='다 풀었으면 채점해요. 가나로 쓰는 서답형은 앱 규칙으로 바로 채점하고, 문장은 Claude에게 채점받을 수 있어요.';$('#scoreBox').className='muted';return}
   const mc=s.questions.filter(q=>!q.excluded&&q.format==='선택형');
   const right=mc.filter(q=>solve.answers[q.id]===q.answer).length;
-  const es=s.questions.filter(q=>!q.excluded&&q.format==='서답형'&&solve.essay[q.id]&&solve.essay[q.id].auto);
-  const esRight=es.filter(q=>solve.essay[q.id].ok).length;
+  const es=s.questions.filter(q=>!q.excluded&&q.format==='서답형'&&solve.essay[q.id]&&solve.essay[q.id].score!=null);
+  const got=es.reduce((a,q)=>a+solve.essay[q.id].score,0),full=es.reduce((a,q)=>a+q.points,0);
   $('#scoreBox').className='';
-  $('#scoreBox').innerHTML=`<span class="big-score">${right}<small> / ${mc.length}</small></span> <span class="muted">선택형</span>${es.length?` <span class="big-score" style="margin-left:12px">${esRight}<small> / ${es.length}</small></span> <span class="muted">가나 쓰기</span>`:''}`;
+  $('#scoreBox').innerHTML=`<span class="big-score">${right}<small> / ${mc.length}</small></span> <span class="muted">선택형</span>${es.length?` <span class="big-score" style="margin-left:12px">${got}<small> / ${full}점</small></span> <span class="muted">채점한 서답형</span>`:''}`;
 }
 function showRef(qid,r){
   const u=cur.units[r-1],box=$('#rb'+qid);if(!box)return;
   const P=u&&PART[u.part];
   box.innerHTML=u?`<div class="refbox"><span class="n">[${r}]</span>${esc(u.t)}<div class="muted" style="font-size:12px">${P?esc(P.label+' · '+P.title):''}${u.head?' · '+esc(u.head):''}</div></div>`:`<div class="refbox">[${r}]번 문장을 찾지 못했어요.</div>`;
 }
+// 동사 구분 + 활용 단답형: "1류, あって" → {group:1, form:"あって"}
+const isGconj=q=>q.format==='서답형'&&!!q.conj&&!!q.group;
+function gconjParts(t){
+  const s=String(t||''),m=s.match(/([123１２３一二三])\s*(류|類|그룹)/);
+  const g=m?({'１':1,'２':2,'３':3,'一':1,'二':2,'三':3}[m[1]]||Number(m[1])):null;
+  return {group:g,form:(m?s.replace(m[0],''):s).replace(/[,、，/\s]+/g,' ').trim()};
+}
+// 한자를 섞어 쓴 답도 받는다 — 단어장의 한자 표기를 빌려 앱의 judge 로 맞춘다
+function kanaTarget(model,accept){const w=WORDS.find(x=>norm(x.kana)===norm(model))||VPOOL.find(x=>norm(x.kana)===norm(model));return {kana:model,word:w?w.word:model,jaAliases:accept||[]}}
+function kanaMsg(j,model){return j.code==='ok'?'맞았어요.':j.code==='empty'?`비워 뒀어요. 정답: ${model}`:j.code==='kana'?`가나 종류가 달라요. 정답: ${model}`
+  :j.code==='near'?`한 글자가 달라요. 정답: ${model}`:j.code==='confuse'?`${j.pair.typed}와 ${j.pair.want}가 달라요. 정답: ${model}`:`정답: ${model}`}
 // 낱말·활용형 하나를 가나로 쓰는 답이면 앱 규칙으로 바로 채점한다
-const isKanaAnswer=q=>q.format==='서답형'&&!hasKanji(q.modelAnswer)&&norm(q.modelAnswer).length>0&&norm(q.modelAnswer).length<=14&&q.criteria.length<=2&&!/[。．.]$/.test(q.modelAnswer.trim());
+const isKanaAnswer=q=>q.format==='서답형'&&!isGconj(q)&&!hasKanji(q.modelAnswer)&&norm(q.modelAnswer).length>0&&norm(q.modelAnswer).length<=14&&q.criteria.length<=2&&!/[。．.]$/.test(q.modelAnswer.trim());
 function gradeAll(){
   const s=cur;
   $$('#qs [data-q].ans-in').forEach(t=>{const id=Number(t.dataset.q);solve.essay[id]={...(solve.essay[id]||{}),text:t.value}});
   s.questions.filter(q=>!q.excluded&&isKanaAnswer(q)).forEach(q=>{
     const v=solve.essay[q.id]||{text:''};
-    const j=judge(v.text,{kana:q.modelAnswer,word:q.modelAnswer,jaAliases:q.accept});
-    const ok=j.code==='ok';
-    const msg=ok?'맞았어요.':j.code==='empty'?`비워 뒀어요. 정답: ${q.modelAnswer}`:j.code==='kana'?`가나 종류가 달라요. 정답: ${q.modelAnswer}`
-      :j.code==='near'?`한 글자가 달라요. 정답: ${q.modelAnswer}`:j.code==='confuse'?`${j.pair.typed}와 ${j.pair.want}가 달라요. 정답: ${q.modelAnswer}`:`정답: ${q.modelAnswer}`;
-    solve.essay[q.id]={...v,auto:true,ok,msg};
+    const j=judge(v.text,kanaTarget(q.modelAnswer,q.accept));
+    solve.essay[q.id]={...v,auto:true,ok:j.code==='ok',score:j.code==='ok'?q.points:0,msg:kanaMsg(j,q.modelAnswer)};
+  });
+  // 구분 2점 + 활용 2점 — 시험 안내의 부분 점수 그대로
+  s.questions.filter(q=>!q.excluded&&isGconj(q)).forEach(q=>{
+    const v=solve.essay[q.id]||{},v2=findV(q.conj.base),exp=v2?anyConj(v2,q.conj.form):gconjParts(q.modelAnswer).form;
+    const gOk=Number(v.g)===q.group.group,j=judge(v.text||'',kanaTarget(exp,[]));
+    const half=Math.round(q.points/2),score=(gOk?half:0)+(j.code==='ok'?q.points-half:0);
+    solve.essay[q.id]={...v,auto:true,ok:score===q.points,score,
+      msg:`${score} / ${q.points}점 · 구분 ${gOk?'맞음':'틀림 (정답 '+GROUP_NM[q.group.group]+')'} · 활용 ${j.code==='ok'?'맞음':kanaMsg(j,exp).replace('정답: ','(정답 ')+(j.code==='ok'?'':')')}`};
   });
   solve.graded=true;
   const mc=s.questions.filter(q=>!q.excluded&&q.format==='선택형');
@@ -1135,7 +1174,7 @@ async function aiGrade(qid){
   try{
     const r=await sample.json(gradePrompt(cur,q,v.text),{modelTier:'default',cache:false});
     const sc=Number(r&&r.score);
-    solve.essay[qid]={...v,ok:sc>=q.points,msg:`${isNaN(sc)?'?':sc} / ${q.points}점 · ${String(r&&r.feedback||'')}`};
+    solve.essay[qid]={...v,ok:sc>=q.points,score:isNaN(sc)?null:Math.max(0,Math.min(q.points,sc)),msg:`${isNaN(sc)?'?':sc} / ${q.points}점 · ${String(r&&r.feedback||'')}`};
     renderSet();$('#q'+qid).scrollIntoView({block:'nearest'});
   }catch(e){m.textContent=errCopy(e)}
 }
@@ -1336,6 +1375,8 @@ $('#eFile').addEventListener('change',e=>{readExamPhotos(e.target.files);e.targe
 $('#eSave').addEventListener('click',async()=>{examText=$('#eText').value;let ok=false;if(db){try{await db.doc('examples/main').set({text:examText,updatedAt:new Date().toISOString()});ok=true}catch(e){}}
   $('#eSaveMsg').textContent=ok?'저장했어요':'저장하지 못했어요. claude.ai에서 열어 주세요.';renderHome()});
 $('#editor').addEventListener('submit',submitEditor);
+$('#fReal').addEventListener('click',()=>{$('#fMc').value=21;$('#fEssay').value=9;$('#fLevel').value='중·상 섞기';$('#fReal').dataset.on='1';
+  $$('#fUnits .pk').forEach(b=>b.setAttribute('aria-pressed','true'));$$('#fTypes .pk').forEach(b=>b.setAttribute('aria-pressed','false'));edUpdate()});
 $('#editor').addEventListener('input',edUpdate);
 ['#fUnits','#fTypes'].forEach(s=>$(s).addEventListener('click',e=>{const b=e.target.closest('.pk');if(!b)return;b.setAttribute('aria-pressed',String(b.getAttribute('aria-pressed')!=='true'));edUpdate()}));
 $('#stop').addEventListener('click',()=>running&&running.ctl&&running.ctl.abort());
@@ -1354,6 +1395,8 @@ $('#qs').addEventListener('click',e=>{
   const c=e.target.closest('.choice');
   if(c&&!solve.graded){const q=Number(c.dataset.q),k=Number(c.dataset.k);solve.answers[q]=solve.answers[q]===k?undefined:k;
     $$(`.choice[data-q="${q}"]`).forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.k)===solve.answers[q])));return}
+  const gp=e.target.closest('.gpick');if(gp&&!solve.graded){const id=Number(gp.dataset.q),g=Number(gp.dataset.g);solve.essay[id]={...(solve.essay[id]||{}),g};
+    $$(`.gpick[data-q="${id}"]`).forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.g)===g)));return}
   const r=e.target.closest('.ref');if(r){showRef(Number(r.dataset.q),Number(r.dataset.r));return}
   const x=e.target.closest('[data-ex]');if(x){const q=cur.questions.find(q=>q.id===Number(x.dataset.ex));if(q){q.excluded=!q.excluded;save(cur);renderSet()}return}
   const g=e.target.closest('[data-grade]');if(g)aiGrade(Number(g.dataset.grade));
@@ -1377,7 +1420,7 @@ async function boot(){
   }catch(e){setStatus('저장된 자료를 불러오지 못했어요. 새로고침해 주세요.',true)}
   renderHome();
 }
-if(/^(localhost|127\.0\.0\.1)$/.test(location.hostname))window.__studio={buildUnits,materials,genPrompt,reviewPrompt,normQ,localCheck,isKanaAnswer,buildExamPdf,PARTS,MAT_MAX,MAX_BYTES,bytes};
+if(/^(localhost|127\.0\.0\.1)$/.test(location.hostname))window.__studio={buildUnits,materials,genPrompt,reviewPrompt,normQ,localCheck,isKanaAnswer,isGconj,gconjParts,kanaTarget,buildExamPdf,PARTS,MAT_MAX,MAX_BYTES,bytes};
 boot();
 })();
 </script>

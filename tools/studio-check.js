@@ -76,6 +76,31 @@ const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; ch
   t(chk.essayKanji.some(s => s.includes("한자")), "서답형 모범 답안에 한자가 있으면 걸린다");
   t(chk.essayKata.some(s => s.includes("가나 종류")), "バス 에 ばす 를 인정 답으로 넣으면 걸린다");
 
+  console.log("── 시험 안내 반영 ──");
+  const ex = await p.evaluate(() => {
+    const S = window.__studio;
+    const g = (model, group) => S.normQ({ format: "서답형", type: "구분 + 활용", stem: "ある(있다)의 동사 종류와 て형을 쓰시오.", conj: { base: "ある", form: "te" },
+      group: { base: "ある", group }, modelAnswer: model, accept: [], criteria: ["동사 종류(2점)", "활용형(2점)"], points: 4, refs: [1] }, 1);
+    const run = q => S.localCheck(q, 100).filter(s => s.startsWith("앱 계산"));
+    return {
+      parts: S.gconjParts("1류, あって"), parts2: S.gconjParts("あって 2류"),
+      isG: S.isGconj(g("1류, あって", 1)),
+      ok: run(g("1류, あって", 1)), badForm: run(g("1류, あて", 1)), badGroup: run(g("2류, あって", 2)),
+      mixed: judge("下のなまえで", S.kanaTarget("したの なまえで", [])).code,
+      wrongKanji: judge("友だちと游ぶ", S.kanaTarget("ともだちと あそぶ", [])).code,
+      mat: S.materials({ units: S.buildUnits(["vb"], false), useNote: false }).includes("ある — 있다"),
+      style: S.genPrompt({ units: S.buildUnits(["t6"], false), useNote: false, examples: "", questions: [], cond: { forms: [], mc: 21, essay: 9, level: "중", must: "", real: true } }),
+    };
+  });
+  t(ex.parts.group === 1 && ex.parts.form === "あって" && ex.parts2.group === 2, "\"1류, あって\" 를 구분과 활용으로 나눈다");
+  t(ex.isG && ex.ok.length === 0, "ある → 1류, あって 는 통과");
+  t(ex.badForm.some(s => s.includes("あって")), "て형을 あて 로 적으면 걸린다");
+  t(ex.badGroup.some(s => s.includes("1류")), "ある 를 2류로 적으면 걸린다");
+  t(ex.mixed === "ok", "한자를 섞은 답(下のなまえで)도 맞다");
+  t(ex.wrongKanji !== "ok", "한자가 틀리면(游ぶ) 오답");
+  t(ex.mat, "근거 자료 활용표에 ある 가 있다");
+  t(/객관식 21문항 50점/.test(ex.style) && /동사 구분 \+ 활용 4문항 각 4점/.test(ex.style), "선생님 시험 안내와 실제 배분이 출제 프롬프트에 들어간다");
+
   console.log("── 시험지 PDF ──");
   const pdf = await p.evaluate(async () => {
     const S = window.__studio;
