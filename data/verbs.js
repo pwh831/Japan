@@ -52,6 +52,18 @@ var VERBS = [
   { id:"v17", kana:"かう",     word:"かう",   group:1, meaning:["사다"],       note:"음편 예시 う→って" },
   { id:"v18", kana:"かく",     word:"かく",   group:1, meaning:["쓰다"],       note:"음편 예시 く→いて" },
   { id:"v19", kana:"およぐ",   word:"およぐ", group:1, meaning:["헤엄치다"],   note:"음편 예시 ぐ→いで" },
+  /* 선생님 음편 학습지 「동사의 音便」 — 1쪽 예시와 5번 연습표에만 있는 동사.
+     시험 안내가 음편(～て형)과 동사 구분·활용 단답형을 따로 짚었으므로 활용 시험에 넣는다(단어 시험에는 없다). */
+  { id:"v37", kana:"いう",     word:"言う",   group:1, meaning:["말하다"],       src:"음편 학습지", note:"촉음편 う→って" },
+  { id:"v38", kana:"しぬ",     word:"死ぬ",   group:1, meaning:["죽다"],         src:"음편 학습지", note:"발음편 ぬ→んで" },
+  { id:"v39", kana:"おく",     word:"おく",   group:1, meaning:["두다", "놓다"], src:"음편 학습지" },
+  { id:"v40", kana:"つける",   word:"つける", group:2, meaning:["켜다"],         src:"음편 학습지" },
+  { id:"v41", kana:"わたす",   word:"わたす", group:1, meaning:["건네주다"],     src:"음편 학습지" },
+  { id:"v42", kana:"いそぐ",   word:"いそぐ", group:1, meaning:["서두르다"],     src:"음편 학습지" },
+  { id:"v43", kana:"きく",     word:"きく",   group:1, meaning:["듣다"],         src:"음편 학습지" },
+  { id:"v44", kana:"もつ",     word:"もつ",   group:1, meaning:["들다", "가지다"], src:"음편 학습지" },
+  { id:"v45", kana:"かす",     word:"かす",   group:1, meaning:["빌려주다"],     src:"음편 학습지" },
+
   /* 단어장 1쪽 「ある 있다 (1류)」. 선생님 시험 안내의 단답형 예시가 바로 이것이다: ある → 1류, あって */
   { id:"v36", kana:"ある",     word:"ある",   group:1, meaning:["있다"],       note:"시험 안내 예시 — 1류, て형 あって" },
 

@@ -24,6 +24,10 @@ const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; ch
   const b = await chromium.launch(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {});
   // 샌드박스 프록시 인증서를 Chromium 이 모를 때가 있다(pdf-lib CDN) — 점검에서만 무시한다
   const p = await (await b.newContext({ ignoreHTTPSErrors: !!process.env.IGNORE_TLS })).newPage();
+  // pdf-lib 두 파일은 CDN 대신 같은 판을 npm 에서 준다 — 샌드박스 프록시가 CDN 을 가끔 끊어 점검이 흔들렸다
+  const NM = path.join(__dirname, "..", "node_modules");
+  await p.route("**/pdf-lib/1.17.1/pdf-lib.min.js", r => r.fulfill({ path: path.join(NM, "pdf-lib/dist/pdf-lib.min.js"), contentType: "text/javascript" }));
+  await p.route("**/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js", r => r.fulfill({ path: path.join(NM, "@pdf-lib/fontkit/dist/fontkit.umd.min.js"), contentType: "text/javascript" }));
   const errs = [];
   p.on("pageerror", e => errs.push(String(e)));
   await p.goto(`http://localhost:${port}/`, { waitUntil: "domcontentloaded" });
