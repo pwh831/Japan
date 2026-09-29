@@ -9,10 +9,11 @@
   "description": "일본어 시험 대비 — 단어·표현·동사 활용",
   "scripts": {
     "build": "python3 build.py",
-    "test": "python3 tools/extract-engine.py > /tmp/engine.js && node tools/test-engine.js /tmp/engine.js",
+    "test": "python3 tools/extract-engine.py > /tmp/engine.js && node tools/test-engine.js /tmp/engine.js && node tools/check-sets.js",
     "smoke": "python3 build.py && node tools/smoke.js",
     "pdf": "python3 tools/annotate-pdf.py",
     "script-pdf": "python3 tools/script-pdf.py",
-    "studio": "python3 tools/build-studio.py --fonts && node tools/studio-check.js"
+    "studio": "python3 tools/build-studio.py --fonts && node tools/studio-check.js",
+    "sets": "node tools/check-sets.js && python3 tools/sets-pdf.py"
   }
 }

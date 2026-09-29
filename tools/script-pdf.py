@@ -63,6 +63,7 @@ def mark(s):
 S = {
     "unit":  ParagraphStyle("unit", fontName="KOB", fontSize=10, textColor=RULE, leading=14),
     "h1":    ParagraphStyle("h1", fontName="JAB", fontSize=22, textColor=INK, leading=30),
+    "h2":    ParagraphStyle("h2", fontName="JAB", fontSize=17, textColor=INK, leading=24),
     "lead":  ParagraphStyle("lead", fontName="KO", fontSize=10, textColor=SOFT, leading=16),
     "page":  ParagraphStyle("page", fontName="KOB", fontSize=9, textColor=colors.white, leading=12,
                             alignment=1),
@@ -133,6 +134,14 @@ def page_tag(sec):
 def build(src, out):
     fonts()
     data = json.load(open(src, encoding="utf-8"))
+    # include — 여러 과 원고를 한 파일로. 과마다 제목 줄(heading)을 넣고 새 쪽에서 시작한다.
+    if data.get("include"):
+        secs = []
+        for fn in data["include"]:
+            sub = json.load(open(os.path.join(os.path.dirname(src), fn), encoding="utf-8"))
+            secs.append({"heading": sub["title_ja"], "heading_ko": sub["title_ko"], "heading_unit": sub["unit"]})
+            secs += sub["sections"]
+        data["sections"] = secs
 
     # 발음은 한 번에 — node 를 줄마다 띄우면 느리다
     flat = []
@@ -149,7 +158,16 @@ def build(src, out):
              Paragraph(esc(data["lead"]), S["lead"]),
              Spacer(1, 7 * mm)]
 
+    first_heading = True
     for sec in data["sections"]:
+        if sec.get("heading"):
+            if not first_heading: story.append(PageBreak())
+            first_heading = False
+            story += [Paragraph(esc(sec["heading_unit"]), S["unit"]),
+                      Paragraph('%s <font name="KOB" size="13" color="#4A524F">%s</font>'
+                                % (esc(sec["heading"]), esc(sec["heading_ko"])), S["h2"]),
+                      Spacer(1, 5 * mm)]
+            continue
         head = [page_tag(sec), Spacer(1, 2 * mm), Paragraph(esc(sec["task"]), S["task"])]
         if sec.get("sub"): head.append(Paragraph(esc(sec["sub"]), S["sub"]))
         head.append(Spacer(1, 3 * mm))
@@ -208,7 +226,8 @@ def build(src, out):
 # 원고 → PDF. 인자가 없으면 둘 다 만든다.
 JOBS = [("unit6.json", "6과-듣기대본.pdf"), ("unit6-honmun.json", "6과-본문.pdf"),
         ("unit6-all.json", "6과-전체지문.pdf"), ("unit3-all.json", "3과-전체지문.pdf"),
-        ("unit4-all.json", "4과-전체지문.pdf")]
+        ("unit4-all.json", "4과-전체지문.pdf"),
+        ("kaiwa-all.json", "회화-3·4과-전체지문.pdf")]
 
 if __name__ == "__main__":
     d = os.path.join(ROOT, "docs", "scripts")
