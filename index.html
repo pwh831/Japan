@@ -405,7 +405,9 @@ function judge(input, w){
   for (i = 0; i < keys.length; i++) if (a === norm(keys[i])) return { code:"ok" };
   if (mixedOk(a, w)) return { code:"ok" };
   var b = norm(w.kana);
-  if (toHira(a) === toHira(b)) return { code:"kana" };
+  /* 가나 종류: 선생님 기준 — 교과서에 히라가나·가타카나 두 가지로 다 적힌 어휘만
+     아무 쪽으로 써도 된다(kanaAny). 나머지는 적힌 가나 그대로 써야 한다. */
+  if (toHira(a) === toHira(b)) return w.kanaAny ? { code:"ok" } : { code:"kana" };
   var cp = confusablePair(a, b);
   if (cp) return { code:"confuse", pair:cp };
   if (lev(a, b) === 1) return { code:"near" };
@@ -697,6 +699,7 @@ function phraseDataErrors(pool){
     /* 한자가 든 문장은 kana 를 따로 적어야 한국어 발음을 달 수 있다 */
     if (hasKanji(p.ja) && !p.kana) bad.push(p.id + ": 한자가 있는데 kana 가 없음");
     if (p.kana && hasKanji(p.kana)) bad.push(p.id + ": kana 에 한자가 남음");
+    if (p.vs && hasKanji(p.vs.ja) && !p.vs.kana) bad.push(p.id + ": 짝 문장에 한자가 있는데 kana 가 없음");
   }
   return bad;
 }
@@ -1336,7 +1339,7 @@ function submit(){
       save();
     }
     retry(j.code === "kana"
-      ? "<b>가나 종류가 다릅니다</b> — 이 답은 " + (/[ァ-ヺ]/.test(want) ? "가타카나" : "히라가나") + "로 씁니다"
+      ? "<b>가나 종류가 다릅니다</b> — 이 답은 " + (/[ァ-ヺ]/.test(want) ? "가타카나" : "히라가나") + "로 씁니다 (교과서에 두 가지로 다 나온 어휘만 아무 쪽이나 인정)"
       : "<b>거의 맞았습니다</b> — 한 글자만 다릅니다");
     return;
   }

@@ -4,7 +4,7 @@
     python3 tools/build-studio.py            # studio/source.js
     python3 tools/build-studio.py --fonts    # + studio/fonts/*.ttf (PDF 받기용)
 
-source.js — 앱과 같은 데이터(단어장·활용표·표현)와 앱의 채점·활용 엔진, 6과 전체 지문.
+source.js — 앱과 같은 데이터(단어장·활용표·표현)와 앱의 채점·활용 엔진, 교과서 전체 지문(3과·6과).
   출제실은 이 엔진으로 Claude가 낸 활용형 정답을 다시 계산해 맞는지 본다.
   엔진을 두 벌로 적지 않으려고 index.html 에서 그대로 잘라 온다(extract-engine.py 와 같은 구간).
 
@@ -12,7 +12,7 @@ fonts — PDF 에 벡터 글자로 넣을 글꼴. 한글(나눔고딕)과 일본
   통째로 넣으면 4개에 14MB 라 쓰는 글자만 남긴다: 한글 2350자(KS X 1001), 가나,
   JIS 제1수준 한자 2965자, 기호. 원본 글꼴은 FONT_DIR(기본 tools/fonts/)에 둔다 — 저장소에는 넣지 않는다.
 """
-import io, json, os, sys
+import io, json, os, re, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, ".."))
@@ -27,10 +27,16 @@ def source():
     js = h.split("<script>\n(function(){")[1]
     a, b = js.index("/* ══ 가나 채점"), js.index("/* ══ 세 시험 ══ */")
     parts.append("/* ══ 앱 엔진 (index.html 에서 그대로) ══ */\n" + js[a:b])
-    texts = json.load(io.open(os.path.join(ROOT, "docs", "scripts", "unit6-all.json"), encoding="utf-8"))
-    keep = [{k: s[k] for k in ("page", "track", "task", "sub", "audio_only", "items", "words") if k in s}
-            for s in texts["sections"]]
-    parts.append("/* 교과서 6과 전체 지문 — docs/scripts/unit6-all.json */\nvar TEXTS = "
+    # 원고의 후리가나 「日本{にほん}」는 출제 자료에서 「日本(にほん)」로 적는다
+    ruby = lambda o: (re.sub(r"\{([^}]+)\}", r"(\1)", o) if isinstance(o, str)
+                      else [ruby(x) for x in o] if isinstance(o, list)
+                      else {k: ruby(v) for k, v in o.items()} if isinstance(o, dict) else o)
+    keep = []
+    for unit, fn in (("t3", "unit3-all.json"), ("t6", "unit6-all.json")):
+        texts = json.load(io.open(os.path.join(ROOT, "docs", "scripts", fn), encoding="utf-8"))
+        keep += [dict(unit=unit, **{k: ruby(s[k]) for k in ("page", "track", "task", "sub", "audio_only", "items", "words") if k in s})
+                 for s in texts["sections"]]
+    parts.append("/* 교과서 전체 지문 — docs/scripts/unit3-all.json · unit6-all.json */\nvar TEXTS = "
                  + json.dumps(keep, ensure_ascii=False) + ";\n")
     os.makedirs(OUT, exist_ok=True)
     p = os.path.join(OUT, "source.js")

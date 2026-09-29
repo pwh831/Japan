@@ -20,7 +20,7 @@ a = js.index("/* ══ 가나 채점")
 b = js.index("/* ══ 세 시험 ══ */")
 out.append(js[a:b])
 
-out.append("module.exports={judge:judge,toKana:toKana,norm:norm,"
+out.append("module.exports={judge:judge,toHira:toHira,toKana:toKana,norm:norm,"
            "stem:stem,conj:conj,deconj:deconj,verbDataErrors:verbDataErrors,"
            "WORDS:WORDS,UNITS:UNITS,VERBS:VERBS,FORMS:FORMS,ADJS:ADJS,ADJFORMS:ADJFORMS,"
            "mixedOk:mixedOk,koParticle:koParticle,toKo:toKo,teForm:teForm,adjConj:adjConj,anyConj:anyConj,formsOf:formsOf,isAdj:isAdj,adjDataErrors:adjDataErrors,"

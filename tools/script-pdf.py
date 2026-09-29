@@ -43,6 +43,23 @@ NUM = re.compile(r"^[\u2460-\u2473]\s*")    # 낱말 앞의 ①② 번호 — �
 def esc(s):
     return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
+# 후리가나 — 원고에 「日本{にほん}」처럼 적는다. 한자(앞 숫자 포함) 바로 뒤의 {읽기}.
+RUBY = re.compile(r"([0-9]*[\u3400-\u9fff\u3005]+)\{([^}]+)\}")
+
+def kana(s):
+    """발음용 — 한자를 읽기로 바꾼다(pron 은 한자가 남으면 비운다)."""
+    return RUBY.sub(lambda m: m.group(2), s)
+
+def mark(s):
+    """PDF 용 — 한자 뒤에 작은 회색 읽기를 붙인다."""
+    out, at = [], 0
+    for m in RUBY.finditer(s):
+        out.append(esc(s[at:m.start()]))
+        out.append('%s<font name="JA" size="8" color="#8A918D">(%s)</font>' % (esc(m.group(1)), esc(m.group(2))))
+        at = m.end()
+    out.append(esc(s[at:]))
+    return "".join(out)
+
 S = {
     "unit":  ParagraphStyle("unit", fontName="KOB", fontSize=10, textColor=RULE, leading=14),
     "h1":    ParagraphStyle("h1", fontName="JAB", fontSize=22, textColor=INK, leading=30),
@@ -87,7 +104,7 @@ def has_hangul(t):
     return any("\uac00" <= ch <= "\ud7a3" for ch in t)
 
 def line_block(spk, ja, pr, ko):
-    body = [Paragraph(esc(ja), S["ja"])]
+    body = [Paragraph(mark(ja), S["ja"])]
     if pr: body.append(Paragraph(esc(ko_punct(pr)), S["pr"]))
     if ko: body.append(Paragraph(esc(ko), S["ko"]))
     who = Paragraph(esc(spk or ""), S["spkko"] if has_hangul(spk or "") else S["spk"])
@@ -121,8 +138,8 @@ def build(src, out):
     flat = []
     for sec in data["sections"]:
         for it in sec.get("items", []):
-            for ln in it["lines"]: flat.append(ln[1])
-        for w in sec.get("words", []): flat.append(NUM.sub("", w[0]))
+            for ln in it["lines"]: flat.append(kana(ln[1]))
+        for w in sec.get("words", []): flat.append(kana(NUM.sub("", w[0])))
     prs = iter(pronounce(flat))
 
     story = [Paragraph(esc(data["unit"]), S["unit"]),
@@ -139,7 +156,7 @@ def build(src, out):
         blocks = []
         for it in sec.get("items", []):
             b = []
-            if it.get("no"): b.append(Paragraph(esc(it["no"]), S["no"]))
+            if it.get("no"): b.append(Paragraph(mark(it["no"]), S["no"]))
             for spk, ja, ko in it["lines"]:
                 pr = next(prs)
                 # line_pron:false — 본문 바로 밑에 해석이 오게 한다(발음은 어휘 표에만)
@@ -151,7 +168,7 @@ def build(src, out):
             rows = []
             for ja, ko in sec["words"]:
                 pr = next(prs)
-                rows.append([Paragraph(esc(ja), S["word"]),
+                rows.append([Paragraph(mark(ja), S["word"]),
                              Paragraph(esc(ko_punct(pr)), S["pr"]), Paragraph(esc(ko), S["wko"])])
             # 어휘 표는 쪽을 넘어가도 된다 — 통째로 넘기면 앞 쪽이 반쯤 빈다.
             # 제목은 표의 첫 줄로 넣고 repeatRows 로 다음 쪽에서도 다시 찍는다.
@@ -190,7 +207,7 @@ def build(src, out):
 
 # 원고 → PDF. 인자가 없으면 둘 다 만든다.
 JOBS = [("unit6.json", "6과-듣기대본.pdf"), ("unit6-honmun.json", "6과-본문.pdf"),
-        ("unit6-all.json", "6과-전체지문.pdf")]
+        ("unit6-all.json", "6과-전체지문.pdf"), ("unit3-all.json", "3과-전체지문.pdf")]
 
 if __name__ == "__main__":
     d = os.path.join(ROOT, "docs", "scripts")

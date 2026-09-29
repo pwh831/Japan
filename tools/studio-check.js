@@ -43,7 +43,7 @@ const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; ch
     const one = ids => { const set = { unitIds: ids, useNote: false, useRef: false, cond: { forms: [], mc: 8, essay: 3, level: "중", must: "" },
       units: S.buildUnits(ids, false), examples: "", questions: [] };
       return { lines: set.units.length, mat: S.bytes(S.materials(set)), gen: S.bytes(S.genPrompt(set)) }; };
-    return { all: one(all), def: one(["vb", "ph", "t6"]), max: S.MAT_MAX, cap: S.MAX_BYTES };
+    return { all: one(all), def: one(["vb", "ph", "t3", "t6"]), max: S.MAT_MAX, cap: S.MAX_BYTES };
   });
   t(sizes.all.mat <= sizes.max, `범위를 다 골라도 근거 자료 ${sizes.all.lines}줄 · ${sizes.all.mat}B (한도 ${sizes.max}B)`);
   t(sizes.all.gen <= sizes.cap - 4000, `출제 프롬프트 ${sizes.all.gen}B (한도 ${sizes.cap}B)`);

@@ -44,6 +44,11 @@ var t = { kana:"テレビ", word:"テレビ" };
 eq(E.judge("テレビ",t).code,"ok","가타카나 정답");
 eq(E.judge("てれび",t).code,"kana","가나 종류만 다름 → 전용 안내");
 eq(E.judge("ﾃﾚﾋﾞ",t).code,"ok","반각 → 전각 정규화");
+/* 선생님 기준: 교과서에 두 가지로 다 적힌 어휘만 가나 종류를 가리지 않는다 */
+eq(E.judge("てれび",{ kana:"テレビ", word:"テレビ", kanaAny:true }).code,"ok","kanaAny — 히라가나로 써도 정답");
+eq(E.judge("てれべ",{ kana:"テレビ", word:"テレビ", kanaAny:true }).code === "ok",false,"kanaAny 라도 글자가 틀리면 오답");
+eq(E.WORDS.filter(function(w){ return /[ァ-ヺ]/.test(w.kana) && E.judge(E.toHira(w.kana), w).code === "ok"; }).length,0,
+   "지금 범위의 가타카나 어휘는 히라가나로 쓰면 오답 (두 가지로 다 나온 어휘 없음)");
 var k = { kana:"きって", word:"切手" };
 eq(E.judge("きって",k).code,"ok","촉음 정답");
 eq(E.judge("きて",k).code,"near","촉음 빠짐은 오답 — 관대 처리 안 함");
