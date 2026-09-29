@@ -136,7 +136,7 @@ var WORDS = [
   { id:"w230", unit:"s2", pos:"명사", word:"窓",       kana:"まど",     meaning:["창문"],
     examples:[{ ja:"ドアや まどを あけます。", ko:"문이랑 창문을 엽니다." }] },
   { id:"w231", unit:"s2", pos:"동사", word:"開ける",   kana:"あける",   meaning:["열다"], note:"2류" },
-  { id:"w232", unit:"s2", pos:"표현", word:"気を つけて！", kana:"きを つけて", meaning:["조심해!"], note:"★ 자주 나옴",
+  { id:"w232", unit:"s2", pos:"표현", word:"気を つけて！", kana:"きを つけて", meaning:["조심해!"], note:"★ 반드시 출제 (선생님, 6과 106쪽)",
     jaAliases:["きを つけて！","気を つけて"],
     examples:[{ ja:"あぶない! きを つけて!", ko:"위험해! 조심해!", form:"きを つけて" }] },
   { id:"w233", unit:"s2", pos:"부사", word:"はやく",   kana:"はやく",   meaning:["빨리"],
@@ -274,7 +274,8 @@ var VERBS = [
   { id:"v37", kana:"いう",     word:"言う",   group:1, meaning:["말하다"],       src:"음편 학습지", note:"촉음편 う→って" },
   { id:"v38", kana:"しぬ",     word:"死ぬ",   group:1, meaning:["죽다"],         src:"음편 학습지", note:"발음편 ぬ→んで" },
   { id:"v39", kana:"おく",     word:"おく",   group:1, meaning:["두다", "놓다"], src:"음편 학습지" },
-  { id:"v40", kana:"つける",   word:"つける", group:2, meaning:["켜다"],         src:"음편 학습지" },
+  { id:"v40", kana:"つける",   word:"つける", group:2, meaning:["켜다"],         src:"음편 학습지",
+    note:"きを つけて(조심해) — 6과 106쪽, 선생님: 반드시 출제" },
   { id:"v41", kana:"わたす",   word:"わたす", group:1, meaning:["건네주다"],     src:"음편 학습지" },
   { id:"v42", kana:"いそぐ",   word:"いそぐ", group:1, meaning:["서두르다"],     src:"음편 학습지" },
   { id:"v43", kana:"きく",     word:"きく",   group:1, meaning:["듣다"],         src:"음편 학습지" },
@@ -538,7 +539,13 @@ var PHRASES = [
 
   { id:"p32", unit:"q5", kind:"표현",
     ja:"がっこうに きて います。", ko:"학교에 와 있습니다.",
-    use:"와 있는 상태를 말할 때 (くる → きて います)", key:"きて", note:"교과서 4과 75쪽" }
+    use:"와 있는 상태를 말할 때 (くる → きて います)", key:"きて", note:"교과서 4과 75쪽" },
+
+  /* 선생님이 106쪽에 "반드시 출제"라고 짚은 것 */
+  { id:"p33", unit:"q2", kind:"표현",
+    ja:"ハナちゃん、あぶない! きを つけて!", ko:"하나야, 위험해! 조심해!",
+    use:"조심하라고 할 때 (きを つける → て형 つけて)", key:"つけて",
+    note:"교과서 6과 106쪽 본문 · 선생님: 반드시 출제" }
 ];
 
 /* 문제 유형과 배분 (PRD §5.4).

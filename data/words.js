@@ -136,7 +136,7 @@ var WORDS = [
   { id:"w230", unit:"s2", pos:"명사", word:"窓",       kana:"まど",     meaning:["창문"],
     examples:[{ ja:"ドアや まどを あけます。", ko:"문이랑 창문을 엽니다." }] },
   { id:"w231", unit:"s2", pos:"동사", word:"開ける",   kana:"あける",   meaning:["열다"], note:"2류" },
-  { id:"w232", unit:"s2", pos:"표현", word:"気を つけて！", kana:"きを つけて", meaning:["조심해!"], note:"★ 자주 나옴",
+  { id:"w232", unit:"s2", pos:"표현", word:"気を つけて！", kana:"きを つけて", meaning:["조심해!"], note:"★ 반드시 출제 (선생님, 6과 106쪽)",
     jaAliases:["きを つけて！","気を つけて"],
     examples:[{ ja:"あぶない! きを つけて!", ko:"위험해! 조심해!", form:"きを つけて" }] },
   { id:"w233", unit:"s2", pos:"부사", word:"はやく",   kana:"はやく",   meaning:["빨리"],

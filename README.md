@@ -138,7 +138,7 @@ npm run studio   # studio/source.js · studio/fonts/ 를 만들고 브라우저�
 ```
 index.html            앱 전체 (UI + 퀴즈 엔진 + 로마자 변환기)
 data/words.js         시험 1 · 단어 135항목
-data/phrases.js       시험 2 · 표현 32항목 (3과 58~61쪽 7항목, 4과 72~75쪽 9항목 포함)
+data/phrases.js       시험 2 · 표현 33항목 (3과 58~61쪽 7항목, 4과 72~75쪽 9항목 포함)
 data/verbs.js         시험 3 · 동사 35 + い형용사 6 (group 한 글자씩)
 build.py              데이터를 인라인해 단일 HTML 생성
 일본어-단어시험.html    배포용 단일 파일 (build.py 산출물)
