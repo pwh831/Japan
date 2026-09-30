@@ -21,19 +21,23 @@ const POOL = E.VERBS.concat(E.ADJS);
 const find = base => POOL.find(v => E.norm(v.kana) === E.norm(base));
 const round1 = x => Math.round(x * 10) / 10;
 
-for (const f of fs.readdirSync(path.join(ROOT, "docs", "sets")).filter(f => /^set\d+\.json$/.test(f)).sort()) {
+for (const f of fs.readdirSync(path.join(ROOT, "docs", "sets")).filter(f => /^(set\d+|drill-[\w-]+)\.json$/.test(f)).sort()) {
   const d = JSON.parse(fs.readFileSync(path.join(ROOT, "docs", "sets", f), "utf8"));
   const qs = d.questions, mc = qs.filter(q => q.choices), sa = qs.filter(q => !q.choices);
   console.log("── " + f + " · " + d.title + " ──");
   const before = fail;
 
+  t(qs.map(q => q.no).join() === Array.from({ length: qs.length }, (_, i) => i + 1).join(), `문항 번호 1~${qs.length}`);
+  if (d.drill) {   // 유형 집중 연습(drill-*.json) — 시험 배점 구조는 따지지 않고 합계 100점만 본다
+    t(round1(qs.reduce((a, q) => a + q.pts, 0)) === 100, `연습 ${qs.length}문항 · 합 ${round1(qs.reduce((a, q) => a + q.pts, 0))}점`);
+  } else {
   t(mc.length === 21 && sa.length === 9, `객관식 ${mc.length} · 서답형 ${sa.length}`);
-  t(qs.map(q => q.no).join() === Array.from({ length: 30 }, (_, i) => i + 1).join(), "문항 번호 1~30");
   t(round1(mc.reduce((a, q) => a + q.pts, 0)) === 50, "객관식 합 " + round1(mc.reduce((a, q) => a + q.pts, 0)));
   const dan = sa.filter(q => q.kind === "단답형"), seo = sa.filter(q => q.kind === "서술형");
   t(dan.reduce((a, q) => a + q.pts, 0) === 20 && dan.length === 5, `단답형 ${dan.length}문항 ${dan.reduce((a, q) => a + q.pts, 0)}점`);
   t(seo.reduce((a, q) => a + q.pts, 0) === 30 && seo.length === 4, `서술형 ${seo.length}문항 ${seo.reduce((a, q) => a + q.pts, 0)}점`);
   t(sa.filter(q => q.conj && q.group).length === 4, "동사 구분·활용 단답형 4문항");
+  }
 
   for (const q of mc) {
     const tag = `${q.no}번`;

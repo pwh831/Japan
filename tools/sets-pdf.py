@@ -138,9 +138,13 @@ def build(src, out):
                  colWidths=[12 * mm, 30 * mm, 12 * mm, 40 * mm, 12 * mm, 25 * mm], hAlign="LEFT")
     name.setStyle(TableStyle([("LINEBELOW", (1, 0), (1, 0), 0.6, LINE), ("LINEBELOW", (3, 0), (3, 0), 0.6, LINE),
                               ("LINEBELOW", (5, 0), (5, 0), 0.6, LINE)]))
-    story += [name, Spacer(1, 6 * mm), Paragraph(mix("Ⅰ. 선택형 (1~21번, 50점)", bold=True), S["sec"]), Spacer(1, 3 * mm)]
+    nmc = sum(1 for q in d["questions"] if "choices" in q)
+    head1 = "Ⅰ. 선택형 (1~%d번%s)" % (nmc, "" if d.get("drill") else ", 50점")
+    story += [name, Spacer(1, 6 * mm), Paragraph(mix(head1, bold=True), S["sec"]), Spacer(1, 3 * mm)]
     for q in d["questions"]:
-        if q["no"] == 22:
+        if d.get("drill") and q["no"] == nmc + 1:
+            story += [Spacer(1, 2 * mm), Paragraph(mix("Ⅱ. 서답형 (%d~%d번)" % (nmc + 1, len(d["questions"])), bold=True), S["sec"]), Spacer(1, 3 * mm)]
+        if not d.get("drill") and q["no"] == 22:
             story += [Spacer(1, 2 * mm), Paragraph(mix("Ⅱ. 서답형 (22~30번, 50점) — 단답형 22~26번 20점 · 서술형 27~30번 30점", bold=True), S["sec"]),
                       Paragraph(mix("부분 점수가 있습니다. 아는 어휘·조사는 최대한 쓰세요. 서술형은 교과서 본문 표현으로 씁니다."), S["meta"]),
                       Spacer(1, 3 * mm)]
@@ -161,3 +165,4 @@ if __name__ == "__main__":
     for f in sorted(os.listdir(d)):
         m = re.match(r"set(\d+)\.json$", f)
         if m: build(os.path.join(d, f), os.path.join(d, "변형문제-%s회.pdf" % m.group(1)))
+        if f == "drill-te.json": build(os.path.join(d, f), os.path.join(d, "음편-て형-10문항.pdf"))
