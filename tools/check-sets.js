@@ -92,7 +92,8 @@ for (const f of fs.readdirSync(path.join(ROOT, "docs", "sets")).filter(f => /^se
     q.choices.forEach((c, i) => {
       if (i + 1 === q.answer) return;
       const k = E.norm(E.toHira(c));
-      t(!RANGE.has(k) && E.lev(k, ans) <= 2, `${q.no}번 철자 선지 ${CIRC[i]} ${c}: 정답과 ${E.lev(k, ans)}글자 차이, 범위 낱말 아님`);
+      const d = E.lev(k, ans), real = RANGE.has(k);
+      t(!real && d <= 2, `${q.no}번 철자 선지 ${CIRC[i]} ${c}: ${real ? "범위 안 진짜 낱말이라 답이 둘일 수 있음" : `정답과 ${d}글자 차이`}`);
     });
   }
   // 내용 일치 문항에는 본문이 있어야 한다 — 자기 <보기>에, 또는 "위 대화"로 앞 묶음 문항의 <보기>에

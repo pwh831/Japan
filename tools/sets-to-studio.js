@@ -1,6 +1,6 @@
 /* 변형문제 세트(docs/sets/set*.json) → 변형 출제실 세트 문서.
- *   node tools/sets-to-studio.js <출력 폴더>   → studio-set1~3.json
- * 출제실 저장소의 sets/variant-1~3 에 그대로 넣으면 출제실 목록에 뜨고, 패드에서 풀고 채점할 수 있다.
+ *   node tools/sets-to-studio.js <출력 폴더>   → studio-setN.json
+ * 출제실 저장소의 sets/variant-N 에 그대로 넣으면 출제실 목록에 뜨고, 패드에서 풀고 채점할 수 있다.
  * 근거 자료(units)는 출제실의 buildUnits 로 범위 전체를 만들어 붙인다(Claude 채점 때 쓰임). */
 // docs/sets/set*.json → 출제실 세트 문서 (sets/<id>)
 const http=require("http"),fs=require("fs"),path=require("path");
@@ -17,7 +17,8 @@ const ROOT="/home/user/Japan/studio", OUT=process.argv[2];
   await b.close();srv.close();
   const NEG=/(않은|아닌|틀린)\s*것/;
   const ul=s=>String(s||"").replace(/\[\[(.*?)\]\]/g,"【$1】");
-  for(const n of [1,2,3]){
+  const nums=fs.readdirSync("/home/user/Japan/docs/sets").map(f=>(f.match(/^set(\d+)\.json$/)||[])[1]).filter(Boolean).map(Number).sort((a,b)=>a-b);
+  for(const n of nums){
     const d=JSON.parse(fs.readFileSync(`/home/user/Japan/docs/sets/set${n}.json`,"utf8"));
     const questions=d.questions.map(q=>{
       const base={id:q.no,type:q.tag,level:"",stem:ul(q.stem).replace(/밑줄 친/g,"【 】 안의"),box:ul(q.box),fromNote:false,st:"pass",issues:[]};
