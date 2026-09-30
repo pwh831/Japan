@@ -597,6 +597,48 @@ function confusablePair(a, b){
   return null;
 }
 
+/* 철자 바꾼 오답 — 이 학교 객관식은 ところ 가 답이면 とこる·とくろ 처럼 한두 글자만 바꾼 선지를 낸다.
+   ① 같은 행의 다른 모음(ろ→る·れ) ② 탁점 붙이기·떼기(こ→ご) ③ 작은 글자(っ·ゃ) 크기 ④ 장음·촉음 넣고 빼기.
+   ①을 먼저 쓰고 모자라면 ②~④. 범위 안의 다른 진짜 낱말(avoid)과 같아지면 버린다. */
+var GOJU = ["あいうえお","かきくけこ","がぎぐげご","さしすせそ","ざじずぜぞ","たちつてと","だぢづでど","なにぬねの",
+            "はひふへほ","ばびぶべぼ","ぱぴぷぺぽ","まみむめも","らりるれろ","やゆよ"];
+var DAKU = ["かが","きぎ","くぐ","けげ","こご","さざ","しじ","すず","せぜ","そぞ","ただ","ちぢ","つづ","てで","とど",
+            "はばぱ","ひびぴ","ふぶぷ","へべぺ","ほぼぽ"];
+var SMALL = ["っつ","ゃや","ゅゆ","ょよ"];
+function spellVariants(word, n, avoid){
+  /* 글자마다 제 문자(히라가나·가타카나)를 지킨다 — ぼうさいセンター 는 앞은 히라가나, 뒤는 가타카나로 */
+  var bad = {}, seen = {}, tiers = [[], [], []], i, j, g;
+  (avoid || []).forEach(function(x){ bad[norm(toHira(x))] = 1; });
+  bad[norm(toHira(word))] = 1;
+  function add(t, v){
+    var k = norm(toHira(v));
+    if (!k || seen[k] || bad[k]) return;
+    if (/^[んっゃゅょー]/.test(k) || /んん|っっ|ーー|っ$|っ[あいうえおなにぬねのまみむめもやゆよらりるれろわをん]/.test(k)) return;
+    seen[k] = 1; tiers[t].push(v);
+  }
+  for (i = 0; i < word.length; i++){
+    var c = word[i], isK = /[ァ-ヺ]/.test(c), h = toHira(c);
+    if (!/[ぁ-ゖ]/.test(h)) continue;
+    var pre = word.slice(0, i), post = word.slice(i + 1);
+    var put = function(t, r){ add(t, pre + (isK ? toKata(r) : r) + post); };
+    GOJU.forEach(function(row){ if (row.indexOf(h) >= 0) for (j = 0; j < row.length; j++) if (row[j] !== h) put(0, row[j]); });
+    DAKU.forEach(function(g){ if (g.indexOf(h) >= 0) for (j = 0; j < g.length; j++) if (g[j] !== h) put(1, g[j]); });
+    SMALL.forEach(function(g){ if (g.indexOf(h) >= 0) put(1, g[0] === h ? g[1] : g[0]); });
+    /* 장음: 가타카나는 ー, 히라가나는 お단 뒤 う */
+    if (isK){ if (post[0] === "ー") add(2, pre + c + post.slice(1)); else add(2, pre + c + "ー" + post); }
+    else if ("おこごそぞとどのほぼぽもろよょ".indexOf(h) >= 0){ if (post[0] === "う") add(2, pre + c + post.slice(1)); else add(2, pre + c + "う" + post); }
+    /* 촉음: か·さ·た·ぱ 행 앞 */
+    var prev = toHira(word[i - 1] || "");
+    if (i > 0 && /[かきくけこさしすせそたちつてとぱぴぷぺぽ]/.test(h) && prev !== "っ" && /[ぁ-ゖ]/.test(prev)) add(2, pre + (isK ? "ッ" : "っ") + c + post);
+  }
+  var out = [];
+  tiers.forEach(function(t){
+    for (j = t.length - 1; j > 0; j--){ g = Math.floor(Math.random() * (j + 1)); var tmp = t[j]; t[j] = t[g]; t[g] = tmp; }
+    t.forEach(function(v){ if (out.length < n) out.push(v); });
+  });
+  return out;
+}
+
 /* 한자와 가나를 섞어 써도 맞다 — 선생님 시험 안내: '일본어로 쓰시오'는 히라가나·가타카나·한자
    모두 써도 된다(下の名前 · 下のなまえ · したのなまえ). 단어장이 한자로 적은 자리마다 그 한자나
    그 읽기 어느 쪽이든 받는다. 단어장에 없는 한자는 맞는지 확인할 수 없어 받지 않는다

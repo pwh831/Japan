@@ -201,6 +201,29 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   t(dSeen > 0, '대비 문제가 나왔다 (' + dSeen + '회)');
   console.log('    표현 유형 분포:', JSON.stringify(pk));
 
+  // 철자 고르기 — 단어 시험에서 이 유형만 켜고 풀어 본다
+  console.log('── 단어 · 철자 고르기 ──');
+  await p.click('#homeBtn'); await p.waitForTimeout(150);
+  await p.click('.test >> nth=0'); await p.waitForTimeout(200);
+  const wTypes = await p.$$eval('#typeChips .chip span:first-child', e => e.map(x => x.textContent));
+  t(wTypes.includes('철자 고르기'), '단어 유형에 철자 고르기가 있다: ' + wTypes.join(','));
+  for (const nm of ['뜻 고르기', '직접 쓰기', '예문 빈칸']) await p.click(`#typeChips .chip:has-text("${nm}")`);
+  await p.click('#startBtn'); await p.waitForTimeout(250);
+  let spOk = 0, spN = 0;
+  for (let i = 0; i < 6; i++) {
+    if (await p.$eval('#result', e => !e.hidden)) break;
+    const meaning = (await p.textContent('#qBody .q-main')).trim();
+    const opts = await p.$$eval('#choices .choice span', e => e.map(x => x.textContent));
+    const w = E.WORDS.find(x => x.meaning.join(', ') === meaning && opts.includes(x.kana));
+    t(opts.length === 5 && new Set(opts).size === 5 && !!w, `  ${meaning}: ${opts.join(' / ')}`);
+    if (!w) break;
+    await p.click(`#choices .choice:has(span:text-is("${w.kana}"))`); await p.waitForTimeout(120);
+    if ((await p.textContent('#fb b')) === '정답') spOk++;
+    spN++;
+    await p.click('#fb .btn'); await p.waitForTimeout(110);
+  }
+  t(spN > 0 && spOk === spN, `철자 고르기: 맞는 철자를 누르면 정답 ${spOk}/${spN}`);
+
   t(errs.length === 0, errs.length ? '페이지 오류:\n     ' + errs.join('\n     ') : '페이지 오류 없음');
   await b.close();
   console.log('\n' + (fail ? fail + '건 실패' : '전부 통과'));

@@ -85,6 +85,16 @@ for (const f of fs.readdirSync(path.join(ROOT, "docs", "sets")).filter(f => /^se
       t(E.judge(a, w).code === "ok" && E.norm(E.toHira(a).replace(/[^぀-ゟ]/g, "")).length > 0, `${tag} 인정 답 「${a}」`);
     }
   }
+  // 철자 고르기(학교 객관식 방식): 오답은 정답에서 한두 글자만 바꾸고, 범위 안 진짜 낱말이면 안 된다
+  const RANGE = new Set(E.WORDS.concat(E.VERBS, E.ADJS).map(x => E.norm(E.toHira(x.kana))));
+  for (const q of mc.filter(q => /철자/.test(q.tag + q.stem))) {
+    const ans = E.norm(E.toHira(q.choices[q.answer - 1]));
+    q.choices.forEach((c, i) => {
+      if (i + 1 === q.answer) return;
+      const k = E.norm(E.toHira(c));
+      t(!RANGE.has(k) && E.lev(k, ans) <= 2, `${q.no}번 철자 선지 ${CIRC[i]} ${c}: 정답과 ${E.lev(k, ans)}글자 차이, 범위 낱말 아님`);
+    });
+  }
   // 내용 일치 문항에는 본문이 있어야 한다 — 자기 <보기>에, 또는 "위 대화"로 앞 묶음 문항의 <보기>에
   const isContent = q => /내용/.test(q.tag) || /내용과\s*일치/.test(q.stem);
   for (const q of qs.filter(isContent)) {

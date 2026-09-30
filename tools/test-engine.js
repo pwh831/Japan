@@ -336,5 +336,26 @@ E.WORDS.forEach(function(w){
 });
 eq(leak.length, 0, "가나가 그대로 남은 낱말: " + leak.slice(0, 5).join(", "));
 
+console.log("── 철자 고르기 — 학교 객관식처럼 한두 글자만 바꾼 오답 ──");
+var SAVOID = E.WORDS.map(function(w){ return w.kana; }).concat(E.VERBS.map(function(v){ return v.kana; }), E.ADJS.map(function(a){ return a.kana; }));
+var sv = E.spellVariants("ところ", 4, SAVOID);
+eq(sv.length, 4, "ところ → " + sv.join(" / "));
+eq(sv.every(function(x){ return /^[とつてたち][こくけかき][ろるれらり]$/.test(x); }), true, "ところ 의 오답은 같은 행 모음만 바꾼다 (とこる·とくろ 식)");
+var spBad = [], spFew = [];
+E.WORDS.forEach(function(w){
+  if (E.norm(w.kana).length < 2) return;
+  var v = E.spellVariants(w.kana, 4, SAVOID);
+  if (v.length < 4) spFew.push(w.kana);
+  v.forEach(function(x){
+    if (SAVOID.some(function(a){ return E.norm(E.toHira(a)) === E.norm(E.toHira(x)); })) spBad.push(w.kana + "→" + x + "(범위 안 낱말)");
+    if (E.lev(E.norm(x), E.norm(w.kana)) !== 1) spBad.push(w.kana + "→" + x + "(두 글자 이상)");
+    if (E.judge(x, w).code === "ok") spBad.push(w.kana + "→" + x + "(채점이 정답으로 받음)");
+  });
+});
+eq(spFew.join(","), "", "두 글자 이상 낱말은 모두 오답 철자 4개를 만든다");
+eq(spBad.slice(0, 5).join(", "), "", "오답 철자는 한 글자 차이·범위 밖 낱말·채점상 오답");
+var mix = E.spellVariants("ぼうさいセンター", 8, SAVOID);
+eq(mix.every(function(x){ return /^[ぁ-ゖ]+[ァ-ヺー]+$/.test(x); }), true, "섞인 표기는 글자마다 제 문자를 지킨다: " + mix.slice(0, 3).join(" / "));
+
 console.log("\n" + pass + " 통과 · " + fail + " 실패");
 process.exit(fail ? 1 : 0);

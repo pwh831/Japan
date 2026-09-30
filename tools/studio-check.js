@@ -128,6 +128,12 @@ const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; ch
     return { bare: has(mk("대화의 내용과 일치하는 것은?", "")), withBox: has(mk("대화의 내용과 일치하는 것은?", "A: あ\nB: い\nA: う")),
              shared: has(mk("위 대화의 내용과 일치하는 것은?", "")) }; });
   t(cont.bare && !cont.withBox && !cont.shared, "내용 일치 문항: 본문이 없으면 걸러 내고, 본문이 있거나 '위 대화' 묶음이면 통과");
+  // 철자 고르기: 오답 철자가 범위 안 진짜 낱말이거나 정답과 너무 다르면 걸러 낸다
+  const sp = await p.evaluate(() => { const S = window.__studio;
+    const mk = ch => S.normQ({ format: "선택형", type: "철자 고르기", stem: "'곳'의 알맞은 철자는?", box: "", choices: ch, answer: 1,
+      why: [1, 2, 3, 4, 5].map(i => ({ fits: i === 1, refs: [1], reason: "", trap: "" })), unique: "" }, 1);
+    return { good: S.spellCheck(mk(["ところ", "とこる", "とくろ", "とけろ", "どころ"])), bad: S.spellCheck(mk(["ところ", "とこる", "とくろ", "えき", "とけろ"])) }; });
+  t(sp.good.length === 0 && sp.bad.length === 2, `철자 고르기: 한 글자씩 바꾼 선지는 통과, 범위 낱말·동떨어진 선지는 걸림 (${sp.bad.length}건)`);
   console.log("── 시험지 PDF ──");
   const pdf = await p.evaluate(async () => {
     const S = window.__studio;
