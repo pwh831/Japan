@@ -85,6 +85,28 @@ for (const f of fs.readdirSync(path.join(ROOT, "docs", "sets")).filter(f => /^se
       t(E.judge(a, w).code === "ok" && E.norm(E.toHira(a).replace(/[^぀-ゟ]/g, "")).length > 0, `${tag} 인정 답 「${a}」`);
     }
   }
+  // 내용 일치 문항에는 본문이 있어야 한다 — 자기 <보기>에, 또는 "위 대화"로 앞 묶음 문항의 <보기>에
+  const isContent = q => /내용/.test(q.tag) || /내용과\s*일치/.test(q.stem);
+  for (const q of qs.filter(isContent)) {
+    const own = (q.box || "").split("\n").length >= 3;
+    const prev = qs.slice(0, q.no - 1).reverse().find(x => (x.box || "").split("\n").length >= 3);
+    const grp = prev && /^\[(\d+)~(\d+)\]/.exec(prev.stem);
+    const shared = /^위 대화/.test(q.stem) && grp && q.no >= +grp[1] && q.no <= +grp[2];
+    t(own || shared, `${q.no}번 내용 문항에 본문이 있다${own ? "" : shared ? ` (${grp[1]}~${grp[2]}번 묶음)` : ""}`);
+  }
+  // 본문(<보기>)이 다른 문항의 답을 그대로 보여 주면 안 된다 — 그 자리는 빈칸 (A)·㉠ 으로 비운다
+  const flat = s => E.norm(E.toHira(String(s || "").replace(/\[\[|\]\]/g, ""))).replace(/[、。!?…・,.\s]/g, "");
+  for (const q of qs) {
+    const answers = q.choices ? [q.choices[q.answer - 1]].filter(c => (q.box || "").includes("(")) : [q.answer].concat(q.accept || []);
+    for (const a of answers) {
+      const key = flat(a);
+      if (key.length < 4 || /[㉠㉡]/.test(a)) continue;
+      // 서답형 답은 다른 문항의 선지에도 보이면 안 된다(쓰는 문제가 베끼는 문제가 된다)
+      const seen = x => flat(x.box).includes(key) || (!q.choices && (x.choices || []).some(c => flat(c).includes(key)));
+      const leak = qs.filter(x => x.no !== q.no && seen(x)).map(x => x.no);
+      t(!leak.length, `${q.no}번 답 「${a}」가 다른 문항 <보기>에 드러나지 않는다${leak.length ? " — " + leak.join(",") + "번" : ""}`);
+    }
+  }
   console.log(fail === before ? "  모두 통과" : `  ${fail - before}건 실패`);
 }
 console.log(`\n${pass} 통과 · ${fail} 실패`);
