@@ -166,6 +166,8 @@ docs/sets/set4~8.json                  변형문제 4~8회 (7·8회는 학교 �
 docs/sets/변형문제-4~8회.pdf             ↑ 문제지 + 정답·해설 (npm run sets — 점검 후 PDF)
 docs/sets/drill-te.json · drill-te2.json   유형 집중 연습 — て형(음편)만 10문항 1·2회 (음편-て형-10문항*.pdf)
 docs/study/1~5-*.pdf                    시험 직전 자료: 본문 서술형 쓰기, 동사 활용표, 함정 체크, 자주 틀리는 유형 10문항, 회화 3과 54~56쪽 요약 (python3 tools/study-pdf.py)
+docs/study/0·6·7-*.pdf                  최종 복습: 계획표(쪽별 체크리스트), 범위 전체 요점정리, 단어 셀프테스트 (python3 tools/review-pdf.py)
+docs/study/최종복습-통합본.pdf          위 자료와 지금까지의 PDF 전부를 복습 순서로 한 파일에 (책갈피 포함)
 ```
 
 ## 고친 뒤
