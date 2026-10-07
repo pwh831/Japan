@@ -167,6 +167,8 @@ docs/sets/변형문제-4~8회.pdf             ↑ 문제지 + 정답·해설 (np
 docs/sets/drill-te.json · drill-te2.json   유형 집중 연습 — て형(음편)만 10문항 1·2회 (음편-て형-10문항*.pdf)
 docs/study/1~5-*.pdf                    시험 직전 자료: 본문 서술형 쓰기, 동사 활용표, 함정 체크, 자주 틀리는 유형 10문항, 회화 3과 54~56쪽 요약 (python3 tools/study-pdf.py)
 docs/study/0·6·7-*.pdf                  최종 복습: 계획표(쪽별 체크리스트), 범위 전체 요점정리, 단어 셀프테스트 (python3 tools/review-pdf.py)
+docs/study/weak-words.json             직접 고른 약한 단어 51개(노트에 틀리게 적힌 철자 포함) → 8-내-약한단어.pdf (카드·셀프테스트 3회)
+docs/sets/drill-mywords.json           ↑ 단어로 만든 철자 고르기·쓰기 20문항 (내-약한단어-20문항.pdf · 출제실 drill-mywords)
 docs/study/최종복습-통합본.pdf          위 자료와 지금까지의 PDF 전부를 복습 순서로 한 파일에 (책갈피 포함)
 ```
 

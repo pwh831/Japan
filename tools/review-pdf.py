@@ -6,6 +6,7 @@
 0. 최종 복습 계획표       — 오늘 밤·내일 아침 순서, 쪽마다 확인할 것과 볼 자료(체크 칸), 지금까지 만든 자료 다시 보기 목록
 6. 범위 전체 요점정리     — 6과 98~111쪽, 회화 3과 58~61쪽, 4과 72~75쪽의 모든 문장(해석)과 어휘를 쪽 순서로
 7. 단어 셀프테스트        — 앱 단어장 130개를 뜻만 보고 쓰기 (정답은 뒷장)
+8. 내 약한 단어           — docs/study/weak-words.json (직접 고른 단어 · 노트에 틀리게 적힌 철자) 카드와 셀프테스트 3회
 최종복습-통합본.pdf        — 위 자료와 지금까지 만든 PDF 전부를 복습 순서로 한 파일에 (책갈피 포함, 굿노트용)
 
 문장은 docs/scripts/unit*-all.json, 단어는 앱 데이터(tools/extract-engine.py 로 뽑은 엔진)에서 그대로 가져온다.
@@ -194,9 +195,74 @@ def selftest():
     doc(os.path.join(OUT, "7-단어-셀프테스트.pdf"), "단어 셀프테스트", story + ans)
     return n
 
+# ─────────────────────────── 8. 내 약한 단어 ───────────────────────────
+def example(k, word):
+    """교과서 지문에서 이 낱말이 나온 첫 문장 (쪽, 문장, 해석)"""
+    keys = [x for x in {k, word} if x]
+    for fn, _ in UNITS:
+        for s in json.load(open(os.path.join(ROOT, "docs", "scripts", fn), encoding="utf-8"))["sections"]:
+            for it in s.get("items", []):
+                for spk, ja, ko in it.get("lines", []):
+                    ja0 = NUM.sub("", ja)
+                    if len(ja0) > len(k) + 1 and any(x in kana(ja0) or x in plain(ja0) for x in keys):
+                        return s["page"], plain(ja0), ko
+    return None
+
+def weak():
+    d = json.load(open(os.path.join(OUT, "weak-words.json"), encoding="utf-8"))
+    ws = d["words"]
+    fix = [w for w in ws if w.get("wrong")]
+    story = [P("내 약한 단어 %d개 — 집중 암기" % len(ws), "title", True),
+             P("직접 고른 숙지 안 된 단어입니다. ① 노트에서 고칠 철자 → ② 단어 카드(발음·기억법·교과서 문장) → ③ 셀프테스트 3회 순서로 보세요. "
+               "같은 단어로 만든 철자 고르기 20문항(내-약한단어-20문항.pdf · 출제실)도 있습니다.", "lead"), Spacer(1, 3 * mm),
+             P("① 노트에서 고칠 것 %d개 — 이대로 쓰면 오답" % len(fix), "sec", True), Spacer(1, 1 * mm),
+             grid([[P(x, "cellS", True) for x in ("뜻", "노트에 쓴 것", "맞는 철자", "기억법")]] +
+                  [[P(w["m"], "cellS"), P(w["wrong"] + " (X)", "jaS"), P(w["kana"], "ja", True), P(w["tip"], "cellS")] for w in fix],
+                  [26 * mm, 34 * mm, 36 * mm, BODY - 96 * mm], extra=[("TEXTCOLOR", (1, 1), (1, -1), sd.SHU)]),
+             Spacer(1, 4 * mm), P("② 단어 카드", "sec", True), Spacer(1, 1 * mm)]
+    rows = [[P(x, "cellS", True) for x in ("", "뜻", "일본어 · 발음", "기억법 · 교과서 문장")]]
+    pink = []
+    for i, w in enumerate(ws, 1):
+        if w.get("wrong"): pink.append(i)
+        jp = w["kana"] + (("  (%s)" % w["word"]) if w.get("word") else "")
+        ex = example(w["kana"], w.get("word"))
+        tip = w["tip"] + ((" · " + w["note"]) if w.get("note") and w["note"] not in w["tip"] else "")
+        cell = mix(tip) + (('<br/><font size="7.5" color="#4A524F">%s쪽 %s — %s</font>' % (ex[0], mix(ex[1]), mix(ex[2]))) if ex else "")
+        rows.append([P(str(i), "cellS"), P(w["m"], "cellS"),
+                     Paragraph(mix(jp) + '<br/><font size="7.5" color="#8A918D">%s</font>' % mix(w["pron"]), S["ja"]),
+                     Paragraph(cell, S["cellS"])])
+    story += [grid(rows, [8 * mm, 28 * mm, 50 * mm, BODY - 86 * mm], extra=[("BACKGROUND", (0, i), (-1, i), PINK) for i in pink])]
+    order = list(range(len(ws)))
+    import random; random.Random(1008).shuffle(order)
+    test = [[P(x, "cellS", True) for x in ("", "뜻", "1회", "2회", "3회")]] + \
+           [[P(str(n), "cellS"), P(ws[i]["m"], "cellS"), "", "", ""] for n, i in enumerate(order, 1)]
+    key = []
+    half = (len(order) + 1) // 2
+    for n in range(half):
+        r = []
+        for j in (n, n + half):
+            if j < len(order):
+                w = ws[order[j]]
+                r += [P(str(j + 1), "cellS"), P(w["m"], "cellS"), P(w["kana"], "jaS")]
+            else:
+                r += ["", "", ""]
+        key.append(r)
+    hw = BODY / 2
+    story += [PageBreak(), P("③ 셀프테스트 — 뜻 보고 쓰기 3회", "title", True),
+              P("카드와 순서를 섞었습니다. 1회 쓰고 채점 → 틀린 것만 2회 → 3회. 가타카나 낱말은 가타카나로, 장음·작은 글자·탁점까지 정확히.", "lead"),
+              Spacer(1, 2 * mm),
+              grid(test, [8 * mm, 34 * mm] + [(BODY - 42 * mm) / 3] * 3, extra=[("TOPPADDING", (0, 1), (-1, -1), 5), ("BOTTOMPADDING", (0, 1), (-1, -1), 5)]),
+              PageBreak(), P("셀프테스트 정답", "title", True), Spacer(1, 2 * mm),
+              grid([[P(x, "cellS", True) for x in ("", "뜻", "정답")] * 2] + key,
+                   [8 * mm, 30 * mm, hw - 38 * mm] * 2)]
+    doc(os.path.join(OUT, "8-내-약한단어.pdf"), "내 약한 단어", story)
+    return len(ws)
+
 # ─────────────────────────── 통합본 ───────────────────────────
 MERGE = [  # (책갈피, docs/ 아래 경로) — 계획표의 순서
  ("0. 최종 복습 계획표", "study/0-최종복습-계획표.pdf"),
+ ("★ 내 약한 단어 51개", "study/8-내-약한단어.pdf"),
+ ("★ 내 약한 단어 20문항", "sets/내-약한단어-20문항.pdf"),
  ("1. 범위 전체 요점정리", "study/6-범위전체-요점정리.pdf"),
  ("2. 단어장 (발음)", "2026-일본어회화-2학기1회고사-단어장-발음.pdf"),
  ("3. 단어 셀프테스트", "study/7-단어-셀프테스트.pdf"),
@@ -225,4 +291,4 @@ def merge():
 
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
-    plan(); summary(); print("단어", selftest()); merge()
+    plan(); summary(); print("단어", selftest()); print("약한 단어", weak()); merge()
