@@ -166,3 +166,4 @@ if __name__ == "__main__":
         m = re.match(r"set(\d+)\.json$", f)
         if m: build(os.path.join(d, f), os.path.join(d, "변형문제-%s회.pdf" % m.group(1)))
         if f == "drill-te.json": build(os.path.join(d, f), os.path.join(d, "음편-て형-10문항.pdf"))
+        if f == "drill-te2.json": build(os.path.join(d, f), os.path.join(d, "음편-て형-10문항-2회.pdf"))

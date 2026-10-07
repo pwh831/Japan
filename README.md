@@ -164,7 +164,7 @@ docs/scripts/kaiwa-all.json           회화 3·4과 합본 원고 (include 로 
 docs/scripts/회화-3·4과-전체지문.pdf     ↑ 굿노트용 — 6과-전체지문.pdf 와 같은 모양
 docs/sets/set4~8.json                  변형문제 4~8회 (7·8회는 학교 기출 형식) (객관식 21·서답형 9, 선생님 배점 안내대로)
 docs/sets/변형문제-4~8회.pdf             ↑ 문제지 + 정답·해설 (npm run sets — 점검 후 PDF)
-docs/sets/drill-te.json · 음편-て형-10문항.pdf   유형 집중 연습 — て형(음편)만 10문항
+docs/sets/drill-te.json · drill-te2.json   유형 집중 연습 — て형(음편)만 10문항 1·2회 (음편-て형-10문항*.pdf)
 ```
 
 ## 고친 뒤
