@@ -71,7 +71,7 @@ for (const f of fs.readdirSync(path.join(ROOT, "docs", "sets")).filter(f => /^(s
   for (const q of sa) {
     const tag = `${q.no}번`;
     t(q.parts.reduce((a, p) => a + p[1], 0) === q.pts, `${tag} 채점 요소 합 ${q.pts}점`);
-    if (q.kind === "서술형") t(!E.hasKanji(q.answer), `${tag} 모범 답안은 가나로`);
+    if (q.kind === "서술형" && !q.ko) t(!E.hasKanji(q.answer), `${tag} 모범 답안은 가나로`);   // ko: 해석·이유처럼 우리말로 답하는 문항
     if (q.conj) {
       const v = find(q.conj.base), exp = v && E.anyConj(v, q.conj.form);
       t(!!v && E.norm(exp) === E.norm(q.conj.shown), `${tag} ${q.conj.base} ${q.conj.form} = ${exp}`);
@@ -105,8 +105,8 @@ for (const f of fs.readdirSync(path.join(ROOT, "docs", "sets")).filter(f => /^(s
   for (const q of qs.filter(isContent)) {
     const own = (q.box || "").split("\n").length >= 3;
     const prev = qs.slice(0, q.no - 1).reverse().find(x => (x.box || "").split("\n").length >= 3);
-    const grp = prev && /^\[(\d+)~(\d+)\]/.exec(prev.stem);
-    const shared = /^위 대화/.test(q.stem) && grp && q.no >= +grp[1] && q.no <= +grp[2];
+    const grp = prev && /^\[(\d+)~(\d+)/.exec(prev.stem);
+    const shared = /^위 (대화|글)/.test(q.stem) && grp && q.no >= +grp[1] && q.no <= +grp[2];
     t(own || shared, `${q.no}번 내용 문항에 본문이 있다${own ? "" : shared ? ` (${grp[1]}~${grp[2]}번 묶음)` : ""}`);
   }
   // 본문(<보기>)이 다른 문항의 답을 그대로 보여 주면 안 된다 — 그 자리는 빈칸 (A)·㉠ 으로 비운다

@@ -162,8 +162,8 @@ docs/scripts/unit4-all.json           4과 72~75쪽 전체 지문 (본문 73쪽,
 docs/scripts/4과-전체지문.pdf           ↑ 을 같은 모양으로
 docs/scripts/kaiwa-all.json           회화 3·4과 합본 원고 (include 로 unit3·unit4 를 묶음)
 docs/scripts/회화-3·4과-전체지문.pdf     ↑ 굿노트용 — 6과-전체지문.pdf 와 같은 모양
-docs/sets/set4~6.json                  변형문제 4~6회 (객관식 21·서답형 9, 선생님 배점 안내대로)
-docs/sets/변형문제-4~6회.pdf             ↑ 문제지 + 정답·해설 (npm run sets — 점검 후 PDF)
+docs/sets/set4~8.json                  변형문제 4~8회 (7·8회는 학교 기출 형식) (객관식 21·서답형 9, 선생님 배점 안내대로)
+docs/sets/변형문제-4~8회.pdf             ↑ 문제지 + 정답·해설 (npm run sets — 점검 후 PDF)
 docs/sets/drill-te.json · 음편-て형-10문항.pdf   유형 집중 연습 — て형(음편)만 10문항
 ```
 

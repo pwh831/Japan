@@ -24,10 +24,10 @@ const ROOT="/home/user/Japan/studio", OUT=process.argv[2];
     const d=JSON.parse(fs.readFileSync(`/home/user/Japan/docs/sets/${f}`,"utf8"));
     // 출제실은 문항마다 카드가 따로다 — "위 대화"·"n번 대화" 문항에도 묶음의 본문을 붙여 그 카드만 보고도 풀게 한다
     const byNo=Object.fromEntries(d.questions.map(q=>[q.no,q]));
-    const groupOf=q=>d.questions.find(x=>{const m=/^\[(\d+)~(\d+)\]/.exec(x.stem);return m&&q.no>+m[1]&&q.no<=+m[2]});
+    const groupOf=q=>d.questions.find(x=>{const m=/^\[(\d+)~(\d+)/.exec(x.stem);return m&&q.no>+m[1]&&q.no<=+m[2]});
     const passage=q=>{
-      if(/^위 /.test(q.stem)&&!q.box){const g=groupOf(q);return g?`(${g.no}번과 같은 대화)\n${g.box}`:""}
-      const m=/^(\d+)번 대화/.exec(q.stem);
+      if(/^위 /.test(q.stem)){const g=groupOf(q);if(g)return `(${g.no}번과 같은 대화)\n${g.box}`+(q.box?`\n\n${q.box}`:"")}
+      const m=/^(\d+)번 (대화|글)/.exec(q.stem);
       if(m&&byNo[m[1]])return `(${m[1]}번 대화)\n${byNo[m[1]].box}\n\n${q.box||""}`;
       return q.box||"";
     };
