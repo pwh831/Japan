@@ -165,6 +165,7 @@ docs/scripts/회화-3·4과-전체지문.pdf     ↑ 굿노트용 — 6과-전�
 docs/sets/set4~8.json                  변형문제 4~8회 (7·8회는 학교 기출 형식) (객관식 21·서답형 9, 선생님 배점 안내대로)
 docs/sets/변형문제-4~8회.pdf             ↑ 문제지 + 정답·해설 (npm run sets — 점검 후 PDF)
 docs/sets/drill-te.json · drill-te2.json   유형 집중 연습 — て형(음편)만 10문항 1·2회 (음편-て형-10문항*.pdf)
+docs/study/1~5-*.pdf                    시험 직전 자료: 본문 서술형 쓰기, 동사 활용표, 함정 체크, 자주 틀리는 유형 10문항, 회화 3과 54~56쪽 요약 (python3 tools/study-pdf.py)
 ```
 
 ## 고친 뒤

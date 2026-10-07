@@ -167,3 +167,4 @@ if __name__ == "__main__":
         if m: build(os.path.join(d, f), os.path.join(d, "변형문제-%s회.pdf" % m.group(1)))
         if f == "drill-te.json": build(os.path.join(d, f), os.path.join(d, "음편-て형-10문항.pdf"))
         if f == "drill-te2.json": build(os.path.join(d, f), os.path.join(d, "음편-て형-10문항-2회.pdf"))
+        if f == "drill-weak.json": build(os.path.join(d, f), os.path.join(ROOT, "docs", "study", "4-자주틀리는유형-보충10문항.pdf"))
