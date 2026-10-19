@@ -85,6 +85,10 @@ p{margin:0}
 .prog .new{background:var(--edge)}
 .prog .mid{background:var(--shu)}
 .prog .done{background:var(--rule)}
+.today{display:flex;flex-direction:column;gap:10px;border:1px solid var(--edge);border-left:3px solid var(--rule);
+       border-radius:3px;background:var(--card);padding:13px 15px}
+#todayNote{font-size:14.5px}
+.today-sub{font-size:12px;color:var(--ink-faint)}
 .legend{display:flex;gap:14px;font-size:12px;color:var(--ink-faint);flex-wrap:wrap}
 .legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px}
 
@@ -212,7 +216,7 @@ footer b{color:var(--ink-soft);font-weight:600}
 <!-- ══ 홈 ══ -->
 <div id="home">
   <div style="display:flex;flex-direction:column;gap:7px">
-    <span class="eyebrow">제6과 · ハナちゃん、あぶない!</span>
+    <span class="eyebrow">2학기 2회고사 · 5과 しゃしんを とっても いいですか</span>
     <h1>일본어 시험</h1>
     <p style="color:var(--ink-soft)">세 시험을 따로 봅니다. 외우는 방식이 달라서 진도도 따로 셉니다.</p>
   </div>
@@ -220,6 +224,19 @@ footer b{color:var(--ink-soft);font-weight:600}
   <section>
     <h2 class="sec">무엇을 볼까요</h2>
     <div class="tests" id="testPick"></div>
+  </section>
+
+  <section id="todaySec">
+    <h2 class="sec">오늘 할 것</h2>
+    <div class="today">
+      <p id="todayNote"></p>
+      <div style="display:flex;gap:9px;flex-wrap:wrap">
+        <button class="btn pri" id="todayBtn" type="button">오늘 할 것</button>
+        <button class="btn" id="slipBtn" type="button">실수 모음</button>
+      </div>
+      <p class="today-sub">배운 날 → 1일 → 3일 → 7일 → 14일 뒤에 직접 써서 다시 확인합니다.
+        서로 다른 날 3번 확실히 맞히고 첫날로부터 7일이 지나야 숙달입니다.</p>
+    </div>
   </section>
 
   <section>
@@ -320,11 +337,11 @@ footer b{color:var(--ink-soft);font-weight:600}
     <p id="rBreak" style="color:var(--ink-soft);font-size:14px"></p>
   </div>
   <section id="rWrongSec">
-    <h2 class="sec">틀린 단어</h2>
+    <h2 class="sec">틀리거나 애매했던 것</h2>
     <div class="wrongs" id="rWrongs"></div>
   </section>
   <div style="display:flex;gap:9px;flex-wrap:wrap">
-    <button class="btn pri" id="againBtn" type="button">틀린 것만 다시</button>
+    <button class="btn pri" id="againBtn" type="button">이것만 다시</button>
     <button class="btn" id="homeBtn" type="button">처음으로</button>
   </div>
 </div>
@@ -353,7 +370,9 @@ var UNITS = [
   { code:"s1", title:"동작 · 교통",   pages:"단어장 1쪽" },
   { code:"s2", title:"지진 · 희망",   pages:"단어장 2쪽" },
   { code:"s3", title:"약속 · 여행",   pages:"단어장 3쪽" },
-  { code:"s4", title:"이동 · 비교",   pages:"단어장 4쪽" }
+  { code:"s4", title:"이동 · 비교",   pages:"단어장 4쪽" },
+  /* 2학기 2회고사 — 진도 나가는 대로 교과서 쪽을 하나씩 더한다. 1회고사(s1~s4)는 기본으로 꺼 둔다 */
+  { code:"k85", title:"5과 · 안내 로봇", pages:"교과서 85쪽", now:true }
 ];
 
 var WORDS = [
@@ -543,7 +562,46 @@ var WORDS = [
   { id:"w429", unit:"s4", pos:"동사", word:"知る",     kana:"しる",     meaning:["알다"], note:"★ 예외 1류",
     ref:"단어장 4쪽 <자주 나오는 예외 1류 동사> 상자에만 — 본문 어휘에는 없다" },
   { id:"w430", unit:"s4", pos:"동사", word:"切る",     kana:"きる",     meaning:["자르다"], note:"★ 예외 1류",
-    ref:"단어장 4쪽 <자주 나오는 예외 1류 동사> 상자에만 — 본문 어휘에는 없다" }
+    ref:"단어장 4쪽 <자주 나오는 예외 1류 동사> 상자에만 — 본문 어휘에는 없다" },
+
+  /* ═══ 교과서 5과 85쪽 ことば (きいて はなそう 1) — 원고는 docs/scripts/unit5-all.json ═══
+     note 의 '필기' 는 교과서에 적힌 선생님 필기. 예문은 명사에만 단다 — 문형(～て くれる 등)에
+     달면 유형 C 에서 다른 문형 보기도 문법상 들어맞아 답이 둘이 된다. */
+  { id:"w501", unit:"k85", pos:"명사", word:"ロボット", kana:"ロボット", meaning:["로봇"],
+    examples:[{ ja:"あ、ロボットが いる。", ko:"아, 로봇이 있다." }] },
+  { id:"w502", unit:"k85", pos:"동사", word:"いる", kana:"いる", meaning:["(사람·동물 등이) 있다"],
+    note:"2류 · 필기: 원래는 ある 이지만 사람처럼 친근하게 느껴 いる 를 씀 · ロボットが いる (は X)" },
+  { id:"w503", unit:"k85", pos:"연체사", word:"この", kana:"この", meaning:["이"] },
+  { id:"w504", unit:"k85", pos:"명사", word:"ニュース", kana:"ニュース", meaning:["뉴스"],
+    examples:[{ ja:"ニュース スタジオは どこですか。", ko:"뉴스 스튜디오는 어디입니까?" }] },
+  { id:"w505", unit:"k85", pos:"명사", word:"スタジオ", kana:"スタジオ", meaning:["스튜디오"],
+    examples:[{ ja:"ニュース スタジオは どこですか。", ko:"뉴스 스튜디오는 어디입니까?" }] },
+  { id:"w506", unit:"k85", pos:"명사", word:"ばしょ", kana:"ばしょ", meaning:["장소"],
+    examples:[{ ja:"この ロボットに ニュース スタジオの ばしょを 聞いて みる?", ko:"이 로봇에게 뉴스 스튜디오의 장소를 물어볼래?" }] },
+  { id:"w507", unit:"k85", pos:"동사", word:"聞く", kana:"きく", meaning:["묻다", "듣다"],
+    note:"1류 · 필기: 뜻이 2개 ① 듣다 ② 묻다 · て형 聞いて" },
+  { id:"w508", unit:"k85", pos:"표현", word:"～て みる", kana:"て みる", meaning:["~해 보다"],
+    jaAliases:["～て みる"], note:"필기: 聞く + て みる → 聞いて みる" },
+  { id:"w509", unit:"k85", pos:"명사", word:"がめん", kana:"がめん", meaning:["화면"],
+    examples:[{ ja:"がめんに タッチするか、話しかけてね。", ko:"화면을 터치하거나 말을 걸어 줘." }] },
+  { id:"w510", unit:"k85", pos:"명사", word:"タッチ", kana:"タッチ", meaning:["터치"],
+    examples:[{ ja:"がめんに タッチするか、話しかけてね。", ko:"화면을 터치하거나 말을 걸어 줘." }] },
+  { id:"w511", unit:"k85", pos:"조사", word:"～か", kana:"か", meaning:["~거나", "~는지"],
+    jaAliases:["～か"], note:"필기: ~인지 아닌지 · タッチするか / できるか" },
+  { id:"w512", unit:"k85", pos:"동사", word:"話しかける", kana:"はなしかける", meaning:["말을 걸다"],
+    note:"2류 · 필기: はなし 이야기 + かける 걸다" },
+  { id:"w513", unit:"k85", pos:"표현", word:"～て いるの?", kana:"て いるの", meaning:["~(하)고 있어?"],
+    jaAliases:["～て いるの?", "～て いるの", "て いるの?"], note:"필기: する + て いる → して いる (상태·진행)" },
+  { id:"w514", unit:"k85", pos:"부사", word:"いろいろ", kana:"いろいろ", meaning:["여러 가지"] },
+  { id:"w515", unit:"k85", pos:"동사", word:"おしえる", kana:"おしえる", meaning:["가르치다"], note:"2류 (필기)" },
+  { id:"w516", unit:"k85", pos:"표현", word:"～て くれる", kana:"て くれる", meaning:["~해 주다"],
+    jaAliases:["～て くれる"], note:"필기: おしえる + て くれる → おしえて くれる" },
+  { id:"w517", unit:"k85", pos:"표현", word:"～て くれない", kana:"て くれない", meaning:["~해 주지 않다"],
+    jaAliases:["～て くれない"], note:"필기: おしえて くれない" },
+  { id:"w518", unit:"k85", pos:"표현", word:"～と おもう", kana:"と おもう", meaning:["~라고 생각하다"],
+    jaAliases:["～と おもう"], note:"필기: と 빈칸 조심" },
+  { id:"w519", unit:"k85", pos:"접속", word:"～けど・けれど", kana:"けど", meaning:["~(지)만", "~(인)데"],
+    jaAliases:["けれど", "～けど", "～けれど", "～けど・けれど"] }
 ];
 
 /* skip:true 인 항목은 출제에서 빠집니다 — 단어장에 두 번 나온 낱말(あらう·けす)의
@@ -1308,6 +1366,50 @@ function phraseDataErrors(pool){
   return bad;
 }
 
+/* ══ 간격 반복 — docs/학습원리.md §2.1·§2.2 ══
+   배운 날 → 1일 → 3일 → 7일 → 14일 뒤에 다시 쓴다. 하루에 몇 번을 맞혀도 하루로 센다
+   — 같은 날 여러 번은 몰아 보기라 오래 남지 않는다.
+   st.rd 는 '확실히 직접 써서 맞힌 날' 목록, st.miss 는 그 뒤로 틀리거나 애매했던 날. */
+var OFFS = [0, 1, 3, 7, 14];
+function pad2(n){ return (n < 10 ? "0" : "") + n; }
+function dayKey(t){ var d = new Date(t); return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()); }
+function dayNum(k){ var p = k.split("-"); return Math.round(Date.UTC(+p[0], p[1] - 1, +p[2]) / 864e5); }
+/* 졸업 — 서로 다른 날 3번, 마지막이 첫날로부터 7일 이상 뒤. 한 번 맞힘은 아는 것이 아니다 */
+function graduated(st){
+  var d = (st && st.rd) || [];
+  return d.length >= 3 && dayNum(d[d.length - 1]) - dayNum(d[0]) >= 7;
+}
+/* 오늘(today, dayKey)부터 며칠 뒤에 다시 쓸지. 0 이하면 오늘 할 것, null 이면 일정 끝 */
+function dueIn(st, today){
+  var d = (st && st.rd) || [], t = dayNum(today);
+  if (!d.length || st.miss) return 0;               /* 처음이거나, 틀린 것은 맞힐 때까지 오늘 */
+  if (d.length >= OFFS.length) return null;
+  return Math.max(dayNum(d[d.length - 1]) + 1, dayNum(d[0]) + OFFS[d.length]) - t;
+}
+/* 확실히 맞힌 날을 적는다 — 같은 날 두 번째부터는 날짜가 늘지 않는다 */
+function markDay(st, today){
+  if (!st.rd) st.rd = [];
+  if (st.rd[st.rd.length - 1] !== today) st.rd.push(today);
+  delete st.miss;
+}
+
+/* ══ 오답 분류 — docs/학습원리.md §2.5 ══
+   가·촉·탁 은 아는데 틀린 것(시험 주에 모아 다시 쓴다), 뜻 은 모르는 것. */
+var ERRNM = { "가":"가나 종류", "촉":"촉음·장음·요음", "탁":"탁점", "뜻":"모름" };
+function errKind(typed, want){
+  var a = norm(typed), b = norm(want);
+  if (!a || a === b) return "뜻";
+  if (a !== b && toHira(a) === toHira(b)) return "가";
+  var big = function(s){
+    return toHira(s).replace(/[っー]/g, "")
+      .replace(/[ぁぃぅぇぉゃゅょゎ]/g, function(c){ return String.fromCharCode(c.charCodeAt(0) + 1); });
+  };
+  if (big(a) === big(b)) return "촉";
+  var flat = function(s){ return toHira(s).normalize("NFD").replace(/[゙゚]/g, "").normalize("NFC"); };
+  if (flat(a) === flat(b)) return "탁";
+  return "뜻";
+}
+
 /* ══ 세 시험 ══ */
 var TESTS = [
   { k:"word", nm:"단어", sub:"낱말의 뜻과 표기", ready:true,
@@ -1315,7 +1417,7 @@ var TESTS = [
             {k:"B",nm:"직접 쓰기",  sub:"뜻 → 일본어",   w:50},
             {k:"C",nm:"예문 빈칸",  sub:"문장 속 단어",  w:20},
             {k:"S",nm:"철자 고르기",sub:"뜻 → 맞는 철자", w:25} ],
-    master:"쓰기(뜻→일본어)를 연속 3회 맞힌 단어가 숙달입니다. 뜻만 아는 단어는 넘어가지 않습니다." },
+    master:"쓰기(뜻→일본어)를 서로 다른 날 3번 확실히 맞히고, 첫날로부터 7일이 지나야 숙달입니다. 같은 날 여러 번은 하루로 셉니다." },
   { k:"verb", nm:"활용", sub:"동사 ます·ましょう·たい·て · い형용사", ready:true,
     types:[ {k:"H",nm:"활용형 쓰기", sub:"기본형 → 활용형", w:60},
             {k:"I",nm:"그룹 고르기", sub:"1류·2류·3류",    w:25},
@@ -1340,7 +1442,8 @@ var cfg = {
   verb:{ range:{ 1:1, 2:1, 3:1, adj:1 }, types:{ H:1, I:1, J:1 } },
   phrase:{ range:{}, types:{ D:1, E:1, F:1, G:1 } }
 };
-UNITS.forEach(function(u){ cfg.word.range[u.code] = 1; });
+/* 지금 진도(now) 쪽만 켜 둔다 — 1회고사 단어장은 남겨 두되 처음엔 끈다 */
+UNITS.forEach(function(u){ cfg.word.range[u.code] = u.now ? 1 : 0; });
 PUNITS.forEach(function(u){ cfg.phrase.range[u.code] = 1; });
 function C(){ return cfg[cfg.test]; }
 
@@ -1408,8 +1511,7 @@ function drawHome(){
     b.querySelector("small").textContent = r.n + "항목" + (r.note ? " · " + r.note : "");
     b.addEventListener("click", function(){
       C().range[r.k] = C().range[r.k] ? 0 : 1;
-      b.setAttribute("aria-pressed", C().range[r.k] ? "true" : "false");
-      refreshStart();
+      drawHome();
     });
     rc.appendChild(b);
   });
@@ -1453,6 +1555,7 @@ function drawHome(){
            .map(function(v){ return v.kana; })
     : [];
   $("progNote").textContent = T().master + (ex.length ? " 지금 범위의 예외: " + ex.join("·") : "");
+  drawToday();
   drawProgress();
   refreshStart();
 }
@@ -1460,8 +1563,10 @@ function drawHome(){
 function rangeItems(){
   if (cfg.test === "word")
     return UNITS.map(function(u){
-      return { k:u.code, nm:u.title.replace("6과 · ", ""), note:u.pages,
-               n:POOL.filter(function(w){ return w.unit === u.code && inScope(w); }).length };
+      var ws = POOL.filter(function(w){ return w.unit === u.code && inScope(w); });
+      var due = ws.filter(function(w){ var d = dueIn(store.word[w.id], dayKey(Date.now())); return d !== null && d <= 0; }).length;
+      return { k:u.code, nm:u.title.replace("6과 · ", ""), n:ws.length,
+               note:u.pages + (u.now ? "" : " · 1회고사") + (due && cfg.word.range[u.code] ? " · 오늘 " + due : "") };
     });
   if (cfg.test === "phrase")
     return PUNITS.map(function(u){
@@ -1512,7 +1617,7 @@ function refCount(){
 function mastered(item){
   var st = store[cfg.test][item.id];
   if (!st) return false;
-  if (cfg.test === "word") return (st.s.B || 0) >= 3;
+  if (cfg.test === "word") return graduated(st);
   if (cfg.test === "verb")
     return formsOf(item).every(function(f){ return (st.s["H" + f.k] || 0) >= 3; });
   /* 대비는 양쪽을 다 가려야 숙달이다. 한쪽만 맞히면 가른 것이 아니다. */
@@ -1522,7 +1627,7 @@ function mastered(item){
 
 function drawProgress(){
   var n = 0, m = 0, d = 0,
-      all = cfg.test === "word" ? POOL : cfg.test === "verb" ? VPOOL : PPOOL;
+      all = cfg.test === "word" ? selected() : cfg.test === "verb" ? VPOOL : PPOOL;
   all.forEach(function(it){
     var st = store[cfg.test][it.id];
     if (!st || (!st.ok && !st.ng)) n++;
@@ -1539,6 +1644,48 @@ function drawProgress(){
     i.style.width = (p[1] / tot * 100) + "%";
     bar.appendChild(i);
   });
+}
+
+/* 오늘 할 것 — 고른 범위에서 오늘 직접 써 볼 단어. 새 단어 + 복습 날이 된 단어 + 틀려서 다시 쓸 단어 */
+var SLIPS = ["가", "촉", "탁", "철"];
+function todayList(){
+  var t = dayKey(Date.now());
+  return selected().filter(function(w){ var d = dueIn(store.word[w.id], t); return d !== null && d <= 0; });
+}
+function slipList(){
+  return selected().filter(function(w){
+    var e = (store.word[w.id] || {}).err || {};
+    return SLIPS.some(function(k){ return e[k]; });
+  });
+}
+function drawToday(){
+  $("todaySec").hidden = cfg.test !== "word";
+  if (cfg.test !== "word") return;
+  var t = dayKey(Date.now()), list = todayList(), nw = 0, mi = 0;
+  list.forEach(function(w){
+    var st = store.word[w.id];
+    if (!st || !(st.rd && st.rd.length) && !st.miss) nw++;
+    else if (st.miss) mi++;
+  });
+  if (list.length){
+    $("todayNote").textContent = "오늘 직접 써 볼 단어 " + list.length + "개 — 새로 " + nw +
+      " · 복습 " + (list.length - nw - mi) + " · 다시 " + mi;
+  } else {
+    var nx = null, cnt = 0;
+    selected().forEach(function(w){
+      var d = dueIn(store.word[w.id], t);
+      if (d === null || d <= 0) return;
+      if (nx === null || d < nx){ nx = d; cnt = 0; }
+      if (d === nx) cnt++;
+    });
+    $("todayNote").textContent = nx === null ? "고른 범위의 일정이 모두 끝났습니다."
+      : "오늘 할 것은 끝 — 다음 복습은 " + nx + "일 뒤 (" + cnt + "개)";
+  }
+  $("todayBtn").disabled = !list.length;
+  $("todayBtn").textContent = list.length ? "시작 · 직접 쓰기 " + list.length + "문항" : "오늘 할 것 없음";
+  var sl = slipList();
+  $("slipBtn").disabled = !sl.length;
+  $("slipBtn").textContent = "실수 모음 · " + sl.length + "개";
 }
 
 function refreshStart(){
@@ -1595,11 +1742,12 @@ function pickBy(list, wKey){
   return list[0];
 }
 
-function buildSession(pool){
-  var kinds = T().types.filter(function(t){ return C().types[t.k]; });
+/* writeOnly — 오늘 할 것·실수 모음. 일정은 직접 쓰기로만 매기므로 단어마다 쓰기 한 문항씩 */
+function buildSession(pool, writeOnly){
+  var kinds = writeOnly ? [{ k:"B", w:1 }] : T().types.filter(function(t){ return C().types[t.k]; });
   if (!kinds.length || !pool.length) return [];
   var withEx = cfg.test === "word" ? pool.filter(function(w){ return blankable(w).length; }) : [];
-  var n = cfg.count ? Math.min(cfg.count, pool.length * 4) : pool.length;
+  var n = writeOnly ? pool.length : cfg.count ? Math.min(cfg.count, pool.length * 4) : pool.length;
   var used = {}, qs = [], guard = 0;
 
   while (qs.length < n && guard++ < n * 40){
@@ -1696,16 +1844,18 @@ function show(which){
   ["home", "quiz", "result"].forEach(function(x){ $(x).hidden = (x !== which); });
   window.scrollTo(0, 0);
 }
-function start(pool){
-  var qs = buildSession(pool || selected());
+function start(pool, writeOnly){
+  var qs = buildSession(pool || selected(), writeOnly);
   if (!qs.length){ alert("출제할 문제가 없습니다. 범위나 유형을 넓혀 보세요."); return; }
-  sess = { test:cfg.test, qs:qs, at:0, score:0, wrong:[], by:{} };
+  sess = { test:cfg.test, qs:qs, at:0, score:0, wrong:[], by:{}, writeOnly:!!writeOnly };
   T().types.forEach(function(t){ sess.by[t.k] = [0, 0]; });
   show("quiz");
   render();
 }
 
 var answered = false, hinted = 0, penalised = false;
+var firstWrong = null;   /* 처음 빗나간 답 — 오답 분류에 쓴다. 다시 쓰라고 하면서 입력칸을 비우므로 따로 둔다 */
+var conf = null;         /* 직접 쓰기를 맞힌 뒤 확신도를 기다리는 중이면 그 처리 함수 */
 function KINDNM(k){ var t = T().types.filter(function(x){ return x.k === k; })[0]; return t ? t.nm : k; }
 function formInfo(f){
   var all = FORMS.concat(ADJFORMS), i;
@@ -1737,7 +1887,7 @@ function answerOf(q){
 
 function render(){
   var q = sess.qs[sess.at];
-  answered = false; hinted = 0; penalised = false;
+  answered = false; hinted = 0; penalised = false; firstWrong = null; conf = null;
 
   $("qNo").textContent = (sess.at + 1) + " / " + sess.qs.length;
   $("qFill").style.width = (sess.at / sess.qs.length * 100) + "%";
@@ -1947,6 +2097,7 @@ function submit(){
   }
   if (j.code === "confuse"){ askConfuse(j.pair, $("ans").value); return; }
   if (j.code === "kana" || j.code === "near"){
+    if (firstWrong === null) firstWrong = $("ans").value;
     if (!penalised){
       penalised = true;
       var st = stat(cfg.test === "word" ? q.w.id : q.v.id);
@@ -2017,6 +2168,18 @@ function finish(good, extra, right){
   else { if (!penalised) st.ng++; st.s[key] = 0; sess.wrong.push({ q:q, item:item }); }
   sess.by[q.k][1]++;
 
+  /* 단어 직접 쓰기는 일정을 움직인다 (docs/학습원리.md §2) */
+  var wordB = cfg.test === "word" && q.k === "B", today = dayKey(Date.now());
+  if (wordB){
+    if (firstWrong !== null || !right){
+      q.err = errKind(firstWrong !== null ? firstWrong : $("ans").value, q.w.kana);
+      if (q.err === "뜻" && firstWrong !== null && lev(norm(firstWrong), norm(q.w.kana)) === 1) q.err = "철";
+      if (!st.err) st.err = {};
+      st.err[q.err] = (st.err[q.err] || 0) + 1;
+    }
+    if (!good) st.miss = today;          /* 맞힐 때까지 오늘 할 것에 남는다 */
+  }
+
   /* 규칙 숙달 — 서로 다른 동사로 연속해야 오른다 */
   if (cfg.test === "verb" && q.k === "H"){
     var r = rule(isAdj(item) ? "adj" : item.group, q.form);
@@ -2037,8 +2200,30 @@ function finish(good, extra, right){
     cfg.test === "phrase" ? revealPhrase(q.p, q.side) :
                             revealVerb(q.v, q.form));
 
+  if (q.err && ERRNM[q.err] && q.err !== "뜻")
+    fb.querySelector(".x").textContent = (extra ? extra + " · " : "") + ERRNM[q.err] + " 실수 — 실수 모음에 넣었습니다";
+
   $("hintBtn").disabled = true; $("skipBtn").disabled = true;
   $("submitBtn").textContent = (sess.at + 1 >= sess.qs.length) ? "결과 보기" : "다음 →";
+
+  /* 확신도 — 애매하게 맞힌 것은 맞힌 날로 세지 않는다. 확실하고 틀린 것이 가장 잘 고쳐지고,
+     애매하게 맞힌 것은 며칠 뒤 틀린다. Enter 는 '확실'. */
+  if (wordB && good){
+    conf = function(sure){
+      conf = null;
+      if (sure) markDay(st, today);
+      else { st.miss = today; st.s.B = Math.max(0, (st.s.B || 1) - 1); sess.wrong.push({ q:q, item:item, unsure:true }); }
+      save(); next();
+    };
+    var cr = document.createElement("div");
+    cr.style.cssText = "display:flex;gap:9px;flex-wrap:wrap;margin-top:10px";
+    cr.innerHTML = '<button class="btn pri" type="button">확실히 알았음 · 다음</button>' +
+                   '<button class="btn" type="button">애매했음 · 다음</button>';
+    cr.children[0].addEventListener("click", function(){ if (conf) conf(true); });
+    cr.children[1].addEventListener("click", function(){ if (conf) conf(false); });
+    fb.appendChild(cr);
+    $("submitBtn").textContent = "확실 · 다음";
+  }
   if (q.k === "A" || q.k === "C" || q.k === "S" || q.k === "I" || q.k === "D" || q.k === "E" || q.k === "F"){
     var go = document.createElement("button");
     go.className = "btn pri"; go.type = "button";
@@ -2133,6 +2318,7 @@ function revealPhrase(p, side){
 }
 
 function next(){
+  if (conf){ conf(true); return; }
   sess.at++;
   if (sess.at >= sess.qs.length) showResult(); else render();
 }
@@ -2161,7 +2347,8 @@ function showResult(){
         ? x.item.kana : x.item.kana + " → " + (answerOf(x.q) || "");
       d.querySelector(".m").textContent = x.item.meaning.join(", ");
     }
-    d.querySelector(".t").textContent = KINDNM(x.q.k) + (x.q.form ? " · " + formNm(x.q.form) : "");
+    d.querySelector(".t").textContent = KINDNM(x.q.k) + (x.q.form ? " · " + formNm(x.q.form) : "") +
+      (x.unsure ? " · 애매" : x.q.err ? " · " + ERRNM[x.q.err] : "");
     box.appendChild(d);
   });
   $("againBtn").hidden = !sess.wrong.length;
@@ -2171,8 +2358,10 @@ function showResult(){
 $("againBtn").addEventListener("click", function(){
   var seen = {}, pool = [];
   sess.wrong.forEach(function(x){ if (!seen[x.item.id]){ seen[x.item.id] = 1; pool.push(x.item); } });
-  start(pool);
+  start(pool, sess.writeOnly);
 });
+$("todayBtn").addEventListener("click", function(){ start(todayList(), true); });
+$("slipBtn").addEventListener("click", function(){ start(slipList(), true); });
 $("homeBtn").addEventListener("click", function(){ drawHome(); show("home"); });
 $("quitBtn").addEventListener("click", function(){ drawHome(); show("home"); });
 $("startBtn").addEventListener("click", function(){ start(); });

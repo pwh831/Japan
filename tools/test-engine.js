@@ -149,7 +149,8 @@ eq(E.FORMS.reduce(function(a,f){return a+f.weight;},0), 100, "형 배분 합계 
 
 console.log("── 단어장 반영 ──");
 eq(E.WORDS.length >= 120, true, "단어 " + E.WORDS.length + "항목");
-eq(E.UNITS.length, 4, "범위 4개 (단어장 쪽)");
+eq(E.UNITS.filter(function(u){ return !u.now; }).length, 4, "1회고사 범위 4개 (단어장 쪽)");
+eq(E.UNITS.filter(function(u){ return u.now; }).length >= 1, true, "2회고사 범위 — 교과서 쪽을 하나씩 더한다");
 var kanji = E.WORDS.filter(function(w){ return /[\u4e00-\u9fff]/.test(w.word); });
 eq(kanji.length >= 30, true, "한자 표기 " + kanji.length + "개 — 단어장이 한자+후리가나로 적는다");
 kanji.forEach(function(w){
@@ -277,8 +278,11 @@ var VK = function(k){ return E.VERBS.filter(function(v){ return v.kana === k; })
 console.log("── 문제가 답을 하나로 좁히는가 ──");
 /* 유형 B 는 뜻만 보여 준다. 두 낱말이 뜻을 나눠 가지면 맞게 써도 오답이 된다. */
 var live = E.WORDS.filter(function(w){ return !w.skip; }), clash = [];
+/* 1회고사(단어장)와 2회고사(교과서 쪽)는 따로 고르는 범위다 — 같은 시험 안에서만 겹치면 안 된다.
+   (ところ 와 ばしょ 는 둘 다 '장소' 지만 한 세션에 같이 나오지 않는다) */
+var nowU = {}; E.UNITS.forEach(function(u){ nowU[u.code] = !!u.now; });
 live.forEach(function(w){ live.forEach(function(x){
-  if (x.id <= w.id || x.kana === w.kana) return;
+  if (x.id <= w.id || x.kana === w.kana || nowU[x.unit] !== nowU[w.unit]) return;
   w.meaning.forEach(function(m){ if (x.meaning.indexOf(m) >= 0)
     clash.push(m + ": " + w.kana + "/" + x.kana); });
 }); });
@@ -287,6 +291,34 @@ eq(clash.length, 0, "뜻이 겹쳐 답이 둘인 낱말: " + clash.join(", "));
 /* 유형 J 는 활용형만 보여 준다. 같은 활용형이 두 동사에서 나오면 둘 다 정답이어야 한다. */
 eq(E.deconj("よんで", E.VERBS).map(function(v){ return v.kana; }).sort().join(","),
    "よぶ,よむ", "よんで 의 기본형은 よむ 와 よぶ 둘 다");
+
+console.log("── 간격 반복 · 졸업 (docs/학습원리.md §2) ──");
+eq(E.dueIn(undefined, "2026-10-19"), 0, "처음 보는 단어는 오늘");
+eq(E.dueIn({ rd:["2026-10-19"] }, "2026-10-19"), 1, "배운 날 맞히면 1일 뒤");
+eq(E.dueIn({ rd:["2026-10-19","2026-10-20"] }, "2026-10-20"), 2, "1일 뒤 맞히면 3일째");
+eq(E.dueIn({ rd:["2026-10-19","2026-10-20","2026-10-22"] }, "2026-10-22"), 4, "3일째 맞히면 7일째");
+eq(E.dueIn({ rd:["2026-10-19","2026-10-20","2026-10-22","2026-10-26"] }, "2026-10-26"), 7, "7일째 맞히면 14일째");
+eq(E.dueIn({ rd:["2026-10-19","2026-10-20","2026-10-22","2026-10-26","2026-11-02"] }, "2026-11-02"), null, "14일째까지 끝나면 일정 끝");
+eq(E.dueIn({ rd:["2026-10-19"] }, "2026-10-25"), -5, "밀린 복습은 음수 — 오늘 할 것에 들어간다");
+eq(E.dueIn({ rd:["2026-10-19","2026-10-24"] }, "2026-10-24"), 1, "늦게 했으면 다음은 적어도 하루 뒤");
+eq(E.dueIn({ rd:["2026-10-19"], miss:"2026-10-20" }, "2026-10-21"), 0, "틀린 것은 맞힐 때까지 오늘");
+eq(E.dueIn({ rd:["2026-10-31"] }, "2026-11-01"), 0, "달이 바뀌어도 하루");
+var st = { rd:["2026-10-19"] };
+E.markDay(st, "2026-10-19");
+eq(st.rd.length, 1, "같은 날 두 번 맞혀도 하루로 센다");
+st.miss = "2026-10-20"; E.markDay(st, "2026-10-20");
+eq(st.rd.length + (st.miss ? "m" : ""), "2", "다시 맞히면 그날이 더해지고 miss 가 지워진다");
+eq(E.graduated({ rd:["2026-10-19","2026-10-20","2026-10-22"] }), false, "3번이라도 7일이 안 지나면 숙달 아님");
+eq(E.graduated({ rd:["2026-10-19","2026-10-22","2026-10-26"] }), true, "서로 다른 날 3번 + 7일 → 숙달");
+eq(E.graduated({ rd:["2026-10-19","2026-10-26"] }), false, "7일이 지나도 2번이면 숙달 아님");
+eq(E.dayKey(new Date(2026, 9, 5, 23, 59).getTime()), "2026-10-05", "dayKey 는 이 기기의 날짜");
+
+console.log("── 오답 분류 (docs/학습원리.md §2.5) ──");
+[["ろぼっと","ロボット","가"], ["ニュス","ニュース","촉"], ["ばしよ","ばしょ","촉"], ["タチ","タッチ","촉"],
+ ["かめん","がめん","탁"], ["はなしがける","はなしかける","탁"], ["おしえる","きく","뜻"], ["","きく","뜻"],
+ ["ニュース","ニュース","뜻"]].forEach(function(r){
+  eq(E.errKind(r[0], r[1]), r[2], "오답 분류: " + (r[0] || "(빈칸)") + " / " + r[1] + " → " + r[2]);
+});
 
 console.log("── 가나 → 한국어 발음 ──");
 var P = E.toKo;

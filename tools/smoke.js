@@ -224,6 +224,78 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   }
   t(spN > 0 && spOk === spN, `철자 고르기: 맞는 철자를 누르면 정답 ${spOk}/${spN}`);
 
+  // 오늘 할 것 — 간격 반복·확신도·오답 분류 (docs/학습원리.md §2·§4)
+  console.log('── 단어 · 오늘 할 것 ──');
+  if (await p.$eval('#quiz', e => !e.hidden)) await p.click('#quitBtn');
+  if (await p.$eval('#result', e => !e.hidden)) await p.click('#homeBtn');
+  await p.evaluate(() => localStorage.clear());
+  await p.reload(); await p.waitForTimeout(400);
+  const nowUnits = E.UNITS.filter(u => u.now).map(u => u.code);
+  const nowWords = E.WORDS.filter(w => nowUnits.includes(w.unit) && !w.skip && !w.ref);
+  t(!(await p.$eval('#todaySec', e => e.hidden)), '단어 시험에 오늘 할 것이 보인다');
+  t((await p.textContent('#todayNote')).includes(nowWords.length + '개'),
+    '처음엔 지금 진도 쪽 전부가 오늘 할 것: ' + (await p.textContent('#todayNote')));
+  const pressed = await p.$$eval('#rangeChips .chip[aria-pressed="true"] span:first-child', e => e.map(x => x.textContent));
+  t(pressed.length === nowUnits.length, '기본 범위는 지금 진도 쪽만: ' + pressed.join(','));
+
+  const findW = m => nowWords.find(w => w.meaning.join(', ') === m);
+  const runToday = async (plan) => {
+    await p.click('#todayBtn'); await p.waitForTimeout(250);
+    const log = [];
+    for (let i = 0; i < 40; i++) {
+      if (await p.$eval('#result', e => !e.hidden)) break;
+      t((await p.textContent('#qKind')).trim() === '직접 쓰기', '  오늘 할 것은 직접 쓰기만');
+      const w = findW((await p.textContent('#qBody .q-main')).trim());
+      if (!w) { t(false, '  뜻으로 낱말을 못 찾음'); break; }
+      const how = plan(w, i);
+      if (how === 'kana') {                       // 가나 종류를 틀렸다가 고쳐 쓴다
+        await p.fill('#ans', E.toHira(w.kana)); await p.click('#submitBtn'); await p.waitForTimeout(120);
+      }
+      await p.fill('#ans', w.kana); await p.click('#submitBtn'); await p.waitForTimeout(140);
+      log.push([w, how, (await p.textContent('#fb b')).trim(), (await p.textContent('#fb .x')).trim()]);
+      if (how === 'unsure') await p.click('#fb button:has-text("애매했음")');
+      else await p.click('#submitBtn');           // 정답이면 '확실 · 다음', 아니면 '다음'
+      await p.waitForTimeout(110);
+    }
+    return log;
+  };
+  const kataW = nowWords.find(w => /[ァ-ヺ]/.test(w.kana) && E.toHira(w.kana) !== w.kana);
+  let unsureW = null;
+  const log1 = await runToday((w, i) => w === kataW ? 'kana' : (!unsureW && w !== kataW ? (unsureW = w, 'unsure') : 'sure'));
+  t(log1.length === nowWords.length, '오늘 할 것을 끝까지 풀었다 (' + log1.length + '문항)');
+  const kRow = log1.find(r => r[1] === 'kana');
+  t(kRow && kRow[2] === '맞게 썼습니다' && kRow[3].includes('가나 종류 실수'),
+    '가나 종류를 틀렸다 고치면 맞게 썼다고 하고 실수로 분류한다: ' + (kRow ? kRow[3] : ''));
+  const rTags = await p.$$eval('#rWrongs .t', e => e.map(x => x.textContent));
+  t(rTags.some(x => x.includes('애매')) && rTags.some(x => x.includes('가나 종류')),
+    '결과에 애매·가나 종류가 표시된다: ' + rTags.join(' / '));
+  await p.click('#homeBtn'); await p.waitForTimeout(200);
+  t((await p.textContent('#todayBtn')).includes('2문항'),
+    '틀렸거나 애매했던 2개만 오늘 다시: ' + (await p.textContent('#todayBtn')));
+  t((await p.textContent('#slipBtn')).includes('1개'), '실수 모음에 1개: ' + (await p.textContent('#slipBtn')));
+  const st1 = await p.evaluate(() => JSON.parse(localStorage.getItem('jp-exam-v2')).word);
+  const sureW = log1.find(r => r[1] === 'sure')[0];
+  t(st1[sureW.id].rd && st1[sureW.id].rd.length === 1 && !st1[unsureW.id].rd,
+    '확실은 그날을 적고, 애매는 적지 않는다');
+
+  await runToday(() => 'sure');
+  await p.click('#homeBtn'); await p.waitForTimeout(200);
+  t(/다음 복습은 1일 뒤 \(\d+개\)/.test(await p.textContent('#todayNote')),
+    '다 맞히면 다음 복습일을 알려 준다: ' + (await p.textContent('#todayNote')));
+  t(await p.$eval('#todayBtn', e => e.disabled), '오늘 할 것이 없으면 버튼이 꺼진다');
+
+  // 하루가 지났다고 치고(기록을 하루 앞당긴다) 다시 열면 전부 복습할 날이 된다
+  await p.evaluate(() => {
+    const s = JSON.parse(localStorage.getItem('jp-exam-v2'));
+    const d = new Date(); d.setDate(d.getDate() - 1);
+    const k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    Object.values(s.word).forEach(x => { if (x.rd) x.rd = [k]; });
+    localStorage.setItem('jp-exam-v2', JSON.stringify(s));
+  });
+  await p.reload(); await p.waitForTimeout(400);
+  t((await p.textContent('#todayNote')).includes('복습 ' + nowWords.length),
+    '다음 날에는 전부 복습으로 돌아온다: ' + (await p.textContent('#todayNote')));
+
   t(errs.length === 0, errs.length ? '페이지 오류:\n     ' + errs.join('\n     ') : '페이지 오류 없음');
   await b.close();
   console.log('\n' + (fail ? fail + '건 실패' : '전부 통과'));
