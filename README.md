@@ -148,6 +148,7 @@ tools/smoke.js        실제 브라우저 종단 시험 (Playwright)
 tools/kana-probe.html 손글씨 입력 점검기 (M2)
 tools/annotate-pdf.py  시험범위 PDF 에 한국어 발음 깔기
 docs/PRD.md           요구사항 정의서
+docs/학습원리.md       공부법 자료를 연구와 대조한 판정 · 내신 운영 규칙 · 앱에 반영할 것
 docs/2026-일본어회화-…-단어장.pdf       시험범위 원본
 docs/2026-일본어회화-…-단어장-발음.pdf  ↑ 에 한국어 발음을 깐 사본
 docs/scripts/unit6.json               6과 듣기 대본 (교과서 음성 받아쓰기)
