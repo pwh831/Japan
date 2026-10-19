@@ -160,6 +160,8 @@ docs/scripts/unit3-all.json           3과 58~61쪽 전체 지문 (본문 59쪽)
 docs/scripts/3과-전체지문.pdf           ↑ 을 같은 모양으로
 docs/scripts/unit4-all.json           4과 72~75쪽 전체 지문 (본문 73쪽, 74쪽 て형 표)
 docs/scripts/4과-전체지문.pdf           ↑ 을 같은 모양으로
+docs/scripts/unit5-all.json           5과 85쪽 전체 지문 (본문 きいて はなそう 1, 선생님 필기 포함)
+docs/scripts/5과-전체지문.pdf           ↑ 을 같은 모양으로
 docs/scripts/kaiwa-all.json           회화 3·4과 합본 원고 (include 로 unit3·unit4 를 묶음)
 docs/scripts/회화-3·4과-전체지문.pdf     ↑ 굿노트용 — 6과-전체지문.pdf 와 같은 모양
 docs/sets/set4~8.json                  변형문제 4~8회 (7·8회는 학교 기출 형식) (객관식 21·서답형 9, 선생님 배점 안내대로)
@@ -179,8 +181,11 @@ npm run build     # → 일본어-단어시험.html
 npm test          # 271항목
 npm run smoke     # 실제 브라우저로 앱을 열어 세션을 끝까지 풀어 본다
 npm run pdf       # → docs/…-단어장-발음.pdf
-npm run script-pdf  # → docs/scripts/6과-듣기대본.pdf · 6과-본문.pdf · 6과-전체지문.pdf · 3과-전체지문.pdf · 4과-전체지문.pdf  (글꼴: tools/fonts/ 에 ZenKakuGothicNew·NanumGothic)
+npm run script-pdf  # → docs/scripts/6과-듣기대본.pdf · 6과-본문.pdf · 6과-전체지문.pdf · 3과-전체지문.pdf · 4과-전체지문.pdf · 5과-전체지문.pdf  (글꼴: tools/fonts/ 에 ZenKakuGothicNew·NanumGothic)
 ```
+
+나눔고딕은 **가나가 들어 있는 원본(KS X 1001판, Debian `fonts-nanum`)** 을 씁니다. Google Fonts 판은 한글만
+있어서 한국어 문장 속 `ことば`·`は` 같은 일본어가 PDF 에서 빈칸이 됩니다.
 
 `npm run pdf` 는 발음 규칙을 다시 적지 않고 **앱의 `pron` 함수를 그대로 떼어 씁니다.**
 두 벌로 적으면 어긋나는 날이 오고, 어긋난 쪽이 어느 쪽인지 알 수 없게 됩니다.
