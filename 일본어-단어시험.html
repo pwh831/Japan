@@ -376,8 +376,7 @@ var UNITS = [
   { code:"k85", title:"5과 · 안내 로봇", pages:"교과서 85쪽", now:true },
   { code:"k87", title:"5과 · 해 볼래? 할 수 있어?", pages:"교과서 87쪽", now:true },
   { code:"k88", title:"5과 · 날씨 전언", pages:"교과서 88쪽", now:true },
-  { code:"k89", title:"5과 · 캐스터 체험", pages:"교과서 89쪽", now:true },
-  { code:"k91", title:"5과 · 어땠어요? 해도 돼요?", pages:"교과서 91·92쪽", now:true }
+  { code:"k89", title:"5과 · 캐스터 체험", pages:"교과서 89쪽", now:true }
 ];
 
 var WORDS = [
@@ -661,15 +660,7 @@ var WORDS = [
     note:"1류 · しゃしんを する (X) — 90쪽 확인" },
   { id:"w551", unit:"k89", pos:"감동사", word:"ええ", kana:"ええ", meaning:["네"] },
   { id:"w552", unit:"k89", pos:"명사", word:"サイン", kana:"サイン", meaning:["사인"],
-    examples:[{ ja:"ここに サインも おねがいします。", ko:"여기에 사인도 부탁합니다." }] },
-
-  /* ═══ 교과서 5과 91·92쪽 ことば (みんなで はなそう 2 · たのしく みんなで) ═══ */
-  { id:"w553", unit:"k91", pos:"표현", word:"どうでしたか", kana:"どうでしたか", meaning:["어땠습니까?"] },
-  { id:"w554", unit:"k91", pos:"명사", word:"アニメ", kana:"アニメ", meaning:["애니메이션"] },
-  { id:"w555", unit:"k91", pos:"동사", word:"かりる", kana:"かりる", meaning:["빌리다"], note:"2류 · かりても いいですか" },
-  { id:"w556", unit:"k91", pos:"동사", word:"はいる", kana:"はいる", meaning:["들어가다"], note:"★ 예외 1류 · はいっても いいですか" },
-  { id:"w557", unit:"k91", pos:"동사", word:"のむ", kana:"のむ", meaning:["마시다"], note:"1류 · のんでも いいですか (92쪽)" },
-  { id:"w558", unit:"k91", pos:"명사", word:"ジュース", kana:"ジュース", meaning:["주스"] }
+    examples:[{ ja:"ここに サインも おねがいします。", ko:"여기에 사인도 부탁합니다." }] }
 ];
 
 /* skip:true 인 항목은 출제에서 빠집니다 — 단어장에 두 번 나온 낱말(あらう·けす)의
@@ -835,7 +826,7 @@ var PUNITS = [
   { code:"q5", title:"방법 · 상황 · 비교", pages:"교과서 4과 72~75쪽" },
   /* 2학기 2회고사 — now:true 만 처음에 켠다 */
   { code:"q6", title:"제안 · 가능 · ～て くれる", pages:"교과서 5과 84~87쪽", now:true },
-  { code:"q7", title:"전언 · 과거 · 허가", pages:"교과서 5과 88~92쪽", now:true }
+  { code:"q7", title:"전언 · 과거 · 허가", pages:"교과서 5과 88·89쪽", now:true }
 ];
 
 var PHRASES = [
@@ -1074,13 +1065,6 @@ var PHRASES = [
     use:"들은 정보를 전할 때 (기본형＋そうです)", key:"そうです",
     note:"교과서 5과 88쪽 2번 · 필기: 기본형 + そうだ, 형용사·동사 둘 다" },
 
-  { id:"p44", unit:"q7", kind:"대비",
-    ja:"とても おもしろかったです。", ko:"아주 재미있었습니다.",
-    use:"지난 일이 좋았다고 할 때 (い형용사 과거 ～かったです)", key:"おもしろかったです",
-    vs:{ ja:"あまり おもしろく なかったです。", ko:"별로 재미있지 않았습니다.", key:"おもしろく なかったです",
-         why:"과거 긍정 ～かったです, 과거 부정 ～く なかったです. おもしろいでした 는 틀린 말 (90쪽 확인)" },
-    note:"교과서 5과 90·91쪽" },
-
   { id:"p45", unit:"q7", kind:"표현",
     ja:"すごく 上手だったよ。", kana:"すごく じょうずだったよ。", ko:"굉장히 잘했어.",
     use:"な형용사 과거로 칭찬할 때 (～だった — 부정은 ～じゃ なかった)", key:"だった",
@@ -1092,29 +1076,9 @@ var PHRASES = [
     use:"해도 되는지 허락을 구할 때 (～ても いいですか)", key:"とっても",
     note:"교과서 5과 89쪽 ⑩ · とる → とって → とっても · しゃしんを する (X)" },
 
-  { id:"p47", unit:"q7", kind:"대비",
+  { id:"p47", unit:"q7", kind:"표현",
     ja:"ええ、いいですよ。", ko:"네, 좋아요.",
-    use:"허락할 때", key:"いいですよ",
-    vs:{ ja:"すみません、写真は ちょっと……。", kana:"すみません、しゃしんは ちょっと……。",
-         ko:"죄송합니다, 사진은 좀…….", key:"ちょっと",
-         why:"허락은 ええ、いいですよ, 거절은 すみません、～は ちょっと…… (말끝을 흐린다)" },
-    note:"교과서 5과 89쪽 ⑪ · 90쪽" },
-
-  { id:"p48", unit:"q7", kind:"표현",
-    ja:"すみません。かさを かりても いいですか。", ko:"실례합니다. 우산을 빌려도 됩니까?",
-    use:"빌려도 되는지 물을 때 (かりる 2류 → かりても)", key:"かりても", note:"교과서 5과 91쪽 3번 ①" },
-
-  { id:"p49", unit:"q7", kind:"표현",
-    ja:"すみません。トイレに いっても いいですか。", ko:"실례합니다. 화장실에 가도 됩니까?",
-    use:"가도 되는지 물을 때 (いく → いっても — て형 예외)", key:"いっても", note:"교과서 5과 91쪽 3번 ②" },
-
-  { id:"p50", unit:"q7", kind:"표현",
-    ja:"ペットと いっしょに はいっても いいですか。", ko:"반려동물과 같이 들어가도 됩니까?",
-    use:"들어가도 되는지 물을 때 (はいる 예외 1류 → はいっても)", key:"はいっても", note:"교과서 5과 91쪽 3번 ③" },
-
-  { id:"p51", unit:"q7", kind:"표현",
-    ja:"じゃ、ジュースを のんでも いいですか。", ko:"그럼 주스를 마셔도 되나요?",
-    use:"마셔도 되는지 물을 때 (のむ → のんでも)", key:"のんでも", note:"교과서 5과 92쪽" },
+    use:"해도 되냐는 물음에 허락할 때", key:"いいですよ", note:"교과서 5과 89쪽 ⑪" },
 
   { id:"p52", unit:"q7", kind:"표현",
     ja:"ユミちゃん、アナウンサーみたい。", ko:"유미야, 아나운서 같아.",
@@ -1123,10 +1087,6 @@ var PHRASES = [
   { id:"p53", unit:"q7", kind:"표현",
     ja:"きんちょうして、うまく よむ ことが できなかった。", ko:"긴장해서 잘 못 읽었어.",
     use:"~할 수 없었다고 할 때 (～ことが できなかった)", key:"できなかった", note:"교과서 5과 89쪽 ⑤" },
-
-  { id:"p54", unit:"q7", kind:"표현",
-    ja:"えいがは どうでしたか。", ko:"영화는 어땠습니까?",
-    use:"지난 일이 어땠는지 물을 때", key:"どうでしたか", note:"교과서 5과 91쪽 2번" },
 
   { id:"p55", unit:"q7", kind:"표현",
     ja:"みなさん、からだに 気を つけて ください。", kana:"みなさん、からだに きを つけて ください。",
@@ -1619,9 +1579,15 @@ var TESTS = [
 ];
 function T(){ var i; for (i=0;i<TESTS.length;i++) if (TESTS[i].k===cfg.test) return TESTS[i]; }
 
-var POOL = WORDS.filter(function(w){ return !w.skip; });
-var VPOOL = VERBS.concat(ADJS);
-var PPOOL = PHRASES;
+/* 지금 시험(now) 범위만 앱에 낸다 — 1회고사 데이터는 파일에 남기되(엔진 테스트·출제실이 쓴다) 앱에서는 뺀다.
+   동사는 아직 2회고사 범위가 없어 활용 시험은 '준비 중' 으로 닫는다. */
+var UNITS_ON = UNITS.filter(function(u){ return u.now; });
+var PUNITS_ON = PUNITS.filter(function(u){ return u.now; });
+function onUnit(list, code){ return list.some(function(u){ return u.code === code; }); }
+var POOL = WORDS.filter(function(w){ return !w.skip && onUnit(UNITS_ON, w.unit); });
+var VPOOL = VERBS.concat(ADJS).filter(function(v){ return v.now; });
+var PPOOL = PHRASES.filter(function(x){ return onUnit(PUNITS_ON, x.unit); });
+TESTS.forEach(function(t){ if (t.k === "verb" && !VPOOL.length){ t.ready = false; t.sub = "2회고사 범위 준비 중"; } });
 /* 철자 고르기 — 바꾼 철자가 범위 안 다른 낱말·동사와 같으면 답이 둘이 된다 */
 var SPELL_AVOID = WORDS.map(function(w){ return w.kana; }).concat(VERBS.map(function(v){ return v.kana; }), ADJS.map(function(a){ return a.kana; }));
 function spellable(w){ var k = norm(w.kana); return k.length >= 2 && k.length <= 12 && spellVariants(w.kana, 4, SPELL_AVOID).length === 4; }
@@ -1633,8 +1599,8 @@ var cfg = {
   phrase:{ range:{}, types:{ D:1, E:1, F:1, G:1 } }
 };
 /* 지금 진도(now) 쪽만 켜 둔다 — 1회고사 단어장은 남겨 두되 처음엔 끈다 */
-UNITS.forEach(function(u){ cfg.word.range[u.code] = u.now ? 1 : 0; });
-PUNITS.forEach(function(u){ cfg.phrase.range[u.code] = u.now ? 1 : 0; });
+UNITS_ON.forEach(function(u){ cfg.word.range[u.code] = 1; });
+PUNITS_ON.forEach(function(u){ cfg.phrase.range[u.code] = 1; });
 function C(){ return cfg[cfg.test]; }
 
 /* ══ 저장 — 시험별로 따로 (PRD §9) ══ */
@@ -1682,7 +1648,7 @@ function drawHome(){
     b.querySelector(".n").innerHTML = "<b></b><span></span>";
     b.querySelector("b").textContent = t.nm;
     b.querySelector(".n span").textContent = t.sub;
-    b.querySelector(".c").textContent =
+    b.querySelector(".c").textContent = !t.ready ? "준비 중" :
       (t.k === "word" ? POOL.filter(inScope).length :
        t.k === "verb" ? VPOOL.filter(inScope).length : PPOOL.length) + "항목";
     if (t.ready) b.addEventListener("click", function(){ cfg.test = t.k; drawHome(); });
@@ -1734,6 +1700,7 @@ function drawHome(){
         .map(function(x){ return x.word || x.kana; })
         .filter(function(w, i, a){ return a.indexOf(w) === i; }).join("·") +
     " — 본문 어휘에는 없습니다";
+  $("refOpt").hidden = !refCount();          /* 참고 항목이 없는 범위에서는 설정 자체를 숨긴다 */
 
   seg($("imeSeg"), ["raw", "hira", "kata"],
       function(v){ return v === "raw" ? "직접" : v === "hira" ? "あ" : "ア"; },
@@ -1752,14 +1719,14 @@ function drawHome(){
 
 function rangeItems(){
   if (cfg.test === "word")
-    return UNITS.map(function(u){
+    return UNITS_ON.map(function(u){
       var ws = POOL.filter(function(w){ return w.unit === u.code && inScope(w); });
       var due = ws.filter(function(w){ var d = dueIn(store.word[w.id], dayKey(Date.now())); return d !== null && d <= 0; }).length;
       return { k:u.code, nm:u.title.replace("6과 · ", ""), n:ws.length,
                note:u.pages + (u.now ? "" : " · 1회고사") + (due && cfg.word.range[u.code] ? " · 오늘 " + due : "") };
     });
   if (cfg.test === "phrase")
-    return PUNITS.map(function(u){
+    return PUNITS_ON.map(function(u){
       return { k:u.code, nm:u.title, note:u.pages + (u.now ? "" : " · 1회고사"),
                n:PPOOL.filter(function(x){ return x.unit === u.code; }).length };
     });

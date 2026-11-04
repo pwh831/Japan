@@ -35,130 +35,135 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   const allForms = E.FORMS.concat(E.ADJFORMS);
   const formOf = ask => (allForms.find(f => ask.indexOf(f.nm) === 0) || {}).k;
 
-  await p.click('.test >> nth=1'); await p.waitForTimeout(150);
-  await p.click('#startBtn'); await p.waitForTimeout(250);
+  /* 활용 시험은 2회고사 동사가 들어오기 전까지 닫혀 있다 — 열려 있을 때만 그 경로를 돌린다 */
+  const verbOpen = await p.$eval('.test >> nth=1', e => !e.disabled).catch(() => false);
+  if (!verbOpen) t((await p.textContent('.test:nth-child(2)')).includes('준비 중'), '활용 시험은 2회고사 범위 준비 중으로 닫혀 있다');
+  if (verbOpen) {
+    await p.click('.test >> nth=1'); await p.waitForTimeout(150);
+    await p.click('#startBtn'); await p.waitForTimeout(250);
 
-  let right = 0, typed = 0, checked = { H:0, J:0 };
-  for (let i = 0; i < 30; i++) {
-    if (await p.$eval('#result', e => !e.hidden)) break;
-    const ask  = (await p.textContent('#qBody .q-ask')).trim();
-    const main = (await p.textContent('#qBody .q-main')).trim();
-    const choicesOpen = await p.$eval('#choices', e => !e.hidden);
+    let right = 0, typed = 0, checked = { H:0, J:0 };
+    for (let i = 0; i < 30; i++) {
+      if (await p.$eval('#result', e => !e.hidden)) break;
+      const ask  = (await p.textContent('#qBody .q-ask')).trim();
+      const main = (await p.textContent('#qBody .q-main')).trim();
+      const choicesOpen = await p.$eval('#choices', e => !e.hidden);
 
-    if (choicesOpen) {                      // 유형 I — 정답 그룹을 눌러 본다
-      const v = byName[main];
-      await p.click(`#choices .choice:has-text("${v && v.group ? (v.group+'류') : '1류'}")`);
-      await p.waitForTimeout(120); await p.click('#fb .btn');
-    } else {
-      let want;
-      if (ask.indexOf('기본형은') >= 0) {   // 유형 J — 활용형 → 기본형
-        const cands = E.deconj(main, E.VERBS);
-        want = cands.length ? cands[0].kana : null; checked.J++;
-      } else {                              // 유형 H — 기본형 → 활용형
-        want = byName[main] ? E.anyConj(byName[main], formOf(ask)) : null; checked.H++;
+      if (choicesOpen) {                      // 유형 I — 정답 그룹을 눌러 본다
+        const v = byName[main];
+        await p.click(`#choices .choice:has-text("${v && v.group ? (v.group+'류') : '1류'}")`);
+        await p.waitForTimeout(120); await p.click('#fb .btn');
+      } else {
+        let want;
+        if (ask.indexOf('기본형은') >= 0) {   // 유형 J — 활용형 → 기본형
+          const cands = E.deconj(main, E.VERBS);
+          want = cands.length ? cands[0].kana : null; checked.J++;
+        } else {                              // 유형 H — 기본형 → 활용형
+          want = byName[main] ? E.anyConj(byName[main], formOf(ask)) : null; checked.H++;
+        }
+        if (!want) { await p.click('#skipBtn'); await p.waitForTimeout(100); await p.click('#submitBtn'); continue; }
+        await p.fill('#ans', want);
+        await p.click('#submitBtn'); await p.waitForTimeout(150);
+        const verdict = await p.textContent('#fb b').catch(() => '');
+        if (verdict === '정답') right++; else console.log('    ✗ ' + main + ' + ' + ask + ' → 입력 ' + want + ' 인데 ' + verdict);
+        typed++;
+        await p.click('#submitBtn');
       }
-      if (!want) { await p.click('#skipBtn'); await p.waitForTimeout(100); await p.click('#submitBtn'); continue; }
-      await p.fill('#ans', want);
-      await p.click('#submitBtn'); await p.waitForTimeout(150);
-      const verdict = await p.textContent('#fb b').catch(() => '');
-      if (verdict === '정답') right++; else console.log('    ✗ ' + main + ' + ' + ask + ' → 입력 ' + want + ' 인데 ' + verdict);
-      typed++;
-      await p.click('#submitBtn');
+      await p.waitForTimeout(120);
     }
-    await p.waitForTimeout(120);
-  }
-  t(typed > 0, '타이핑 문제 ' + typed + '개 (H ' + checked.H + ' · J ' + checked.J + ')');
-  t(right === typed, '엔진이 낸 정답이 앱 채점을 통과: ' + right + '/' + typed);
+    t(typed > 0, '타이핑 문제 ' + typed + '개 (H ' + checked.H + ' · J ' + checked.J + ')');
+    t(right === typed, '엔진이 낸 정답이 앱 채점을 통과: ' + right + '/' + typed);
 
-  // 참고 항목 — 기본으로 빠져 있어야 하고, 켜면 돌아와야 한다
-  await p.click('#homeBtn'); await p.waitForTimeout(150);
-  await p.evaluate(() => localStorage.clear());
-  await p.reload(); await p.waitForTimeout(400);
-  await p.click('.test >> nth=1'); await p.waitForTimeout(200);
-  const refOff = (await p.textContent('#startBtn')).match(/(\d+)항목/)[1] | 0;
-  t((await p.$eval('#refSeg button[aria-pressed="true"]', e => e.textContent.trim())) === '빼기',
-    '참고 항목은 기본으로 빠져 있다');
-  // 전부 다 풀어 보고 참고 항목이 한 번도 안 나오는지 본다
-  await p.click('#countSeg button >> nth=3');            // 전체
-  await p.click('#startBtn'); await p.waitForTimeout(250);
-  const seen = new Set();
-  for (let i = 0; i < 120; i++) {
-    if (await p.$eval('#result', e => !e.hidden)) break;
-    seen.add((await p.textContent('#qBody .q-main')).trim());
-    if (await p.$eval('#choices', e => !e.hidden)) {        // 고르기 문제
-      await p.click('#choices .choice >> nth=0'); await p.waitForTimeout(60);
-      await p.click('#fb .btn'); await p.waitForTimeout(60);
-    } else {                                                // 쓰기 문제
-      await p.click('#skipBtn'); await p.waitForTimeout(60);
-      await p.click('#submitBtn'); await p.waitForTimeout(60);
+    // 참고 항목 — 기본으로 빠져 있어야 하고, 켜면 돌아와야 한다
+    await p.click('#homeBtn'); await p.waitForTimeout(150);
+    await p.evaluate(() => localStorage.clear());
+    await p.reload(); await p.waitForTimeout(400);
+    await p.click('.test >> nth=1'); await p.waitForTimeout(200);
+    const refOff = (await p.textContent('#startBtn')).match(/(\d+)항목/)[1] | 0;
+    t((await p.$eval('#refSeg button[aria-pressed="true"]', e => e.textContent.trim())) === '빼기',
+      '참고 항목은 기본으로 빠져 있다');
+    // 전부 다 풀어 보고 참고 항목이 한 번도 안 나오는지 본다
+    await p.click('#countSeg button >> nth=3');            // 전체
+    await p.click('#startBtn'); await p.waitForTimeout(250);
+    const seen = new Set();
+    for (let i = 0; i < 120; i++) {
+      if (await p.$eval('#result', e => !e.hidden)) break;
+      seen.add((await p.textContent('#qBody .q-main')).trim());
+      if (await p.$eval('#choices', e => !e.hidden)) {        // 고르기 문제
+        await p.click('#choices .choice >> nth=0'); await p.waitForTimeout(60);
+        await p.click('#fb .btn'); await p.waitForTimeout(60);
+      } else {                                                // 쓰기 문제
+        await p.click('#skipBtn'); await p.waitForTimeout(60);
+        await p.click('#submitBtn'); await p.waitForTimeout(60);
+      }
     }
-  }
-  const refVs = E.VERBS.filter(v => v.ref);
-  const refKana = refVs.map(v => v.kana);
-  const refShown = new Set();                              // 기본형과 활용형 전부
-  refVs.forEach(v => { refShown.add(v.kana);
-    E.formsOf(v).forEach(f => refShown.add(E.anyConj(v, f.k))); });
-  const leaked = [...seen].filter(m => refShown.has(m));
-  t(leaked.length === 0, '참고 항목이 출제되지 않는다' + (leaked.length ? ' — 샌 것: ' + leaked : ''));
-  await p.click('#homeBtn'); await p.waitForTimeout(200);
-  await p.click('#refSeg button >> nth=1');              // 넣기
-  await p.waitForTimeout(150);
-  const refOn = (await p.textContent('#startBtn')).match(/(\d+)항목/)[1] | 0;
-  t(refOn === refOff + refKana.length,
-    '켜면 ' + refKana.length + '개가 돌아온다 (' + refOff + ' → ' + refOn + ')');
-  await p.click('#refSeg button >> nth=0'); await p.waitForTimeout(150);   // 다시 빼기
+    const refVs = E.VERBS.filter(v => v.ref);
+    const refKana = refVs.map(v => v.kana);
+    const refShown = new Set();                              // 기본형과 활용형 전부
+    refVs.forEach(v => { refShown.add(v.kana);
+      E.formsOf(v).forEach(f => refShown.add(E.anyConj(v, f.k))); });
+    const leaked = [...seen].filter(m => refShown.has(m));
+    t(leaked.length === 0, '참고 항목이 출제되지 않는다' + (leaked.length ? ' — 샌 것: ' + leaked : ''));
+    await p.click('#homeBtn'); await p.waitForTimeout(200);
+    await p.click('#refSeg button >> nth=1');              // 넣기
+    await p.waitForTimeout(150);
+    const refOn = (await p.textContent('#startBtn')).match(/(\d+)항목/)[1] | 0;
+    t(refOn === refOff + refKana.length,
+      '켜면 ' + refKana.length + '개가 돌아온다 (' + refOff + ' → ' + refOn + ')');
+    await p.click('#refSeg button >> nth=0'); await p.waitForTimeout(150);   // 다시 빼기
 
-  // 오답 경로: 일부러 틀리게 (예외 동사에 규칙만 적용한 답)
-  if (await p.$eval('#quiz', e => !e.hidden)) await p.click('#quitBtn');
-  else if (await p.$eval('#result', e => !e.hidden)) await p.click('#homeBtn');
-  await p.waitForTimeout(150);
-  await p.evaluate(() => localStorage.clear());
-  await p.reload(); await p.waitForTimeout(400);
-  await p.click('.test >> nth=1'); await p.waitForTimeout(150);
-  await p.click('#typeChips .chip >> nth=1'); // 그룹 고르기 끄기
-  await p.click('#typeChips .chip >> nth=2'); // 기본형 되찾기 끄기
-  await p.click('#startBtn'); await p.waitForTimeout(250);
-  const main2 = (await p.textContent('#qBody .q-main')).trim();
-  const ask2  = (await p.textContent('#qBody .q-ask')).trim();
-  const v2 = byName[main2], f2 = formOf(ask2);
-  const suf = (E.FORMS.find(f => f.k === f2) || {}).suffix;
-  const wrong = (v2 && v2.group === 1 && v2.kana.slice(-1) === 'る' && suf)
-      ? v2.kana.slice(0,-1) + suf       // かえる → かえます (규칙만 믿으면 나오는 틀린 답)
-      : 'さかな';
-  await p.fill('#ans', wrong);
-  await p.click('#submitBtn'); await p.waitForTimeout(200);
-  const fbTxt = await p.textContent('#fb');
-  t(/오답|다릅니다|맞았습니다/.test(fbTxt), '틀린 답이 오답으로 잡힘 (' + wrong + ')');
-
-  // 한 글자 차이면 되묻고 다시 쓰게 한다(정답 화면이 아직 안 나온다) — 확실히 틀린 답으로 한 번 더
-  if (!(await p.$('#fb .reveal'))) {
-    await p.fill('#ans', 'ぬぬぬぬぬ');
+    // 오답 경로: 일부러 틀리게 (예외 동사에 규칙만 적용한 답)
+    if (await p.$eval('#quiz', e => !e.hidden)) await p.click('#quitBtn');
+    else if (await p.$eval('#result', e => !e.hidden)) await p.click('#homeBtn');
+    await p.waitForTimeout(150);
+    await p.evaluate(() => localStorage.clear());
+    await p.reload(); await p.waitForTimeout(400);
+    await p.click('.test >> nth=1'); await p.waitForTimeout(150);
+    await p.click('#typeChips .chip >> nth=1'); // 그룹 고르기 끄기
+    await p.click('#typeChips .chip >> nth=2'); // 기본형 되찾기 끄기
+    await p.click('#startBtn'); await p.waitForTimeout(250);
+    const main2 = (await p.textContent('#qBody .q-main')).trim();
+    const ask2  = (await p.textContent('#qBody .q-ask')).trim();
+    const v2 = byName[main2], f2 = formOf(ask2);
+    const suf = (E.FORMS.find(f => f.k === f2) || {}).suffix;
+    const wrong = (v2 && v2.group === 1 && v2.kana.slice(-1) === 'る' && suf)
+        ? v2.kana.slice(0,-1) + suf       // かえる → かえます (규칙만 믿으면 나오는 틀린 답)
+        : 'さかな';
+    await p.fill('#ans', wrong);
     await p.click('#submitBtn'); await p.waitForTimeout(200);
-  }
-  await p.click('#submitBtn'); await p.waitForTimeout(200);   // 다음 문제로
+    const fbTxt = await p.textContent('#fb');
+    t(/오답|다릅니다|맞았습니다/.test(fbTxt), '틀린 답이 오답으로 잡힘 (' + wrong + ')');
 
-  // 한 글자 빗나갔다가 다시 맞게 쓴 경우 — 점수는 안 주더라도 '오답' 이라 부르면 안 된다
-  const main3 = (await p.textContent('#qBody .q-main')).trim();
-  const ask3  = (await p.textContent('#qBody .q-ask')).trim();
-  const want3 = byName[main3] ? E.anyConj(byName[main3], formOf(ask3)) : null;
-  if (want3 && want3.length > 2) {
-    await p.fill('#ans', want3.slice(0, -1));                 // lev 1 → 되묻고 다시 쓰게 한다
-    await p.click('#submitBtn'); await p.waitForTimeout(200);
-    t(!(await p.$('#fb .reveal')), '한 글자 차이는 바로 끝내지 않고 다시 쓰게 한다');
-    await p.fill('#ans', want3);                              // 이번엔 맞게
-    await p.click('#submitBtn'); await p.waitForTimeout(200);
-    const verdict3 = (await p.textContent('#fb b')).trim();
-    t(verdict3 === '맞게 썼습니다',
-      '맞게 쓴 답을 오답이라 부르지 않는다 (' + want3 + ' → "' + verdict3 + '")');
-    t(/점수에는 안 들어갑니다/.test(await p.textContent('#fb')), '점수에 안 들어가는 이유를 말해 준다');
-  }
+    // 한 글자 차이면 되묻고 다시 쓰게 한다(정답 화면이 아직 안 나온다) — 확실히 틀린 답으로 한 번 더
+    if (!(await p.$('#fb .reveal'))) {
+      await p.fill('#ans', 'ぬぬぬぬぬ');
+      await p.click('#submitBtn'); await p.waitForTimeout(200);
+    }
+    await p.click('#submitBtn'); await p.waitForTimeout(200);   // 다음 문제로
 
-  // 한국어 발음 — 정답 화면에만, 문제 화면에는 없어야 한다
-  const pronRows = await p.$$eval('#fb .pron', e => e.map(x => x.textContent.trim()).filter(Boolean));
-  t(pronRows.length > 0, '정답 화면에 한국어 발음이 붙는다 (' + pronRows.slice(0,3).join(' · ') + ')');
-  t(pronRows.every(x => /^[가-힣\s·ー、。!?！？~～]+$/.test(x)), '발음 줄에 가나·한자가 남지 않았다');
-  await p.click('#submitBtn'); await p.waitForTimeout(200);
-  t(await p.$$eval('#qBody .pron', e => e.length) === 0, '문제 화면에는 발음이 없다 (읽기 연습이 사라지지 않게)');
+    // 한 글자 빗나갔다가 다시 맞게 쓴 경우 — 점수는 안 주더라도 '오답' 이라 부르면 안 된다
+    const main3 = (await p.textContent('#qBody .q-main')).trim();
+    const ask3  = (await p.textContent('#qBody .q-ask')).trim();
+    const want3 = byName[main3] ? E.anyConj(byName[main3], formOf(ask3)) : null;
+    if (want3 && want3.length > 2) {
+      await p.fill('#ans', want3.slice(0, -1));                 // lev 1 → 되묻고 다시 쓰게 한다
+      await p.click('#submitBtn'); await p.waitForTimeout(200);
+      t(!(await p.$('#fb .reveal')), '한 글자 차이는 바로 끝내지 않고 다시 쓰게 한다');
+      await p.fill('#ans', want3);                              // 이번엔 맞게
+      await p.click('#submitBtn'); await p.waitForTimeout(200);
+      const verdict3 = (await p.textContent('#fb b')).trim();
+      t(verdict3 === '맞게 썼습니다',
+        '맞게 쓴 답을 오답이라 부르지 않는다 (' + want3 + ' → "' + verdict3 + '")');
+      t(/점수에는 안 들어갑니다/.test(await p.textContent('#fb')), '점수에 안 들어가는 이유를 말해 준다');
+    }
+
+    // 한국어 발음 — 정답 화면에만, 문제 화면에는 없어야 한다
+    const pronRows = await p.$$eval('#fb .pron', e => e.map(x => x.textContent.trim()).filter(Boolean));
+    t(pronRows.length > 0, '정답 화면에 한국어 발음이 붙는다 (' + pronRows.slice(0,3).join(' · ') + ')');
+    t(pronRows.every(x => /^[가-힣\s·ー、。!?！？~～]+$/.test(x)), '발음 줄에 가나·한자가 남지 않았다');
+    await p.click('#submitBtn'); await p.waitForTimeout(200);
+    t(await p.$$eval('#qBody .pron', e => e.length) === 0, '문제 화면에는 발음이 없다 (읽기 연습이 사라지지 않게)');
+  }
 
   // ── 시험 2 · 표현 ──
   /* 어느 화면에 있든 홈으로 — 퀴즈 중이면 그만두기, 결과면 처음으로 */
@@ -168,7 +173,8 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   t(await p.$eval('#home', e => !e.hidden), '홈으로 돌아왔다');
   await p.click('.test >> nth=2'); await p.waitForTimeout(200);
   const pRange = await p.$$eval('#rangeChips .chip span:first-child', e => e.map(x => x.textContent));
-  t(pRange.length === E.PUNITS.length, '표현 범위 ' + E.PUNITS.length + '개 (교재 쪽): ' + pRange.join(' '));
+  const pNowN = E.PUNITS.filter(u => u.now).length;
+  t(pRange.length === pNowN, '표현 범위는 2회고사 ' + pNowN + '개만 — 1회고사는 안 보인다: ' + pRange.join(' · '));
   const pOn = await p.$$eval('#rangeChips .chip[aria-pressed="true"] span:first-child', e => e.map(x => x.textContent));
   t(pOn.length === E.PUNITS.filter(u => u.now).length, '표현도 지금 진도 범위만 켜고 시작: ' + pOn.join(' · '));
   const pTypes = await p.$$eval('#typeChips .chip span:first-child', e => e.map(x => x.textContent));
@@ -240,6 +246,7 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
     '처음엔 지금 진도 쪽 전부가 오늘 할 것: ' + (await p.textContent('#todayNote')));
   const pressed = await p.$$eval('#rangeChips .chip[aria-pressed="true"] span:first-child', e => e.map(x => x.textContent));
   t(pressed.length === nowUnits.length, '기본 범위는 지금 진도 쪽만: ' + pressed.join(','));
+  t((await p.$$('#rangeChips .chip')).length === nowUnits.length, '단어 범위에도 1회고사 쪽이 안 보인다');
 
   const findW = m => nowWords.find(w => w.meaning.join(', ') === m);
   const runToday = async (plan) => {

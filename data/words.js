@@ -25,8 +25,7 @@ var UNITS = [
   { code:"k85", title:"5과 · 안내 로봇", pages:"교과서 85쪽", now:true },
   { code:"k87", title:"5과 · 해 볼래? 할 수 있어?", pages:"교과서 87쪽", now:true },
   { code:"k88", title:"5과 · 날씨 전언", pages:"교과서 88쪽", now:true },
-  { code:"k89", title:"5과 · 캐스터 체험", pages:"교과서 89쪽", now:true },
-  { code:"k91", title:"5과 · 어땠어요? 해도 돼요?", pages:"교과서 91·92쪽", now:true }
+  { code:"k89", title:"5과 · 캐스터 체험", pages:"교과서 89쪽", now:true }
 ];
 
 var WORDS = [
@@ -310,15 +309,7 @@ var WORDS = [
     note:"1류 · しゃしんを する (X) — 90쪽 확인" },
   { id:"w551", unit:"k89", pos:"감동사", word:"ええ", kana:"ええ", meaning:["네"] },
   { id:"w552", unit:"k89", pos:"명사", word:"サイン", kana:"サイン", meaning:["사인"],
-    examples:[{ ja:"ここに サインも おねがいします。", ko:"여기에 사인도 부탁합니다." }] },
-
-  /* ═══ 교과서 5과 91·92쪽 ことば (みんなで はなそう 2 · たのしく みんなで) ═══ */
-  { id:"w553", unit:"k91", pos:"표현", word:"どうでしたか", kana:"どうでしたか", meaning:["어땠습니까?"] },
-  { id:"w554", unit:"k91", pos:"명사", word:"アニメ", kana:"アニメ", meaning:["애니메이션"] },
-  { id:"w555", unit:"k91", pos:"동사", word:"かりる", kana:"かりる", meaning:["빌리다"], note:"2류 · かりても いいですか" },
-  { id:"w556", unit:"k91", pos:"동사", word:"はいる", kana:"はいる", meaning:["들어가다"], note:"★ 예외 1류 · はいっても いいですか" },
-  { id:"w557", unit:"k91", pos:"동사", word:"のむ", kana:"のむ", meaning:["마시다"], note:"1류 · のんでも いいですか (92쪽)" },
-  { id:"w558", unit:"k91", pos:"명사", word:"ジュース", kana:"ジュース", meaning:["주스"] }
+    examples:[{ ja:"ここに サインも おねがいします。", ko:"여기에 사인도 부탁합니다." }] }
 ];
 
 /* skip:true 인 항목은 출제에서 빠집니다 — 단어장에 두 번 나온 낱말(あらう·けす)의

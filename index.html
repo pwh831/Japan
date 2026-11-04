@@ -826,9 +826,15 @@ var TESTS = [
 ];
 function T(){ var i; for (i=0;i<TESTS.length;i++) if (TESTS[i].k===cfg.test) return TESTS[i]; }
 
-var POOL = WORDS.filter(function(w){ return !w.skip; });
-var VPOOL = VERBS.concat(ADJS);
-var PPOOL = PHRASES;
+/* 지금 시험(now) 범위만 앱에 낸다 — 1회고사 데이터는 파일에 남기되(엔진 테스트·출제실이 쓴다) 앱에서는 뺀다.
+   동사는 아직 2회고사 범위가 없어 활용 시험은 '준비 중' 으로 닫는다. */
+var UNITS_ON = UNITS.filter(function(u){ return u.now; });
+var PUNITS_ON = PUNITS.filter(function(u){ return u.now; });
+function onUnit(list, code){ return list.some(function(u){ return u.code === code; }); }
+var POOL = WORDS.filter(function(w){ return !w.skip && onUnit(UNITS_ON, w.unit); });
+var VPOOL = VERBS.concat(ADJS).filter(function(v){ return v.now; });
+var PPOOL = PHRASES.filter(function(x){ return onUnit(PUNITS_ON, x.unit); });
+TESTS.forEach(function(t){ if (t.k === "verb" && !VPOOL.length){ t.ready = false; t.sub = "2회고사 범위 준비 중"; } });
 /* 철자 고르기 — 바꾼 철자가 범위 안 다른 낱말·동사와 같으면 답이 둘이 된다 */
 var SPELL_AVOID = WORDS.map(function(w){ return w.kana; }).concat(VERBS.map(function(v){ return v.kana; }), ADJS.map(function(a){ return a.kana; }));
 function spellable(w){ var k = norm(w.kana); return k.length >= 2 && k.length <= 12 && spellVariants(w.kana, 4, SPELL_AVOID).length === 4; }
@@ -840,8 +846,8 @@ var cfg = {
   phrase:{ range:{}, types:{ D:1, E:1, F:1, G:1 } }
 };
 /* 지금 진도(now) 쪽만 켜 둔다 — 1회고사 단어장은 남겨 두되 처음엔 끈다 */
-UNITS.forEach(function(u){ cfg.word.range[u.code] = u.now ? 1 : 0; });
-PUNITS.forEach(function(u){ cfg.phrase.range[u.code] = u.now ? 1 : 0; });
+UNITS_ON.forEach(function(u){ cfg.word.range[u.code] = 1; });
+PUNITS_ON.forEach(function(u){ cfg.phrase.range[u.code] = 1; });
 function C(){ return cfg[cfg.test]; }
 
 /* ══ 저장 — 시험별로 따로 (PRD §9) ══ */
@@ -889,7 +895,7 @@ function drawHome(){
     b.querySelector(".n").innerHTML = "<b></b><span></span>";
     b.querySelector("b").textContent = t.nm;
     b.querySelector(".n span").textContent = t.sub;
-    b.querySelector(".c").textContent =
+    b.querySelector(".c").textContent = !t.ready ? "준비 중" :
       (t.k === "word" ? POOL.filter(inScope).length :
        t.k === "verb" ? VPOOL.filter(inScope).length : PPOOL.length) + "항목";
     if (t.ready) b.addEventListener("click", function(){ cfg.test = t.k; drawHome(); });
@@ -941,6 +947,7 @@ function drawHome(){
         .map(function(x){ return x.word || x.kana; })
         .filter(function(w, i, a){ return a.indexOf(w) === i; }).join("·") +
     " — 본문 어휘에는 없습니다";
+  $("refOpt").hidden = !refCount();          /* 참고 항목이 없는 범위에서는 설정 자체를 숨긴다 */
 
   seg($("imeSeg"), ["raw", "hira", "kata"],
       function(v){ return v === "raw" ? "직접" : v === "hira" ? "あ" : "ア"; },
@@ -959,14 +966,14 @@ function drawHome(){
 
 function rangeItems(){
   if (cfg.test === "word")
-    return UNITS.map(function(u){
+    return UNITS_ON.map(function(u){
       var ws = POOL.filter(function(w){ return w.unit === u.code && inScope(w); });
       var due = ws.filter(function(w){ var d = dueIn(store.word[w.id], dayKey(Date.now())); return d !== null && d <= 0; }).length;
       return { k:u.code, nm:u.title.replace("6과 · ", ""), n:ws.length,
                note:u.pages + (u.now ? "" : " · 1회고사") + (due && cfg.word.range[u.code] ? " · 오늘 " + due : "") };
     });
   if (cfg.test === "phrase")
-    return PUNITS.map(function(u){
+    return PUNITS_ON.map(function(u){
       return { k:u.code, nm:u.title, note:u.pages + (u.now ? "" : " · 1회고사"),
                n:PPOOL.filter(function(x){ return x.unit === u.code; }).length };
     });
