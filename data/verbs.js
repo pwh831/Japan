@@ -134,25 +134,27 @@ var GROUP_NM = { 1:"1류", 2:"2류", 3:"3류" };
          + 교과서 5과 90쪽 표. 낱말은 학습지 아래 표 10개 + 단어장에서 89쪽까지 배운 い형용사.
    1회고사 ADJS(부정·연결·과거)와 따로 둔다 — 출제실이 ADJS 를 그대로 쓰기 때문이다.
    ★ 선생님 필기: ～かったでした · ～だったです 같은 표현은 없다.
-   ★ いい(좋다)는 よい 로 활용 — よく ない · よく なかった · よかった. */
+   ★ いい(좋다)는 よい 로 활용 — よく ない · よく なかった · よかった.
+   pg 는 교과서 쪽: 본문에 나온 쪽(からい 87 · あつい 등 88 · おもしろかった·じょうずだった 89 ·
+   たのしい·こわい 91), 학습지에만 있는 것은 형용사 과거 표현 표가 있는 90쪽. */
 var ADJS2 = [
-  { id:"b01", kana:"おいしい",   word:"おいしい",   meaning:["맛있다"] },
-  { id:"b02", kana:"おもしろい", word:"おもしろい", meaning:["재미있다"] },
-  { id:"b03", kana:"たのしい",   word:"たのしい",   meaning:["즐겁다"] },
-  { id:"b04", kana:"こわい",     word:"こわい",     meaning:["무섭다"] },
-  { id:"b05", kana:"いい",       word:"いい",       meaning:["좋다", "괜찮다"], irregular:true,
+  { id:"b01", pg:90, kana:"おいしい",   word:"おいしい",   meaning:["맛있다"] },
+  { id:"b02", pg:89, kana:"おもしろい", word:"おもしろい", meaning:["재미있다"] },
+  { id:"b03", pg:91, kana:"たのしい",   word:"たのしい",   meaning:["즐겁다"] },
+  { id:"b04", pg:91, kana:"こわい",     word:"こわい",     meaning:["무섭다"] },
+  { id:"b05", pg:90, kana:"いい",       word:"いい",       meaning:["좋다", "괜찮다"], irregular:true,
     forms:{ neg:"よく ない", past:"よかった", pastp:"よかったです", negpast:"よく なかった", negpastp:"よく なかったです" },
     note:"★ よい 로 활용 — いく ない · いかった 가 아니다" },
-  { id:"b06", kana:"からい",     word:"辛い",       meaning:["맵다"] },
-  { id:"b07", kana:"あつい",     word:"暑い",       meaning:["덥다"] },
-  { id:"b08", kana:"あたたかい", word:"あたたかい", meaning:["따뜻하다"] },
-  { id:"b09", kana:"すずしい",   word:"すずしい",   meaning:["시원하다"] },
-  { id:"b10", kana:"さむい",     word:"さむい",     meaning:["춥다"] },
-  { id:"b11", kana:"すきだ",     word:"好きだ",     meaning:["좋아하다"], na:true },
-  { id:"b12", kana:"きれいだ",   word:"きれいだ",   meaning:["예쁘다"], na:true },
-  { id:"b13", kana:"たいへんだ", word:"たいへんだ", meaning:["힘들다"], na:true },
-  { id:"b14", kana:"じょうずだ", word:"上手だ",     meaning:["잘하다"], na:true },
-  { id:"b15", kana:"しずかだ",   word:"しずかだ",   meaning:["조용하다"], na:true }
+  { id:"b06", pg:87, kana:"からい",     word:"辛い",       meaning:["맵다"] },
+  { id:"b07", pg:88, kana:"あつい",     word:"暑い",       meaning:["덥다"] },
+  { id:"b08", pg:88, kana:"あたたかい", word:"あたたかい", meaning:["따뜻하다"] },
+  { id:"b09", pg:88, kana:"すずしい",   word:"すずしい",   meaning:["시원하다"] },
+  { id:"b10", pg:88, kana:"さむい",     word:"さむい",     meaning:["춥다"] },
+  { id:"b11", pg:90, kana:"すきだ",     word:"好きだ",     meaning:["좋아하다"], na:true },
+  { id:"b12", pg:90, kana:"きれいだ",   word:"きれいだ",   meaning:["예쁘다"], na:true },
+  { id:"b13", pg:90, kana:"たいへんだ", word:"たいへんだ", meaning:["힘들다"], na:true },
+  { id:"b14", pg:89, kana:"じょうずだ", word:"上手だ",     meaning:["잘하다"], na:true },
+  { id:"b15", pg:90, kana:"しずかだ",   word:"しずかだ",   meaning:["조용하다"], na:true }
 ];
 
 /* 2회고사 형용사의 형. 과거 부정이 가장 틀리기 쉽다(부정문으로 바꾼 뒤 과거형 — 단어장 2쪽 ★). */

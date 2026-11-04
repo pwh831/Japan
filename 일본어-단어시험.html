@@ -100,6 +100,16 @@ p{margin:0}
 .plan-head h2{margin:0;font-size:17px;font-weight:700}
 #todayNote{font-size:13px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
 .plan-rows{display:flex;flex-direction:column;border-top:1px solid var(--edge-soft)}
+.upto{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;padding:0 18px 14px;margin:0}
+.upto label{font-size:13px;font-weight:600;color:var(--ink-soft)}
+.upto-field{display:inline-flex;align-items:baseline;gap:6px;font-size:13px;color:var(--ink-soft)}
+.upto input{font:inherit;font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:16px;font-weight:500;
+            width:4.2em;padding:5px 8px;border:1px solid var(--edge);border-radius:3px;
+            background:var(--paper);color:var(--ink);text-align:center}
+.upto input:focus-visible{outline:2px solid var(--rule);outline-offset:1px}
+.upto .btn{padding:5px 12px;font-size:13px}
+.upto small{flex-basis:100%;font-size:12px;color:var(--ink-faint)}
+.upto small.warn{color:var(--shu)}
 .plan-row{display:grid;grid-template-columns:minmax(0,1fr) 92px 44px;align-items:center;gap:14px;
           padding:11px 18px;border-bottom:1px solid var(--edge-soft)}
 .plan-row .pn{display:flex;flex-direction:column;min-width:0}
@@ -258,6 +268,13 @@ footer b{color:var(--ink-soft);font-weight:600}
       <h2 id="planTitle">오늘 공부</h2>
       <span id="todayNote"></span>
     </div>
+    <form class="upto" id="uptoForm" autocomplete="off">
+      <label for="uptoIn">진도</label>
+      <span class="upto-field"><input id="uptoIn" type="number" inputmode="numeric" min="1" max="999" step="1"
+        aria-describedby="uptoHint"><span>쪽까지</span></span>
+      <button class="btn" id="uptoBtn" type="submit">적용</button>
+      <small id="uptoHint"></small>
+    </form>
     <div class="plan-rows" id="planRows"></div>
     <div class="plan-foot">
       <div class="row">
@@ -972,25 +989,27 @@ var GROUP_NM = { 1:"1류", 2:"2류", 3:"3류" };
          + 교과서 5과 90쪽 표. 낱말은 학습지 아래 표 10개 + 단어장에서 89쪽까지 배운 い형용사.
    1회고사 ADJS(부정·연결·과거)와 따로 둔다 — 출제실이 ADJS 를 그대로 쓰기 때문이다.
    ★ 선생님 필기: ～かったでした · ～だったです 같은 표현은 없다.
-   ★ いい(좋다)는 よい 로 활용 — よく ない · よく なかった · よかった. */
+   ★ いい(좋다)는 よい 로 활용 — よく ない · よく なかった · よかった.
+   pg 는 교과서 쪽: 본문에 나온 쪽(からい 87 · あつい 등 88 · おもしろかった·じょうずだった 89 ·
+   たのしい·こわい 91), 학습지에만 있는 것은 형용사 과거 표현 표가 있는 90쪽. */
 var ADJS2 = [
-  { id:"b01", kana:"おいしい",   word:"おいしい",   meaning:["맛있다"] },
-  { id:"b02", kana:"おもしろい", word:"おもしろい", meaning:["재미있다"] },
-  { id:"b03", kana:"たのしい",   word:"たのしい",   meaning:["즐겁다"] },
-  { id:"b04", kana:"こわい",     word:"こわい",     meaning:["무섭다"] },
-  { id:"b05", kana:"いい",       word:"いい",       meaning:["좋다", "괜찮다"], irregular:true,
+  { id:"b01", pg:90, kana:"おいしい",   word:"おいしい",   meaning:["맛있다"] },
+  { id:"b02", pg:89, kana:"おもしろい", word:"おもしろい", meaning:["재미있다"] },
+  { id:"b03", pg:91, kana:"たのしい",   word:"たのしい",   meaning:["즐겁다"] },
+  { id:"b04", pg:91, kana:"こわい",     word:"こわい",     meaning:["무섭다"] },
+  { id:"b05", pg:90, kana:"いい",       word:"いい",       meaning:["좋다", "괜찮다"], irregular:true,
     forms:{ neg:"よく ない", past:"よかった", pastp:"よかったです", negpast:"よく なかった", negpastp:"よく なかったです" },
     note:"★ よい 로 활용 — いく ない · いかった 가 아니다" },
-  { id:"b06", kana:"からい",     word:"辛い",       meaning:["맵다"] },
-  { id:"b07", kana:"あつい",     word:"暑い",       meaning:["덥다"] },
-  { id:"b08", kana:"あたたかい", word:"あたたかい", meaning:["따뜻하다"] },
-  { id:"b09", kana:"すずしい",   word:"すずしい",   meaning:["시원하다"] },
-  { id:"b10", kana:"さむい",     word:"さむい",     meaning:["춥다"] },
-  { id:"b11", kana:"すきだ",     word:"好きだ",     meaning:["좋아하다"], na:true },
-  { id:"b12", kana:"きれいだ",   word:"きれいだ",   meaning:["예쁘다"], na:true },
-  { id:"b13", kana:"たいへんだ", word:"たいへんだ", meaning:["힘들다"], na:true },
-  { id:"b14", kana:"じょうずだ", word:"上手だ",     meaning:["잘하다"], na:true },
-  { id:"b15", kana:"しずかだ",   word:"しずかだ",   meaning:["조용하다"], na:true }
+  { id:"b06", pg:87, kana:"からい",     word:"辛い",       meaning:["맵다"] },
+  { id:"b07", pg:88, kana:"あつい",     word:"暑い",       meaning:["덥다"] },
+  { id:"b08", pg:88, kana:"あたたかい", word:"あたたかい", meaning:["따뜻하다"] },
+  { id:"b09", pg:88, kana:"すずしい",   word:"すずしい",   meaning:["시원하다"] },
+  { id:"b10", pg:88, kana:"さむい",     word:"さむい",     meaning:["춥다"] },
+  { id:"b11", pg:90, kana:"すきだ",     word:"好きだ",     meaning:["좋아하다"], na:true },
+  { id:"b12", pg:90, kana:"きれいだ",   word:"きれいだ",   meaning:["예쁘다"], na:true },
+  { id:"b13", pg:90, kana:"たいへんだ", word:"たいへんだ", meaning:["힘들다"], na:true },
+  { id:"b14", pg:89, kana:"じょうずだ", word:"上手だ",     meaning:["잘하다"], na:true },
+  { id:"b15", pg:90, kana:"しずかだ",   word:"しずかだ",   meaning:["조용하다"], na:true }
 ];
 
 /* 2회고사 형용사의 형. 과거 부정이 가장 틀리기 쉽다(부정문으로 바꾼 뒤 과거형 — 단어장 2쪽 ★). */
@@ -1210,52 +1229,52 @@ var PHRASES = [
 
   /* ═══ 교과서 5과 Topic 1 (84~87쪽) — 본문은 85쪽 ═══ */
   /* 대비로 내지 않는다 — 뜻을 가리면 おしえて みるよ 도 문법상 맞아 답이 둘이 된다 */
-  { id:"p34", unit:"q6", kind:"표현",
+  { id:"p34", pg:85, unit:"q6", kind:"표현",
     ja:"この ロボット、いろいろ おしえて くれるよ。", ko:"이 로봇, 여러 가지 가르쳐 줘.",
     use:"남이 나에게 해 줄 때 (～て くれる — ～て みる 는 '해 보다')", key:"くれる",
     note:"교과서 5과 85·86쪽 · 86쪽 확인: おしえて くれる (みる X)" },
 
-  { id:"p35", unit:"q6", kind:"표현",
+  { id:"p35", pg:84, unit:"q6", kind:"표현",
     ja:"かんじを よむ ことが できますか。", ko:"한자를 읽을 수 있습니까?",
     use:"할 수 있는지 물을 때 (기본형＋ことが できますか — 답은 はい、できます / いいえ、できません)",
     key:"できますか", note:"교과서 5과 84·86쪽" },
 
-  { id:"p36", unit:"q6", kind:"표현",
+  { id:"p36", pg:85, unit:"q6", kind:"표현",
     ja:"ぼくも サッカーせんしゅに なる ことが できるか 聞いて みる。",
     kana:"ぼくも サッカーせんしゅに なる ことが できるか きいて みる。",
     ko:"나도 축구 선수가 될 수 있는지 물어볼래.",
     use:"될 수 있는지 물어보겠다고 할 때 (～に なる ことが できるか)", key:"ことが",
     note:"교과서 5과 85쪽 ⑧ · 선생님: 서답형 ★ · 86쪽 확인: なる ことが できる (する X)" },
 
-  { id:"p37", unit:"q6", kind:"표현",
+  { id:"p37", pg:85, unit:"q6", kind:"표현",
     ja:"この ロボットに ニュース スタジオの ばしょを 聞いて みる?",
     kana:"この ロボットに ニュース スタジオの ばしょを きいて みる?",
     ko:"이 로봇에게 뉴스 스튜디오의 장소를 물어볼래?",
     use:"해 보자고 제안할 때 (～て みる?)", key:"に",
     note:"교과서 5과 85쪽 ② · 필기: に 별표 (~에게)" },
 
-  { id:"p38", unit:"q6", kind:"표현",
+  { id:"p38", pg:85, unit:"q6", kind:"표현",
     ja:"がめんに タッチするか、話しかけてね。", kana:"がめんに タッチするか、はなしかけてね。",
     ko:"화면을 터치하거나 말을 걸어 줘.",
     use:"둘 중 하나를 하라고 할 때 (～か ~거나)", key:"か、", note:"교과서 5과 85쪽 ④" },
 
-  { id:"p39", unit:"q6", kind:"표현",
+  { id:"p39", pg:85, unit:"q6", kind:"표현",
     ja:"それは おしえて くれないと おもうけど……。", ko:"그건 가르쳐 주지 않을 것 같은데…….",
     use:"자기 생각을 조심스럽게 말할 때 (～と おもう)", key:"と おもう",
     note:"교과서 5과 85쪽 ⑨ · 필기: と 빈칸 조심" },
 
-  { id:"p40", unit:"q6", kind:"표현",
+  { id:"p40", pg:85, unit:"q6", kind:"표현",
     ja:"ユミちゃん、ノアくん、何 して いるの?", kana:"ユミちゃん、ノアくん、なに して いるの?",
     ko:"유미야, 노아야, 뭐 하고 있어?",
     use:"지금 뭘 하고 있는지 물을 때 (する → して いるの?)", key:"して いるの",
     note:"교과서 5과 85쪽 ⑥ · 필기: する + て いる (상태·진행)" },
 
-  { id:"p41", unit:"q6", kind:"표현",
+  { id:"p41", pg:87, unit:"q6", kind:"표현",
     ja:"この からい トッポッキ たべて みる?", ko:"이 매운 떡볶이 먹어 볼래?",
     use:"먹어 보자고 권할 때 (たべる → たべて みる)", key:"たべて", note:"교과서 5과 87쪽 1번" },
 
   /* ═══ 교과서 5과 Topic 2 (88~92쪽) — 본문은 89쪽 ═══ */
-  { id:"p42", unit:"q7", kind:"대비",
+  { id:"p42", pg:89, unit:"q7", kind:"대비",
     ja:"この あつさは 8月まつまで つづくそうです。", kana:"この あつさは はちがつまつまで つづくそうです。",
     ko:"이 더위는 8월 말까지 계속된다고 합니다.",
     use:"'더위'라는 명사를 쓸 때 (あつい → あつさ)", key:"あつさ",
@@ -1263,35 +1282,35 @@ var PHRASES = [
          why:"'더위'(명사)는 あつさ — い 를 さ 로, '덥다'(형용사)는 あつい — 90쪽 확인" },
     note:"교과서 5과 88·89·90쪽" },
 
-  { id:"p43", unit:"q7", kind:"표현",
+  { id:"p43", pg:88, unit:"q7", kind:"표현",
     ja:"あしたは さむい そうです。", ko:"내일은 춥다고 합니다.",
     use:"들은 정보를 전할 때 (기본형＋そうです)", key:"そうです",
     note:"교과서 5과 88쪽 2번 · 필기: 기본형 + そうだ, 형용사·동사 둘 다" },
 
-  { id:"p45", unit:"q7", kind:"표현",
+  { id:"p45", pg:89, unit:"q7", kind:"표현",
     ja:"すごく 上手だったよ。", kana:"すごく じょうずだったよ。", ko:"굉장히 잘했어.",
     use:"な형용사 과거로 칭찬할 때 (～だった — 부정은 ～じゃ なかった)", key:"だった",
     note:"교과서 5과 89쪽 ④ · 90쪽 표" },
 
-  { id:"p46", unit:"q7", kind:"표현",
+  { id:"p46", pg:89, unit:"q7", kind:"표현",
     ja:"いっしょに 写真を とっても いいですか。", kana:"いっしょに しゃしんを とっても いいですか。",
     ko:"같이 사진을 찍어도 됩니까?",
     use:"해도 되는지 허락을 구할 때 (～ても いいですか)", key:"とっても",
     note:"교과서 5과 89쪽 ⑩ · とる → とって → とっても · しゃしんを する (X)" },
 
-  { id:"p47", unit:"q7", kind:"표현",
+  { id:"p47", pg:89, unit:"q7", kind:"표현",
     ja:"ええ、いいですよ。", ko:"네, 좋아요.",
     use:"해도 되냐는 물음에 허락할 때", key:"いいですよ", note:"교과서 5과 89쪽 ⑪" },
 
-  { id:"p52", unit:"q7", kind:"표현",
+  { id:"p52", pg:89, unit:"q7", kind:"표현",
     ja:"ユミちゃん、アナウンサーみたい。", ko:"유미야, 아나운서 같아.",
     use:"~같다고 할 때 (명사＋みたい)", key:"みたい", note:"교과서 5과 89쪽 ③" },
 
-  { id:"p53", unit:"q7", kind:"표현",
+  { id:"p53", pg:89, unit:"q7", kind:"표현",
     ja:"きんちょうして、うまく よむ ことが できなかった。", ko:"긴장해서 잘 못 읽었어.",
     use:"~할 수 없었다고 할 때 (～ことが できなかった)", key:"できなかった", note:"교과서 5과 89쪽 ⑤" },
 
-  { id:"p55", unit:"q7", kind:"표현",
+  { id:"p55", pg:89, unit:"q7", kind:"표현",
     ja:"みなさん、からだに 気を つけて ください。", kana:"みなさん、からだに きを つけて ください。",
     ko:"여러분, 몸조심하세요.",
     use:"몸조심하라고 할 때", key:"からだに", note:"교과서 5과 89쪽 ② · 필기: に 별표" }
@@ -1795,26 +1814,39 @@ function T(){ var i; for (i=0;i<TESTS.length;i++) if (TESTS[i].k===cfg.test) ret
 
 /* 지금 시험(now) 범위만 앱에 낸다 — 1회고사 데이터는 파일에 남기되(엔진 테스트·출제실이 쓴다) 앱에서는 뺀다.
    동사는 아직 2회고사 범위가 없어 활용 시험은 '준비 중' 으로 닫는다. */
-var UNITS_ON = UNITS.filter(function(u){ return u.now; });
-var PUNITS_ON = PUNITS.filter(function(u){ return u.now; });
 function onUnit(list, code){ return list.some(function(u){ return u.code === code; }); }
-/* 단어장 항목은 교과서 쪽(pg)이 지금 진도(UPTO)까지인 것만 — 아직 안 배운 쪽은 데이터에만 있다 */
-function taught(w){ return w.pg === undefined || (w.pg !== null && w.pg <= UPTO); }
-var POOL = WORDS.filter(function(w){ return !w.skip && onUnit(UNITS_ON, w.unit) && taught(w); });
-UNITS_ON = UNITS_ON.filter(function(u){ return POOL.some(function(w){ return w.unit === u.code; }); });
-var VPOOL = VERBS.concat(ADJS).filter(function(v){ return v.now; }).concat(ADJS2);
-var HAS_VERB = VPOOL.some(function(v){ return !isAdj(v); });
-var PPOOL = PHRASES.filter(function(x){ return onUnit(PUNITS_ON, x.unit); });
-TESTS.forEach(function(t){
-  if (t.k !== "verb") return;
-  if (!VPOOL.length){ t.ready = false; t.sub = "2회고사 범위 준비 중"; return; }
-  if (!HAS_VERB){
-    /* 아직 형용사뿐 — 동사 유형(그룹 고르기)은 뺀다 */
-    t.nm = "활용"; t.sub = "い·な형용사 부정형·과거형";
-    t.types = t.types.filter(function(x){ return x.k !== "I"; });
-    t.master = "활용형을 직접 써서 서로 다른 날 3번 확실히 맞히고 첫날로부터 7일이 지나야 숙달입니다. ～かったでした · ～だったです 는 없는 말입니다 (선생님).";
+
+/* ══ 진도 — 교과서 이 쪽까지 배운 것만 낸다 ══
+   홈에서 쪽수를 넣으면 단어·활용·표현 세 시험이 그 쪽까지로 좁혀진다. 기본값은 data/words.js 의 UPTO.
+   이 기기의 브라우저에만 저장한다(학습 기록과 같은 곳). pg:null 은 교과서 쪽을 아직 모르는 단어장 항목. */
+var UPTO_KEY = "jp-upto";
+var upto = UPTO;
+try { var su = parseInt(localStorage.getItem(UPTO_KEY), 10); if (su > 0) upto = su; } catch(e){}
+function taught(w){ return w.pg === undefined || (w.pg !== null && w.pg <= upto); }
+
+var UNITS_ON, PUNITS_ON, POOL, VPOOL, PPOOL, HAS_VERB;
+var VERB_TEST = TESTS.filter(function(t){ return t.k === "verb"; })[0];
+var VERB_TYPES = VERB_TEST.types, VERB_MASTER = VERB_TEST.master;
+function setPools(){
+  POOL = WORDS.filter(function(w){ return !w.skip && onUnit(UNITS, w.unit) && UNITS.some(function(u){ return u.now && u.code === w.unit; }) && taught(w); });
+  UNITS_ON = UNITS.filter(function(u){ return u.now && POOL.some(function(w){ return w.unit === u.code; }); });
+  VPOOL = VERBS.concat(ADJS).filter(function(v){ return v.now && taught(v); }).concat(ADJS2.filter(taught));
+  HAS_VERB = VPOOL.some(function(v){ return !isAdj(v); });
+  PPOOL = PHRASES.filter(function(x){ return PUNITS.some(function(u){ return u.now && u.code === x.unit; }) && taught(x); });
+  PUNITS_ON = PUNITS.filter(function(u){ return u.now && PPOOL.some(function(x){ return x.unit === u.code; }); });
+  var vt = VERB_TEST;
+  vt.ready = VPOOL.length > 0;
+  vt.types = HAS_VERB ? VERB_TYPES : VERB_TYPES.filter(function(x){ return x.k !== "I"; });   /* 형용사뿐이면 그룹 고르기는 뺀다 */
+  vt.sub = !VPOOL.length ? "진도 안에 활용 항목이 없습니다" : HAS_VERB ? "동사 · 형용사" : "い·な형용사 부정형·과거형";
+  vt.master = HAS_VERB ? VERB_MASTER : "활용형을 직접 써서 서로 다른 날 3번 확실히 맞히고 첫날로부터 7일이 지나야 숙달입니다. ～かったでした · ～だったです 는 없는 말입니다 (선생님).";
+  /* 새로 보이게 된 범위는 켜 둔다 — 진도를 늘렸는데 칩이 꺼져 있으면 안 나온 줄 안다 */
+  if (typeof cfg !== "undefined"){
+    UNITS_ON.forEach(function(u){ if (cfg.word.range[u.code] === undefined) cfg.word.range[u.code] = 1; });
+    PUNITS_ON.forEach(function(u){ if (cfg.phrase.range[u.code] === undefined) cfg.phrase.range[u.code] = 1; });
+    if (!readyTest(cfg.test)) cfg.test = "word";
   }
-});
+}
+setPools();
 /* 철자 고르기 — 바꾼 철자가 범위 안 다른 낱말·동사와 같으면 답이 둘이 된다 */
 var SPELL_AVOID = WORDS.map(function(w){ return w.kana; }).concat(VERBS.map(function(v){ return v.kana; }), ADJS.map(function(a){ return a.kana; }));
 function spellable(w){ var k = norm(w.kana); return k.length >= 2 && k.length <= 12 && spellVariants(w.kana, 4, SPELL_AVOID).length === 4; }
@@ -1826,8 +1858,8 @@ var cfg = {
   phrase:{ range:{}, types:{ D:1, E:1, F:1, G:1 } }
 };
 /* 지금 진도(now) 쪽만 켜 둔다 — 1회고사 단어장은 남겨 두되 처음엔 끈다 */
-UNITS_ON.forEach(function(u){ cfg.word.range[u.code] = 1; });
-PUNITS_ON.forEach(function(u){ cfg.phrase.range[u.code] = 1; });
+UNITS.forEach(function(u){ if (u.now) cfg.word.range[u.code] = 1; });
+PUNITS.forEach(function(u){ if (u.now) cfg.phrase.range[u.code] = 1; });
 function C(){ return cfg[cfg.test]; }
 
 /* ══ 저장 — 시험별로 따로 (PRD §9) ══ */
@@ -2060,7 +2092,29 @@ function nextNote(k){
   });
   return nx === null ? "일정 끝" : "다음 복습 " + nx + "일 뒤 · " + cnt + "개";
 }
+/* 진도 입력 — 쪽수를 넣으면 그 쪽까지 배운 것만 세 시험에 낸다 */
+var PG_ALL = WORDS.concat(PHRASES, ADJS2).filter(function(x){ return x.pg; })
+  .map(function(x){ return x.pg; });
+var PG_MIN = Math.min.apply(null, PG_ALL), PG_MAX = Math.max.apply(null, PG_ALL);
+function uptoHint(msg, warn){
+  var h = $("uptoHint");
+  h.textContent = msg || ("지금 범위 교과서 " + PG_MIN + "~" + PG_MAX + "쪽 · " + upto + "쪽까지 단어 " + POOL.length +
+    " · 활용 " + VPOOL.length + " · 표현 " + PPOOL.length + "개");
+  h.className = warn ? "warn" : "";
+}
+$("uptoForm").addEventListener("submit", function(e){
+  e.preventDefault();
+  var v = parseInt($("uptoIn").value, 10);
+  if (!(v >= 1 && v <= 999)){ uptoHint("쪽수를 숫자로 넣어 주세요 (예: 89)", true); $("uptoIn").focus(); return; }
+  upto = v;
+  try { localStorage.setItem(UPTO_KEY, String(v)); } catch(err){}
+  setPools(); drawHome();
+  if (v < PG_MIN) uptoHint(v + "쪽까지는 아직 들어 있는 항목이 없습니다 — 지금 범위는 " + PG_MIN + "쪽부터", true);
+});
+
 function drawToday(){
+  if (document.activeElement !== $("uptoIn")) $("uptoIn").value = upto;
+  uptoHint();
   var rows = $("planRows"), total = 0, slips = 0;
   rows.innerHTML = "";
   TEST_ORDER.forEach(function(k){

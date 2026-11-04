@@ -100,6 +100,16 @@ p{margin:0}
 .plan-head h2{margin:0;font-size:17px;font-weight:700}
 #todayNote{font-size:13px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
 .plan-rows{display:flex;flex-direction:column;border-top:1px solid var(--edge-soft)}
+.upto{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;padding:0 18px 14px;margin:0}
+.upto label{font-size:13px;font-weight:600;color:var(--ink-soft)}
+.upto-field{display:inline-flex;align-items:baseline;gap:6px;font-size:13px;color:var(--ink-soft)}
+.upto input{font:inherit;font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:16px;font-weight:500;
+            width:4.2em;padding:5px 8px;border:1px solid var(--edge);border-radius:3px;
+            background:var(--paper);color:var(--ink);text-align:center}
+.upto input:focus-visible{outline:2px solid var(--rule);outline-offset:1px}
+.upto .btn{padding:5px 12px;font-size:13px}
+.upto small{flex-basis:100%;font-size:12px;color:var(--ink-faint)}
+.upto small.warn{color:var(--shu)}
 .plan-row{display:grid;grid-template-columns:minmax(0,1fr) 92px 44px;align-items:center;gap:14px;
           padding:11px 18px;border-bottom:1px solid var(--edge-soft)}
 .plan-row .pn{display:flex;flex-direction:column;min-width:0}
@@ -258,6 +268,13 @@ footer b{color:var(--ink-soft);font-weight:600}
       <h2 id="planTitle">오늘 공부</h2>
       <span id="todayNote"></span>
     </div>
+    <form class="upto" id="uptoForm" autocomplete="off">
+      <label for="uptoIn">진도</label>
+      <span class="upto-field"><input id="uptoIn" type="number" inputmode="numeric" min="1" max="999" step="1"
+        aria-describedby="uptoHint"><span>쪽까지</span></span>
+      <button class="btn" id="uptoBtn" type="submit">적용</button>
+      <small id="uptoHint"></small>
+    </form>
     <div class="plan-rows" id="planRows"></div>
     <div class="plan-foot">
       <div class="row">
@@ -881,26 +898,39 @@ function T(){ var i; for (i=0;i<TESTS.length;i++) if (TESTS[i].k===cfg.test) ret
 
 /* 지금 시험(now) 범위만 앱에 낸다 — 1회고사 데이터는 파일에 남기되(엔진 테스트·출제실이 쓴다) 앱에서는 뺀다.
    동사는 아직 2회고사 범위가 없어 활용 시험은 '준비 중' 으로 닫는다. */
-var UNITS_ON = UNITS.filter(function(u){ return u.now; });
-var PUNITS_ON = PUNITS.filter(function(u){ return u.now; });
 function onUnit(list, code){ return list.some(function(u){ return u.code === code; }); }
-/* 단어장 항목은 교과서 쪽(pg)이 지금 진도(UPTO)까지인 것만 — 아직 안 배운 쪽은 데이터에만 있다 */
-function taught(w){ return w.pg === undefined || (w.pg !== null && w.pg <= UPTO); }
-var POOL = WORDS.filter(function(w){ return !w.skip && onUnit(UNITS_ON, w.unit) && taught(w); });
-UNITS_ON = UNITS_ON.filter(function(u){ return POOL.some(function(w){ return w.unit === u.code; }); });
-var VPOOL = VERBS.concat(ADJS).filter(function(v){ return v.now; }).concat(ADJS2);
-var HAS_VERB = VPOOL.some(function(v){ return !isAdj(v); });
-var PPOOL = PHRASES.filter(function(x){ return onUnit(PUNITS_ON, x.unit); });
-TESTS.forEach(function(t){
-  if (t.k !== "verb") return;
-  if (!VPOOL.length){ t.ready = false; t.sub = "2회고사 범위 준비 중"; return; }
-  if (!HAS_VERB){
-    /* 아직 형용사뿐 — 동사 유형(그룹 고르기)은 뺀다 */
-    t.nm = "활용"; t.sub = "い·な형용사 부정형·과거형";
-    t.types = t.types.filter(function(x){ return x.k !== "I"; });
-    t.master = "활용형을 직접 써서 서로 다른 날 3번 확실히 맞히고 첫날로부터 7일이 지나야 숙달입니다. ～かったでした · ～だったです 는 없는 말입니다 (선생님).";
+
+/* ══ 진도 — 교과서 이 쪽까지 배운 것만 낸다 ══
+   홈에서 쪽수를 넣으면 단어·활용·표현 세 시험이 그 쪽까지로 좁혀진다. 기본값은 data/words.js 의 UPTO.
+   이 기기의 브라우저에만 저장한다(학습 기록과 같은 곳). pg:null 은 교과서 쪽을 아직 모르는 단어장 항목. */
+var UPTO_KEY = "jp-upto";
+var upto = UPTO;
+try { var su = parseInt(localStorage.getItem(UPTO_KEY), 10); if (su > 0) upto = su; } catch(e){}
+function taught(w){ return w.pg === undefined || (w.pg !== null && w.pg <= upto); }
+
+var UNITS_ON, PUNITS_ON, POOL, VPOOL, PPOOL, HAS_VERB;
+var VERB_TEST = TESTS.filter(function(t){ return t.k === "verb"; })[0];
+var VERB_TYPES = VERB_TEST.types, VERB_MASTER = VERB_TEST.master;
+function setPools(){
+  POOL = WORDS.filter(function(w){ return !w.skip && onUnit(UNITS, w.unit) && UNITS.some(function(u){ return u.now && u.code === w.unit; }) && taught(w); });
+  UNITS_ON = UNITS.filter(function(u){ return u.now && POOL.some(function(w){ return w.unit === u.code; }); });
+  VPOOL = VERBS.concat(ADJS).filter(function(v){ return v.now && taught(v); }).concat(ADJS2.filter(taught));
+  HAS_VERB = VPOOL.some(function(v){ return !isAdj(v); });
+  PPOOL = PHRASES.filter(function(x){ return PUNITS.some(function(u){ return u.now && u.code === x.unit; }) && taught(x); });
+  PUNITS_ON = PUNITS.filter(function(u){ return u.now && PPOOL.some(function(x){ return x.unit === u.code; }); });
+  var vt = VERB_TEST;
+  vt.ready = VPOOL.length > 0;
+  vt.types = HAS_VERB ? VERB_TYPES : VERB_TYPES.filter(function(x){ return x.k !== "I"; });   /* 형용사뿐이면 그룹 고르기는 뺀다 */
+  vt.sub = !VPOOL.length ? "진도 안에 활용 항목이 없습니다" : HAS_VERB ? "동사 · 형용사" : "い·な형용사 부정형·과거형";
+  vt.master = HAS_VERB ? VERB_MASTER : "활용형을 직접 써서 서로 다른 날 3번 확실히 맞히고 첫날로부터 7일이 지나야 숙달입니다. ～かったでした · ～だったです 는 없는 말입니다 (선생님).";
+  /* 새로 보이게 된 범위는 켜 둔다 — 진도를 늘렸는데 칩이 꺼져 있으면 안 나온 줄 안다 */
+  if (typeof cfg !== "undefined"){
+    UNITS_ON.forEach(function(u){ if (cfg.word.range[u.code] === undefined) cfg.word.range[u.code] = 1; });
+    PUNITS_ON.forEach(function(u){ if (cfg.phrase.range[u.code] === undefined) cfg.phrase.range[u.code] = 1; });
+    if (!readyTest(cfg.test)) cfg.test = "word";
   }
-});
+}
+setPools();
 /* 철자 고르기 — 바꾼 철자가 범위 안 다른 낱말·동사와 같으면 답이 둘이 된다 */
 var SPELL_AVOID = WORDS.map(function(w){ return w.kana; }).concat(VERBS.map(function(v){ return v.kana; }), ADJS.map(function(a){ return a.kana; }));
 function spellable(w){ var k = norm(w.kana); return k.length >= 2 && k.length <= 12 && spellVariants(w.kana, 4, SPELL_AVOID).length === 4; }
@@ -912,8 +942,8 @@ var cfg = {
   phrase:{ range:{}, types:{ D:1, E:1, F:1, G:1 } }
 };
 /* 지금 진도(now) 쪽만 켜 둔다 — 1회고사 단어장은 남겨 두되 처음엔 끈다 */
-UNITS_ON.forEach(function(u){ cfg.word.range[u.code] = 1; });
-PUNITS_ON.forEach(function(u){ cfg.phrase.range[u.code] = 1; });
+UNITS.forEach(function(u){ if (u.now) cfg.word.range[u.code] = 1; });
+PUNITS.forEach(function(u){ if (u.now) cfg.phrase.range[u.code] = 1; });
 function C(){ return cfg[cfg.test]; }
 
 /* ══ 저장 — 시험별로 따로 (PRD §9) ══ */
@@ -1146,7 +1176,29 @@ function nextNote(k){
   });
   return nx === null ? "일정 끝" : "다음 복습 " + nx + "일 뒤 · " + cnt + "개";
 }
+/* 진도 입력 — 쪽수를 넣으면 그 쪽까지 배운 것만 세 시험에 낸다 */
+var PG_ALL = WORDS.concat(PHRASES, ADJS2).filter(function(x){ return x.pg; })
+  .map(function(x){ return x.pg; });
+var PG_MIN = Math.min.apply(null, PG_ALL), PG_MAX = Math.max.apply(null, PG_ALL);
+function uptoHint(msg, warn){
+  var h = $("uptoHint");
+  h.textContent = msg || ("지금 범위 교과서 " + PG_MIN + "~" + PG_MAX + "쪽 · " + upto + "쪽까지 단어 " + POOL.length +
+    " · 활용 " + VPOOL.length + " · 표현 " + PPOOL.length + "개");
+  h.className = warn ? "warn" : "";
+}
+$("uptoForm").addEventListener("submit", function(e){
+  e.preventDefault();
+  var v = parseInt($("uptoIn").value, 10);
+  if (!(v >= 1 && v <= 999)){ uptoHint("쪽수를 숫자로 넣어 주세요 (예: 89)", true); $("uptoIn").focus(); return; }
+  upto = v;
+  try { localStorage.setItem(UPTO_KEY, String(v)); } catch(err){}
+  setPools(); drawHome();
+  if (v < PG_MIN) uptoHint(v + "쪽까지는 아직 들어 있는 항목이 없습니다 — 지금 범위는 " + PG_MIN + "쪽부터", true);
+});
+
 function drawToday(){
+  if (document.activeElement !== $("uptoIn")) $("uptoIn").value = upto;
+  uptoHint();
   var rows = $("planRows"), total = 0, slips = 0;
   rows.innerHTML = "";
   TEST_ORDER.forEach(function(k){

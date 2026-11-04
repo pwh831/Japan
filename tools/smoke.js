@@ -254,8 +254,10 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   const taught = w => w.pg === undefined || (w.pg !== null && w.pg <= E.UPTO);
   const nowWords = E.WORDS.filter(w => E.UNITS.some(u => u.now && u.code === w.unit) && !w.skip && !w.ref && taught(w));
   const nowUnits = E.UNITS.filter(u => u.now && nowWords.some(w => w.unit === u.code)).map(u => u.code);
-  const nowPhr = E.PHRASES.filter(x => E.PUNITS.some(u => u.now && u.code === x.unit));
-  const total0 = nowWords.length + E.ADJS2.length + nowPhr.length;
+  const nowPhr = E.PHRASES.filter(x => E.PUNITS.some(u => u.now && u.code === x.unit) && taught(x));
+  const nowAdj = E.ADJS2.filter(taught);
+  const total0 = nowWords.length + nowAdj.length + nowPhr.length;
+  t((await p.$eval('#uptoIn', e => e.value)) === String(E.UPTO), '진도 입력칸에 기본 진도 ' + E.UPTO + '쪽');
   t(E.WORDS.some(w => w.pg === null || w.pg > E.UPTO), '아직 안 배운 단어장 항목은 데이터에만 있다');
   t(!(await p.$eval('#todaySec', e => e.hidden)), '홈 맨 위에 오늘 공부가 있다');
   t(await p.$eval('#free', e => !e.open), '범위·유형 설정은 자유 연습 안에 접혀 있다');
@@ -266,7 +268,7 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   const pressed = await p.$$eval('#rangeChips .chip[aria-pressed="true"] span:first-child', e => e.map(x => x.textContent));
   t(pressed.length === nowUnits.length, '기본 범위는 지금 진도 쪽만: ' + pressed.join(','));
   t((await p.$$('#rangeChips .chip')).length === nowUnits.length, '단어 범위에도 1회고사 쪽이 안 보인다');
-  const rowOf = async k => (await p.textContent(`#planRows .plan-row[data-test="${k}"]`)) || '';
+  const rowOf = async k => { const el = await p.$(`#planRows .plan-row[data-test="${k}"]`); return el ? (await el.textContent()) || '' : ''; };
 
   const findW = m => nowWords.find(w => w.meaning.join(', ') === m);
   /* 오늘 공부를 시작해 단어 차례만 푼다 — 결과 화면에서 '이어서' 를 확인하고 처음으로 */
@@ -329,7 +331,7 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
     vN++; if ((await p.textContent('#fb b')).trim() === '정답') vOk++;
     await p.click('#submitBtn'); await p.waitForTimeout(100);
   }
-  t(vN === E.ADJS2.length && vOk === vN, '활용 차례: 형용사마다 한 문항, 엔진 답이 정답 ' + vOk + '/' + vN);
+  t(vN === nowAdj.length && vOk === vN, '활용 차례: 진도 안 형용사마다 한 문항, 엔진 답이 정답 ' + vOk + '/' + vN);
   t(await p.$eval('#nextBtn', e => !e.hidden && /이어서 · 표현/.test(e.textContent)), '활용이 끝나면 표현으로 이어서');
   await p.click('#nextBtn'); await p.waitForTimeout(250);
   t(['핵심어 쓰기', '대비 고르기', '뜻 고르기'].includes((await p.textContent('#qKind')).trim()),
@@ -347,6 +349,23 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   await p.reload(); await p.waitForTimeout(400);
   t((await rowOf('word')).includes('복습 ' + nowWords.length),
     '다음 날에는 단어가 전부 복습으로 돌아온다: ' + (await rowOf('word')));
+
+  // 진도 쪽수를 바꾸면 세 시험이 그 쪽까지로 좁혀진다 — 새로고침해도 남는다
+  const upTo = n => ({ w:nowWords.filter(w => w.pg <= n).length,
+                       v:E.ADJS2.filter(a => a.pg <= n).length,
+                       p:E.PHRASES.filter(x => x.pg && x.pg <= n).length });
+  await p.fill('#uptoIn', '85'); await p.click('#uptoBtn'); await p.waitForTimeout(200);
+  const c85 = upTo(85), rw = await rowOf('word'), rv = await rowOf('verb');
+  t(new RegExp(c85.w + '$').test(rw.trim()), '85쪽까지: 단어 ' + c85.w + '개 — ' + rw);
+  t(c85.v === 0 ? !rv : true, '85쪽까지는 활용 항목이 없어 활용 줄이 빠진다' + (rv ? ' — ' + rv : ''));
+  t(/85쪽까지/.test(await p.textContent('#uptoHint')), '안내에 진도가 보인다: ' + (await p.textContent('#uptoHint')));
+  await p.reload(); await p.waitForTimeout(400);
+  t((await p.$eval('#uptoIn', e => e.value)) === '85', '새로고침해도 진도가 남는다');
+  await p.fill('#uptoIn', '90'); await p.click('#uptoBtn'); await p.waitForTimeout(200);
+  t((await p.textContent('#uptoHint')).includes('활용 ' + upTo(90).v), '90쪽까지면 학습지 형용사가 열린다: ' + (await p.textContent('#uptoHint')));
+  await p.fill('#uptoIn', ''); await p.click('#uptoBtn'); await p.waitForTimeout(150);
+  t(/숫자로/.test(await p.textContent('#uptoHint')), '빈칸으로 적용하면 안내한다');
+  await p.fill('#uptoIn', String(E.UPTO)); await p.click('#uptoBtn'); await p.waitForTimeout(150);
 
   // 기록 지우기는 두 번 눌러야 한다 (confirm() 이 뜨지 않는 화면)
   await openFree();
