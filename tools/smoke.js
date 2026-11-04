@@ -239,8 +239,11 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   if (await p.$eval('#result', e => !e.hidden)) await p.click('#homeBtn');
   await p.evaluate(() => localStorage.clear());
   await p.reload(); await p.waitForTimeout(400);
-  const nowUnits = E.UNITS.filter(u => u.now).map(u => u.code);
-  const nowWords = E.WORDS.filter(w => nowUnits.includes(w.unit) && !w.skip && !w.ref);
+  /* 단어장 항목은 교과서 쪽(pg)이 진도(UPTO)까지인 것만 앱에 나온다 */
+  const taught = w => w.pg === undefined || (w.pg !== null && w.pg <= E.UPTO);
+  const nowWords = E.WORDS.filter(w => E.UNITS.some(u => u.now && u.code === w.unit) && !w.skip && !w.ref && taught(w));
+  const nowUnits = E.UNITS.filter(u => u.now && nowWords.some(w => w.unit === u.code)).map(u => u.code);
+  t(E.WORDS.some(w => w.pg === null || w.pg > E.UPTO), '아직 안 배운 단어장 항목은 데이터에만 있다');
   t(!(await p.$eval('#todaySec', e => e.hidden)), '단어 시험에 오늘 할 것이 보인다');
   t((await p.textContent('#todayNote')).includes(nowWords.length + '개'),
     '처음엔 지금 진도 쪽 전부가 오늘 할 것: ' + (await p.textContent('#todayNote')));

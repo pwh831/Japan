@@ -831,7 +831,10 @@ function T(){ var i; for (i=0;i<TESTS.length;i++) if (TESTS[i].k===cfg.test) ret
 var UNITS_ON = UNITS.filter(function(u){ return u.now; });
 var PUNITS_ON = PUNITS.filter(function(u){ return u.now; });
 function onUnit(list, code){ return list.some(function(u){ return u.code === code; }); }
-var POOL = WORDS.filter(function(w){ return !w.skip && onUnit(UNITS_ON, w.unit); });
+/* 단어장 항목은 교과서 쪽(pg)이 지금 진도(UPTO)까지인 것만 — 아직 안 배운 쪽은 데이터에만 있다 */
+function taught(w){ return w.pg === undefined || (w.pg !== null && w.pg <= UPTO); }
+var POOL = WORDS.filter(function(w){ return !w.skip && onUnit(UNITS_ON, w.unit) && taught(w); });
+UNITS_ON = UNITS_ON.filter(function(u){ return POOL.some(function(w){ return w.unit === u.code; }); });
 var VPOOL = VERBS.concat(ADJS).filter(function(v){ return v.now; });
 var PPOOL = PHRASES.filter(function(x){ return onUnit(PUNITS_ON, x.unit); });
 TESTS.forEach(function(t){ if (t.k === "verb" && !VPOOL.length){ t.ready = false; t.sub = "2회고사 범위 준비 중"; } });
