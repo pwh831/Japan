@@ -1,4 +1,5 @@
 <title>일본어 시험</title>
+<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
@@ -35,8 +36,14 @@ body{
   font-family:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
   font-size:15px; line-height:1.65; -webkit-text-size-adjust:100%;
 }
-.wrap{max-width:660px;margin:0 auto;padding-inline:18px;padding-block:24px 72px;
+.wrap{max-width:660px;margin:0 auto;padding-block:24px 72px;
+      padding-left:max(18px, env(safe-area-inset-left, 0px));
+      padding-right:max(18px, env(safe-area-inset-right, 0px));
       display:flex;flex-direction:column;gap:24px}
+/* 화면마다 구획 사이를 같은 간격으로 — 홈의 섹션들이 붙어 보이던 것 */
+#home, #result{display:flex;flex-direction:column;gap:30px}
+#quiz{display:flex;flex-direction:column;gap:14px}
+#home[hidden], #quiz[hidden], #result[hidden]{display:none}
 .ja{font-family:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif}
 .mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
 
@@ -85,10 +92,36 @@ p{margin:0}
 .prog .new{background:var(--edge)}
 .prog .mid{background:var(--shu)}
 .prog .done{background:var(--rule)}
-.today{display:flex;flex-direction:column;gap:10px;border:1px solid var(--edge);border-left:3px solid var(--rule);
-       border-radius:3px;background:var(--card);padding:13px 15px}
-#todayNote{font-size:14.5px}
-.today-sub{font-size:12px;color:var(--ink-faint)}
+/* ── 오늘 공부 — 홈의 주인공. 여는 순간 할 일과 버튼 하나 ── */
+.plan{background:var(--card);border:1px solid var(--edge);border-radius:6px;box-shadow:var(--shadow);
+      display:flex;flex-direction:column}
+.plan-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;
+           padding:16px 18px 12px}
+.plan-head h2{margin:0;font-size:17px;font-weight:700}
+#todayNote{font-size:13px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+.plan-rows{display:flex;flex-direction:column;border-top:1px solid var(--edge-soft)}
+.plan-row{display:grid;grid-template-columns:minmax(0,1fr) 92px 44px;align-items:center;gap:14px;
+          padding:11px 18px;border-bottom:1px solid var(--edge-soft)}
+.plan-row .pn{display:flex;flex-direction:column;min-width:0}
+.plan-row .pn b{font-size:15px;font-weight:600}
+.plan-row .pn small{font-size:12px;color:var(--ink-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plan-row .pc{font-size:18px;font-weight:500;text-align:right;color:var(--ink)}
+.plan-row .pc.zero{color:var(--rule);font-size:13px}
+.plan-row .prog{height:6px}
+.plan-foot{display:flex;flex-direction:column;gap:10px;padding:14px 18px 16px}
+.plan-foot .row{display:flex;gap:9px;flex-wrap:wrap}
+.plan-foot .row .pri{flex:1 1 220px}
+.today-sub{font-size:12px;color:var(--ink-faint);text-wrap:pretty}
+.done-msg{font-size:14px;color:var(--rule);font-weight:600}
+
+details.free{border-top:1px solid var(--edge)}
+details.free > summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:baseline;
+                       gap:12px;padding:14px 2px;font-weight:600;font-size:15px}
+details.free > summary::-webkit-details-marker{display:none}
+details.free > summary small{font-size:12px;font-weight:400;color:var(--ink-faint)}
+details.free > summary::after{content:"펼치기";font-size:12px;font-weight:500;color:var(--rule)}
+details.free[open] > summary::after{content:"접기"}
+.free-body{display:flex;flex-direction:column;gap:26px;padding-block:6px 4px}
 .legend{display:flex;gap:14px;font-size:12px;color:var(--ink-faint);flex-wrap:wrap}
 .legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px}
 
@@ -218,25 +251,31 @@ footer b{color:var(--ink-soft);font-weight:600}
   <div style="display:flex;flex-direction:column;gap:7px">
     <span class="eyebrow">2학기 2회고사 · 5과 しゃしんを とっても いいですか</span>
     <h1>일본어 시험</h1>
-    <p style="color:var(--ink-soft)">세 시험을 따로 봅니다. 외우는 방식이 달라서 진도도 따로 셉니다.</p>
   </div>
+
+  <section class="plan" id="todaySec" aria-labelledby="planTitle">
+    <div class="plan-head">
+      <h2 id="planTitle">오늘 공부</h2>
+      <span id="todayNote"></span>
+    </div>
+    <div class="plan-rows" id="planRows"></div>
+    <div class="plan-foot">
+      <div class="row">
+        <button class="btn pri big" id="todayBtn" type="button">오늘 공부 시작</button>
+        <button class="btn" id="slipBtn" type="button">실수 모음</button>
+      </div>
+      <p class="today-sub">단어 → 활용 → 표현 순서로 이어서 풉니다. 직접 써서 맞히면 1일 → 3일 → 7일 → 14일 뒤에
+        다시 나오고, 틀리거나 애매한 것은 맞힐 때까지 오늘 남습니다. 서로 다른 날 3번, 첫날로부터 7일이 지나면 숙달입니다.</p>
+    </div>
+  </section>
+
+  <details class="free" id="free">
+    <summary><span>자유 연습 <small>범위·유형을 골라 풀기</small></span></summary>
+    <div class="free-body">
 
   <section>
     <h2 class="sec">무엇을 볼까요</h2>
     <div class="tests" id="testPick"></div>
-  </section>
-
-  <section id="todaySec">
-    <h2 class="sec">오늘 할 것</h2>
-    <div class="today">
-      <p id="todayNote"></p>
-      <div style="display:flex;gap:9px;flex-wrap:wrap">
-        <button class="btn pri" id="todayBtn" type="button">오늘 할 것</button>
-        <button class="btn" id="slipBtn" type="button">실수 모음</button>
-      </div>
-      <p class="today-sub">배운 날 → 1일 → 3일 → 7일 → 14일 뒤에 직접 써서 다시 확인합니다.
-        서로 다른 날 3번 확실히 맞히고 첫날로부터 7일이 지나야 숙달입니다.</p>
-    </div>
   </section>
 
   <section>
@@ -280,6 +319,8 @@ footer b{color:var(--ink-soft);font-weight:600}
   </section>
 
   <button class="btn pri big" id="startBtn" type="button">시작</button>
+    </div>
+  </details>
 
   <footer>
     기록은 이 브라우저에만 저장됩니다(localStorage). <button class="btn" id="resetBtn" type="button"
@@ -341,7 +382,8 @@ footer b{color:var(--ink-soft);font-weight:600}
     <div class="wrongs" id="rWrongs"></div>
   </section>
   <div style="display:flex;gap:9px;flex-wrap:wrap">
-    <button class="btn pri" id="againBtn" type="button">이것만 다시</button>
+    <button class="btn pri" id="nextBtn" type="button" hidden>이어서</button>
+    <button class="btn" id="againBtn" type="button">이것만 다시</button>
     <button class="btn" id="homeBtn" type="button">처음으로</button>
   </div>
 </div>
@@ -1744,10 +1786,10 @@ var TESTS = [
     types:[ {k:"H",nm:"활용형 쓰기", sub:"기본형 → 활용형", w:60},
             {k:"I",nm:"그룹 고르기", sub:"1류·2류·3류",    w:25},
             {k:"J",nm:"기본형 되찾기",sub:"활용형 → 기본형", w:15} ],
-    master:"활용형을 각각 연속 3회 맞히면 숙달입니다. 규칙이 잡히면 평범한 것은 덜 나오고 예외만 남습니다." },
+    master:"활용형을 직접 써서 서로 다른 날 3번 확실히 맞히고, 첫날로부터 7일이 지나야 숙달입니다. 오늘 공부에서는 가장 덜 맞힌 형을 냅니다." },
   { k:"phrase", nm:"표현", sub:"문장을 언제·어떻게 쓰나", ready:true,
     types:PFORMS,
-    master:"헷갈리는 짝은 양쪽을 번갈아 냅니다. 한쪽만 3회 맞혀서는 숙달이 아닙니다 — 한쪽만 맞히면 가른 것이 아니니까요." }
+    master:"핵심어를 직접 써서 서로 다른 날 3번 확실히 맞히고, 첫날로부터 7일이 지나야 숙달입니다. 헷갈리는 짝은 양쪽을 번갈아 냅니다." }
 ];
 function T(){ var i; for (i=0;i<TESTS.length;i++) if (TESTS[i].k===cfg.test) return TESTS[i]; }
 
@@ -1770,7 +1812,7 @@ TESTS.forEach(function(t){
     /* 아직 형용사뿐 — 동사 유형(그룹 고르기)은 뺀다 */
     t.nm = "활용"; t.sub = "い·な형용사 부정형·과거형";
     t.types = t.types.filter(function(x){ return x.k !== "I"; });
-    t.master = "형마다 연속 3회 맞히면 숙달입니다. ～かったでした · ～だったです 는 없는 말입니다 (선생님).";
+    t.master = "활용형을 직접 써서 서로 다른 날 3번 확실히 맞히고 첫날로부터 7일이 지나야 숙달입니다. ～かったでした · ～だったです 는 없는 말입니다 (선생님).";
   }
 });
 /* 철자 고르기 — 바꾼 철자가 범위 안 다른 낱말·동사와 같으면 답이 둘이 된다 */
@@ -1959,78 +2001,110 @@ function refCount(){
   return POOL.concat(VPOOL).filter(function(x){ return x.ref; }).length;
 }
 
-function mastered(item){
-  var st = store[cfg.test][item.id];
-  if (!st) return false;
-  if (cfg.test === "word") return graduated(st);
-  if (cfg.test === "verb")
-    return formsOf(item).every(function(f){ return (st.s["H" + f.k] || 0) >= 3; });
-  /* 대비는 양쪽을 다 가려야 숙달이다. 한쪽만 맞히면 가른 것이 아니다. */
-  if (item.kind === "대비") return (st.s.D || 0) >= 3 && (st.s.D1 || 0) >= 3;
-  return (gOk(item, 0) ? (st.s.G || 0) : (st.s.E || 0)) >= 3;
+/* 숙달 — 세 시험 모두 같은 기준: 직접 써서 서로 다른 날 3번, 첫날로부터 7일 (docs/학습원리.md §2.2) */
+function mastered(item, k){
+  return graduated(store[k || cfg.test][item.id]);
 }
-
-function drawProgress(){
-  var n = 0, m = 0, d = 0,
-      all = cfg.test === "word" ? selected() : cfg.test === "verb" ? VPOOL : PPOOL;
+function progressOf(k, all){
+  var n = 0, m = 0, d = 0;
   all.forEach(function(it){
-    var st = store[cfg.test][it.id];
+    var st = store[k][it.id];
     if (!st || (!st.ok && !st.ng)) n++;
-    else if (mastered(it)) d++;
+    else if (mastered(it, k)) d++;
     else m++;
   });
-  $("cNew").textContent = n; $("cMid").textContent = m; $("cDone").textContent = d;
-  var tot = all.length || 1, bar = $("progBar");
+  return { n:n, m:m, d:d, tot:all.length };
+}
+function fillBar(bar, pr){
   bar.innerHTML = "";
-  [["done", d, "var(--rule)"], ["mid", m, "var(--shu)"], ["new", n, "var(--edge)"]].forEach(function(p){
-    if (!p[1]) return;
+  [[pr.d, "var(--rule)"], [pr.m, "var(--shu)"], [pr.n, "var(--edge)"]].forEach(function(p){
+    if (!p[0]) return;
     var i = document.createElement("i");
-    i.style.background = p[2];
-    i.style.width = (p[1] / tot * 100) + "%";
+    i.style.background = p[1];
+    i.style.width = (p[0] / (pr.tot || 1) * 100) + "%";
     bar.appendChild(i);
   });
 }
-
-/* 오늘 할 것 — 고른 범위에서 오늘 직접 써 볼 단어. 새 단어 + 복습 날이 된 단어 + 틀려서 다시 쓸 단어 */
-var SLIPS = ["가", "촉", "탁", "철"];
-function todayList(){
-  var t = dayKey(Date.now());
-  return selected().filter(function(w){ var d = dueIn(store.word[w.id], t); return d !== null && d <= 0; });
+function drawProgress(){
+  var pr = progressOf(cfg.test, cfg.test === "word" ? selected() : cfg.test === "verb" ? VPOOL : PPOOL);
+  $("cNew").textContent = pr.n; $("cMid").textContent = pr.m; $("cDone").textContent = pr.d;
+  fillBar($("progBar"), pr);
 }
-function slipList(){
-  return selected().filter(function(w){
-    var e = (store.word[w.id] || {}).err || {};
-    return SLIPS.some(function(k){ return e[k]; });
+
+/* ══ 오늘 공부 — 세 시험을 한 번에 (docs/학습원리.md §3) ══
+   새 항목 + 복습 날이 된 항목 + 틀려서 다시 쓸 항목. 지금 시험 범위 전체에서 고른다(자유 연습의 범위 칩과 무관). */
+var SLIPS = ["가", "촉", "탁", "철"];
+var TEST_ORDER = ["word", "verb", "phrase"];
+function poolOf(k){ return k === "word" ? POOL : k === "verb" ? VPOOL : PPOOL; }
+function readyTest(k){ return TESTS.some(function(t){ return t.k === k && t.ready; }); }
+function testNm(k){ return (TESTS.filter(function(t){ return t.k === k; })[0] || {}).nm || k; }
+function todayList(k){
+  k = k || cfg.test;
+  var t = dayKey(Date.now());
+  return poolOf(k).filter(function(x){ var d = dueIn(store[k][x.id], t); return d !== null && d <= 0; });
+}
+function slipList(k){
+  k = k || cfg.test;
+  return poolOf(k).filter(function(x){
+    var e = (store[k][x.id] || {}).err || {};
+    return SLIPS.some(function(s){ return e[s]; });
   });
+}
+function nextNote(k){
+  var t = dayKey(Date.now()), nx = null, cnt = 0;
+  poolOf(k).forEach(function(x){
+    var d = dueIn(store[k][x.id], t);
+    if (d === null || d <= 0) return;
+    if (nx === null || d < nx){ nx = d; cnt = 0; }
+    if (d === nx) cnt++;
+  });
+  return nx === null ? "일정 끝" : "다음 복습 " + nx + "일 뒤 · " + cnt + "개";
 }
 function drawToday(){
-  $("todaySec").hidden = cfg.test !== "word";
-  if (cfg.test !== "word") return;
-  var t = dayKey(Date.now()), list = todayList(), nw = 0, mi = 0;
-  list.forEach(function(w){
-    var st = store.word[w.id];
-    if (!st || !(st.rd && st.rd.length) && !st.miss) nw++;
-    else if (st.miss) mi++;
-  });
-  if (list.length){
-    $("todayNote").textContent = "오늘 직접 써 볼 단어 " + list.length + "개 — 새로 " + nw +
-      " · 복습 " + (list.length - nw - mi) + " · 다시 " + mi;
-  } else {
-    var nx = null, cnt = 0;
-    selected().forEach(function(w){
-      var d = dueIn(store.word[w.id], t);
-      if (d === null || d <= 0) return;
-      if (nx === null || d < nx){ nx = d; cnt = 0; }
-      if (d === nx) cnt++;
+  var rows = $("planRows"), total = 0, slips = 0;
+  rows.innerHTML = "";
+  TEST_ORDER.forEach(function(k){
+    if (!readyTest(k)) return;
+    var list = todayList(k), nw = 0, mi = 0;
+    list.forEach(function(x){
+      var st = store[k][x.id];
+      if (!st || !(st.rd && st.rd.length) && !st.miss) nw++;
+      else if (st.miss) mi++;
     });
-    $("todayNote").textContent = nx === null ? "고른 범위의 일정이 모두 끝났습니다."
-      : "오늘 할 것은 끝 — 다음 복습은 " + nx + "일 뒤 (" + cnt + "개)";
-  }
-  $("todayBtn").disabled = !list.length;
-  $("todayBtn").textContent = list.length ? "시작 · 직접 쓰기 " + list.length + "문항" : "오늘 할 것 없음";
-  var sl = slipList();
-  $("slipBtn").disabled = !sl.length;
-  $("slipBtn").textContent = "실수 모음 · " + sl.length + "개";
+    total += list.length; slips += slipList(k).length;
+    var row = document.createElement("div");
+    row.className = "plan-row"; row.setAttribute("data-test", k);
+    row.innerHTML = '<span class="pn"><b></b><small></small></span><span class="prog"></span><span class="pc mono"></span>';
+    row.querySelector("b").textContent = testNm(k);
+    row.querySelector("small").textContent = list.length
+      ? [["새로", nw], ["복습", list.length - nw - mi], ["다시", mi]].filter(function(p){ return p[1]; })
+          .map(function(p){ return p[0] + " " + p[1]; }).join(" · ")
+      : nextNote(k);
+    fillBar(row.querySelector(".prog"), progressOf(k, poolOf(k)));
+    var pc = row.querySelector(".pc");
+    pc.textContent = list.length ? list.length : "끝";
+    if (!list.length) pc.className += " zero";
+    rows.appendChild(row);
+  });
+  /* 한 문항 15초쯤 — 하루 10~15분이 목표다 (docs/학습원리.md §3) */
+  $("todayNote").textContent = total ? total + "문항 · 약 " + Math.max(1, Math.round(total * 15 / 60)) + "분" : "오늘 할 것은 끝났습니다";
+  $("todayBtn").disabled = !total;
+  $("todayBtn").textContent = total ? "오늘 공부 시작 · " + total + "문항" : "오늘 공부 끝";
+  $("slipBtn").disabled = !slips;
+  $("slipBtn").textContent = "실수 모음 · " + slips + "개";
+}
+
+/* 오늘 공부·실수 모음은 시험을 차례로 이어 푼다 — 결과 화면의 '이어서' 가 다음 시험을 연다 */
+var plan = null;
+function runPlan(listFn){
+  plan = { order:TEST_ORDER.filter(function(k){ return readyTest(k) && listFn(k).length; }), fn:listFn };
+  nextPlan();
+}
+function nextPlan(){
+  if (!plan || !plan.order.length){ plan = null; drawHome(); show("home"); return; }
+  var k = plan.order.shift();
+  cfg.test = k;
+  start(plan.fn(k), true);
 }
 
 function refreshStart(){
@@ -2087,12 +2161,27 @@ function pickBy(list, wKey){
   return list[0];
 }
 
-/* writeOnly — 오늘 할 것·실수 모음. 일정은 직접 쓰기로만 매기므로 단어마다 쓰기 한 문항씩 */
+/* writeOnly — 오늘 공부·실수 모음. 일정은 직접 쓰기로 매기므로 항목마다 쓰기 한 문항씩.
+   단어는 뜻 → 일본어, 활용은 가장 덜 맞힌 형, 표현은 핵심어 빈칸(빈칸을 못 파는 표현은 대비·뜻 고르기). */
+function schedQ(it){
+  var s = (store[cfg.test][it.id] || {}).s || {};
+  if (cfg.test === "word") return { k:"B", w:it };
+  if (cfg.test === "verb"){
+    var fs = formsOf(it), lo = Math.min.apply(null, fs.map(function(f){ return s["H" + f.k] || 0; }));
+    var weak = fs.filter(function(f){ return (s["H" + f.k] || 0) === lo; });
+    return { k:"H", v:it, form:weak[Math.floor(Math.random() * weak.length)].k };
+  }
+  var sd = sides(it).filter(function(d){ return gOk(it, d); });
+  if (sd.length) return { k:"G", p:it, side:sd[Math.floor(Math.random() * sd.length)] };
+  if (it.vs) return { k:"D", p:it, side:Math.random() < .5 ? 0 : 1 };
+  return { k:"E", p:it, side:0 };
+}
 function buildSession(pool, writeOnly){
-  var kinds = writeOnly ? [{ k:"B", w:1 }] : T().types.filter(function(t){ return C().types[t.k]; });
+  if (writeOnly) return shuffle(pool.map(schedQ));
+  var kinds = T().types.filter(function(t){ return C().types[t.k]; });
   if (!kinds.length || !pool.length) return [];
   var withEx = cfg.test === "word" ? pool.filter(function(w){ return blankable(w).length; }) : [];
-  var n = writeOnly ? pool.length : cfg.count ? Math.min(cfg.count, pool.length * 4) : pool.length;
+  var n = cfg.count ? Math.min(cfg.count, pool.length * 4) : pool.length;
   var used = {}, qs = [], guard = 0;
 
   while (qs.length < n && guard++ < n * 40){
@@ -2191,7 +2280,7 @@ function show(which){
 }
 function start(pool, writeOnly){
   var qs = buildSession(pool || selected(), writeOnly);
-  if (!qs.length){ alert("출제할 문제가 없습니다. 범위나 유형을 넓혀 보세요."); return; }
+  if (!qs.length){ $("startBtn").textContent = "출제할 문제가 없습니다 — 범위나 유형을 넓혀 보세요"; return; }
   sess = { test:cfg.test, qs:qs, at:0, score:0, wrong:[], by:{}, writeOnly:!!writeOnly };
   T().types.forEach(function(t){ sess.by[t.k] = [0, 0]; });
   show("quiz");
@@ -2513,17 +2602,20 @@ function finish(good, extra, right){
   else { if (!penalised) st.ng++; st.s[key] = 0; sess.wrong.push({ q:q, item:item }); }
   sess.by[q.k][1]++;
 
-  /* 단어 직접 쓰기는 일정을 움직인다 (docs/학습원리.md §2) */
-  var wordB = cfg.test === "word" && q.k === "B", today = dayKey(Date.now());
-  if (wordB){
-    if (firstWrong !== null || !right){
-      q.err = errKind(firstWrong !== null ? firstWrong : $("ans").value, q.w.kana);
-      if (q.err === "뜻" && firstWrong !== null && lev(norm(firstWrong), norm(q.w.kana)) === 1) q.err = "철";
-      if (!st.err) st.err = {};
-      st.err[q.err] = (st.err[q.err] || 0) + 1;
-    }
-    if (!good) st.miss = today;          /* 맞힐 때까지 오늘 할 것에 남는다 */
+  /* 직접 쓰기(단어 B · 활용 H · 표현 G)는 일정을 움직인다 (docs/학습원리.md §2).
+     오늘 공부에서 쓰기를 못 내는 표현(대비·뜻)은 고르기로 대신 센다. */
+  var written = (cfg.test === "word" && q.k === "B") || (cfg.test === "verb" && q.k === "H") ||
+                (cfg.test === "phrase" && q.k === "G");
+  var sched = written || (sess.writeOnly && (q.k === "D" || q.k === "E"));
+  var today = dayKey(Date.now()), want = answerOf(q) || "";
+  if (written && (firstWrong !== null || !right)){
+    q.err = errKind(firstWrong !== null ? firstWrong : $("ans").value, want);
+    if (q.err === "뜻" && firstWrong !== null && lev(norm(firstWrong), norm(want)) === 1) q.err = "철";
+    if (!st.err) st.err = {};
+    st.err[q.err] = (st.err[q.err] || 0) + 1;
   }
+  if (sched && !good) st.miss = today;   /* 맞힐 때까지 오늘 공부에 남는다 */
+  if (sched && good && !written) markDay(st, today);
 
   /* 규칙 숙달 — 서로 다른 동사로 연속해야 오른다 */
   if (cfg.test === "verb" && q.k === "H"){
@@ -2553,11 +2645,11 @@ function finish(good, extra, right){
 
   /* 확신도 — 애매하게 맞힌 것은 맞힌 날로 세지 않는다. 확실하고 틀린 것이 가장 잘 고쳐지고,
      애매하게 맞힌 것은 며칠 뒤 틀린다. Enter 는 '확실'. */
-  if (wordB && good){
+  if (written && good){
     conf = function(sure){
       conf = null;
       if (sure) markDay(st, today);
-      else { st.miss = today; st.s.B = Math.max(0, (st.s.B || 1) - 1); sess.wrong.push({ q:q, item:item, unsure:true }); }
+      else { st.miss = today; st.s[key] = Math.max(0, (st.s[key] || 1) - 1); sess.wrong.push({ q:q, item:item, unsure:true }); }
       save(); next();
     };
     var cr = document.createElement("div");
@@ -2703,6 +2795,11 @@ function showResult(){
     box.appendChild(d);
   });
   $("againBtn").hidden = !sess.wrong.length;
+  var nb = $("nextBtn"), nk = plan && plan.order.length ? plan.order[0] : null;
+  nb.hidden = !nk;
+  if (nk) nb.textContent = "이어서 · " + testNm(nk) + " " + plan.fn(nk).length + "문항 →";
+  $("againBtn").className = "btn" + (nk ? "" : " pri");
+  $("homeBtn").textContent = plan && !nk ? "오늘 공부 끝 · 처음으로" : "처음으로";
   drawProgress();
 }
 
@@ -2711,16 +2808,26 @@ $("againBtn").addEventListener("click", function(){
   sess.wrong.forEach(function(x){ if (!seen[x.item.id]){ seen[x.item.id] = 1; pool.push(x.item); } });
   start(pool, sess.writeOnly);
 });
-$("todayBtn").addEventListener("click", function(){ start(todayList(), true); });
-$("slipBtn").addEventListener("click", function(){ start(slipList(), true); });
-$("homeBtn").addEventListener("click", function(){ drawHome(); show("home"); });
-$("quitBtn").addEventListener("click", function(){ drawHome(); show("home"); });
-$("startBtn").addEventListener("click", function(){ start(); });
+$("todayBtn").addEventListener("click", function(){ runPlan(todayList); });
+$("slipBtn").addEventListener("click", function(){ runPlan(slipList); });
+$("nextBtn").addEventListener("click", nextPlan);
+$("homeBtn").addEventListener("click", function(){ plan = null; drawHome(); show("home"); });
+$("quitBtn").addEventListener("click", function(){ plan = null; drawHome(); show("home"); });
+$("startBtn").addEventListener("click", function(){ plan = null; start(); });
+/* 지우기는 두 번 눌러야 한다 — 이 화면에서는 confirm() 대화상자가 뜨지 않는다 */
+var resetArm = 0;
 $("resetBtn").addEventListener("click", function(){
-  if (!confirm(T().nm + " 시험의 학습 기록을 지웁니다. 계속할까요?")) return;
+  var b = $("resetBtn");
+  if (Date.now() - resetArm > 4000){
+    resetArm = Date.now();
+    b.textContent = T().nm + " 기록을 지우려면 한 번 더";
+    setTimeout(function(){ if (Date.now() - resetArm >= 4000) b.textContent = "기록 지우기"; }, 4100);
+    return;
+  }
+  resetArm = 0; b.textContent = "기록 지우기";
   store[cfg.test] = {};
   if (cfg.test === "verb") store.rules = {};
-  save(); drawProgress();
+  save(); drawHome();
 });
 
 document.addEventListener("keydown", function(e){

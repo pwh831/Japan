@@ -23,6 +23,8 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   fs.copyFileSync(built, path.join(alone, 'app.html'));
   await p.goto('file://' + path.join(alone, 'app.html'));
   await p.waitForTimeout(400);
+  /* 범위·유형 설정은 '자유 연습' 안에 접혀 있다 — 시험 카드를 누르기 전에 편다 */
+  const openFree = () => p.evaluate(() => { const d = document.getElementById('free'); if (d) d.open = true; });
   let fail = 0; const t = (ok, m) => { if (!ok) fail++; console.log((ok?'  ✓ ':'  ✗ ')+m); };
 
   t(!fs.readFileSync(built,'utf8').includes('<script src='),
@@ -40,7 +42,7 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   const verbOpen = await p.$eval('.test >> nth=1', e => !e.disabled).catch(() => false);
   if (!verbOpen) t((await p.textContent('.test:nth-child(2)')).includes('준비 중'), '활용 시험은 2회고사 범위 준비 중으로 닫혀 있다');
   if (verbOpen) {
-    await p.click('.test >> nth=1'); await p.waitForTimeout(150);
+    await openFree(); await p.click('.test >> nth=1'); await p.waitForTimeout(150);
     await p.click('#startBtn'); await p.waitForTimeout(250);
 
     let right = 0, typed = 0, checked = { H:0, J:0 };
@@ -79,7 +81,7 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
     await p.click('#homeBtn'); await p.waitForTimeout(150);
     await p.evaluate(() => localStorage.clear());
     await p.reload(); await p.waitForTimeout(400);
-    await p.click('.test >> nth=1'); await p.waitForTimeout(200);
+    await openFree(); await p.click('.test >> nth=1'); await p.waitForTimeout(200);
     /* 참고 항목(단어장 상자에만 있는 동사)은 1회고사에만 있다 — 지금 범위에 없으면 설정 줄이 숨는다 */
     const vChips = await p.$$eval('#rangeChips .chip span:first-child', e => e.map(x => x.textContent));
     const hasVerb2 = E.VERBS.some(v => v.now);
@@ -127,7 +129,7 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
     await p.waitForTimeout(150);
     await p.evaluate(() => localStorage.clear());
     await p.reload(); await p.waitForTimeout(400);
-    await p.click('.test >> nth=1'); await p.waitForTimeout(150);
+    await openFree(); await p.click('.test >> nth=1'); await p.waitForTimeout(150);
     for (const nm of ['그룹 고르기', '기본형 되찾기'])        // 활용형 쓰기만 남긴다 (형용사뿐이면 그룹 고르기는 없다)
       if (await p.$(`#typeChips .chip:has-text("${nm}")`)) await p.click(`#typeChips .chip:has-text("${nm}")`);
     await p.click('#startBtn'); await p.waitForTimeout(250);
@@ -180,7 +182,7 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   else if (await p.$eval('#result', e => !e.hidden)) await p.click('#homeBtn');
   await p.waitForTimeout(200);
   t(await p.$eval('#home', e => !e.hidden), '홈으로 돌아왔다');
-  await p.click('.test >> nth=2'); await p.waitForTimeout(200);
+  await openFree(); await p.click('.test >> nth=2'); await p.waitForTimeout(200);
   const pRange = await p.$$eval('#rangeChips .chip span:first-child', e => e.map(x => x.textContent));
   const pNowN = E.PUNITS.filter(u => u.now).length;
   t(pRange.length === pNowN, '표현 범위는 2회고사 ' + pNowN + '개만 — 1회고사는 안 보인다: ' + pRange.join(' · '));
@@ -222,7 +224,7 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   // 철자 고르기 — 단어 시험에서 이 유형만 켜고 풀어 본다
   console.log('── 단어 · 철자 고르기 ──');
   await p.click('#homeBtn'); await p.waitForTimeout(150);
-  await p.click('.test >> nth=0'); await p.waitForTimeout(200);
+  await openFree(); await p.click('.test >> nth=0'); await p.waitForTimeout(200);
   const wTypes = await p.$$eval('#typeChips .chip span:first-child', e => e.map(x => x.textContent));
   t(wTypes.includes('철자 고르기'), '단어 유형에 철자 고르기가 있다: ' + wTypes.join(','));
   for (const nm of ['뜻 고르기', '직접 쓰기', '예문 빈칸']) await p.click(`#typeChips .chip:has-text("${nm}")`);
@@ -243,7 +245,7 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   t(spN > 0 && spOk === spN, `철자 고르기: 맞는 철자를 누르면 정답 ${spOk}/${spN}`);
 
   // 오늘 할 것 — 간격 반복·확신도·오답 분류 (docs/학습원리.md §2·§4)
-  console.log('── 단어 · 오늘 할 것 ──');
+  console.log('── 오늘 공부 ──');
   if (await p.$eval('#quiz', e => !e.hidden)) await p.click('#quitBtn');
   if (await p.$eval('#result', e => !e.hidden)) await p.click('#homeBtn');
   await p.evaluate(() => localStorage.clear());
@@ -252,21 +254,28 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   const taught = w => w.pg === undefined || (w.pg !== null && w.pg <= E.UPTO);
   const nowWords = E.WORDS.filter(w => E.UNITS.some(u => u.now && u.code === w.unit) && !w.skip && !w.ref && taught(w));
   const nowUnits = E.UNITS.filter(u => u.now && nowWords.some(w => w.unit === u.code)).map(u => u.code);
+  const nowPhr = E.PHRASES.filter(x => E.PUNITS.some(u => u.now && u.code === x.unit));
+  const total0 = nowWords.length + E.ADJS2.length + nowPhr.length;
   t(E.WORDS.some(w => w.pg === null || w.pg > E.UPTO), '아직 안 배운 단어장 항목은 데이터에만 있다');
-  t(!(await p.$eval('#todaySec', e => e.hidden)), '단어 시험에 오늘 할 것이 보인다');
-  t((await p.textContent('#todayNote')).includes(nowWords.length + '개'),
-    '처음엔 지금 진도 쪽 전부가 오늘 할 것: ' + (await p.textContent('#todayNote')));
+  t(!(await p.$eval('#todaySec', e => e.hidden)), '홈 맨 위에 오늘 공부가 있다');
+  t(await p.$eval('#free', e => !e.open), '범위·유형 설정은 자유 연습 안에 접혀 있다');
+  const rowsTxt = await p.$$eval('#planRows .plan-row', e => e.map(x => x.textContent));
+  t(rowsTxt.length === 3, '오늘 공부에 단어·활용·표현 세 줄: ' + rowsTxt.join(' | '));
+  t((await p.textContent('#todayBtn')).includes(total0 + '문항'),
+    '처음엔 세 시험 전부가 오늘 할 것: ' + (await p.textContent('#todayBtn')) + ' · ' + (await p.textContent('#todayNote')));
   const pressed = await p.$$eval('#rangeChips .chip[aria-pressed="true"] span:first-child', e => e.map(x => x.textContent));
   t(pressed.length === nowUnits.length, '기본 범위는 지금 진도 쪽만: ' + pressed.join(','));
   t((await p.$$('#rangeChips .chip')).length === nowUnits.length, '단어 범위에도 1회고사 쪽이 안 보인다');
+  const rowOf = async k => (await p.textContent(`#planRows .plan-row[data-test="${k}"]`)) || '';
 
   const findW = m => nowWords.find(w => w.meaning.join(', ') === m);
-  const runToday = async (plan) => {
+  /* 오늘 공부를 시작해 단어 차례만 푼다 — 결과 화면에서 '이어서' 를 확인하고 처음으로 */
+  const runWords = async (plan) => {
     await p.click('#todayBtn'); await p.waitForTimeout(250);
     const log = [];
     for (let i = 0; i < 200; i++) {
       if (await p.$eval('#result', e => !e.hidden)) break;
-      t((await p.textContent('#qKind')).trim() === '직접 쓰기', '  오늘 할 것은 직접 쓰기만');
+      if ((await p.textContent('#qKind')).trim() !== '직접 쓰기') { t(false, '  단어 차례에 다른 유형이 나왔다'); break; }
       const w = findW((await p.textContent('#qBody .q-main')).trim());
       if (!w) { t(false, '  뜻으로 낱말을 못 찾음'); break; }
       const how = plan(w, i);
@@ -283,30 +292,51 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   };
   const kataW = nowWords.find(w => /[ァ-ヺ]/.test(w.kana) && E.toHira(w.kana) !== w.kana);
   let unsureW = null;
-  const log1 = await runToday((w, i) => w === kataW ? 'kana' : (!unsureW && w !== kataW ? (unsureW = w, 'unsure') : 'sure'));
-  t(log1.length === nowWords.length, '오늘 할 것을 끝까지 풀었다 (' + log1.length + '문항)');
+  const log1 = await runWords((w, i) => w === kataW ? 'kana' : (!unsureW && w !== kataW ? (unsureW = w, 'unsure') : 'sure'));
+  t(log1.length === nowWords.length, '단어 차례를 끝까지 풀었다 (' + log1.length + '문항)');
   const kRow = log1.find(r => r[1] === 'kana');
   t(kRow && kRow[2] === '맞게 썼습니다' && kRow[3].includes('가나 종류 실수'),
     '가나 종류를 틀렸다 고치면 맞게 썼다고 하고 실수로 분류한다: ' + (kRow ? kRow[3] : ''));
   const rTags = await p.$$eval('#rWrongs .t', e => e.map(x => x.textContent));
   t(rTags.some(x => x.includes('애매')) && rTags.some(x => x.includes('가나 종류')),
     '결과에 애매·가나 종류가 표시된다: ' + rTags.join(' / '));
+  t(await p.$eval('#nextBtn', e => !e.hidden && /이어서 · 활용/.test(e.textContent)),
+    '단어가 끝나면 활용으로 이어서: ' + (await p.textContent('#nextBtn')));
   await p.click('#homeBtn'); await p.waitForTimeout(200);
-  t((await p.textContent('#todayBtn')).includes('2문항'),
-    '틀렸거나 애매했던 2개만 오늘 다시: ' + (await p.textContent('#todayBtn')));
+  t(/다시 2/.test(await rowOf('word')) && /2$/.test((await rowOf('word')).trim()),
+    '틀렸거나 애매했던 단어 2개만 오늘 다시: ' + (await rowOf('word')));
   t((await p.textContent('#slipBtn')).includes('1개'), '실수 모음에 1개: ' + (await p.textContent('#slipBtn')));
   const st1 = await p.evaluate(() => JSON.parse(localStorage.getItem('jp-exam-v2')).word);
   const sureW = log1.find(r => r[1] === 'sure')[0];
   t(st1[sureW.id].rd && st1[sureW.id].rd.length === 1 && !st1[unsureW.id].rd,
     '확실은 그날을 적고, 애매는 적지 않는다');
 
-  await runToday(() => 'sure');
+  await runWords(() => 'sure');
   await p.click('#homeBtn'); await p.waitForTimeout(200);
-  t(/다음 복습은 1일 뒤 \(\d+개\)/.test(await p.textContent('#todayNote')),
-    '다 맞히면 다음 복습일을 알려 준다: ' + (await p.textContent('#todayNote')));
-  t(await p.$eval('#todayBtn', e => e.disabled), '오늘 할 것이 없으면 버튼이 꺼진다');
+  t(/다음 복습 1일 뒤 · \d+개/.test(await rowOf('word')) && /끝/.test(await rowOf('word')),
+    '단어를 다 맞히면 다음 복습일을 알려 준다: ' + (await rowOf('word')));
 
-  // 하루가 지났다고 치고(기록을 하루 앞당긴다) 다시 열면 전부 복습할 날이 된다
+  /* 활용 → 표현 으로 이어지는지 — 활용형은 엔진이 낸 답으로 */
+  await p.click('#todayBtn'); await p.waitForTimeout(250);
+  t((await p.textContent('#qKind')).trim() === '활용형 쓰기', '단어가 끝났으면 오늘 공부는 활용부터');
+  let vOk = 0, vN = 0;
+  for (let i = 0; i < 60; i++) {
+    if (await p.$eval('#result', e => !e.hidden)) break;
+    const main = (await p.textContent('#qBody .q-main')).trim(), ask = (await p.textContent('#qBody .q-ask')).trim();
+    const want = byName[main] ? E.anyConj(byName[main], formOf(ask)) : null;
+    if (!want) { await p.click('#skipBtn'); await p.waitForTimeout(100); await p.click('#submitBtn'); continue; }
+    await p.fill('#ans', want); await p.click('#submitBtn'); await p.waitForTimeout(130);
+    vN++; if ((await p.textContent('#fb b')).trim() === '정답') vOk++;
+    await p.click('#submitBtn'); await p.waitForTimeout(100);
+  }
+  t(vN === E.ADJS2.length && vOk === vN, '활용 차례: 형용사마다 한 문항, 엔진 답이 정답 ' + vOk + '/' + vN);
+  t(await p.$eval('#nextBtn', e => !e.hidden && /이어서 · 표현/.test(e.textContent)), '활용이 끝나면 표현으로 이어서');
+  await p.click('#nextBtn'); await p.waitForTimeout(250);
+  t(['핵심어 쓰기', '대비 고르기', '뜻 고르기'].includes((await p.textContent('#qKind')).trim()),
+    '표현 차례는 핵심어 쓰기 위주: ' + (await p.textContent('#qKind')));
+  await p.click('#quitBtn'); await p.waitForTimeout(200);
+
+  // 하루가 지났다고 치고(기록을 하루 앞당긴다) 다시 열면 단어가 전부 복습할 날이 된다
   await p.evaluate(() => {
     const s = JSON.parse(localStorage.getItem('jp-exam-v2'));
     const d = new Date(); d.setDate(d.getDate() - 1);
@@ -315,8 +345,13 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
     localStorage.setItem('jp-exam-v2', JSON.stringify(s));
   });
   await p.reload(); await p.waitForTimeout(400);
-  t((await p.textContent('#todayNote')).includes('복습 ' + nowWords.length),
-    '다음 날에는 전부 복습으로 돌아온다: ' + (await p.textContent('#todayNote')));
+  t((await rowOf('word')).includes('복습 ' + nowWords.length),
+    '다음 날에는 단어가 전부 복습으로 돌아온다: ' + (await rowOf('word')));
+
+  // 기록 지우기는 두 번 눌러야 한다 (confirm() 이 뜨지 않는 화면)
+  await openFree();
+  await p.click('#resetBtn'); await p.waitForTimeout(100);
+  t(/한 번 더/.test(await p.textContent('#resetBtn')), '기록 지우기는 한 번 누르면 확인을 묻는다');
 
   t(errs.length === 0, errs.length ? '페이지 오류:\n     ' + errs.join('\n     ') : '페이지 오류 없음');
   await b.close();
