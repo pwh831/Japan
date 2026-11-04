@@ -168,10 +168,13 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   t(await p.$eval('#home', e => !e.hidden), '홈으로 돌아왔다');
   await p.click('.test >> nth=2'); await p.waitForTimeout(200);
   const pRange = await p.$$eval('#rangeChips .chip span:first-child', e => e.map(x => x.textContent));
-  t(pRange.length === 5, '표현 범위 5개 (3·4과 포함) (교재 쪽): ' + pRange.join(' '));
+  t(pRange.length === E.PUNITS.length, '표현 범위 ' + E.PUNITS.length + '개 (교재 쪽): ' + pRange.join(' '));
+  const pOn = await p.$$eval('#rangeChips .chip[aria-pressed="true"] span:first-child', e => e.map(x => x.textContent));
+  t(pOn.length === E.PUNITS.filter(u => u.now).length, '표현도 지금 진도 범위만 켜고 시작: ' + pOn.join(' · '));
   const pTypes = await p.$$eval('#typeChips .chip span:first-child', e => e.map(x => x.textContent));
   t(pTypes.join(',') === '대비 고르기,뜻 고르기,상황 → 표현,핵심어 쓰기', '표현 유형 4개');
-  t(/표현 3\d항목/.test(await p.textContent('#startBtn')), '시작: ' + await p.textContent('#startBtn'));
+  const pNow = E.PHRASES.filter(x => E.PUNITS.some(u => u.now && u.code === x.unit)).length;
+  t((await p.textContent('#startBtn')).includes('표현 ' + pNow + '항목'), '시작: ' + await p.textContent('#startBtn'));
 
   await p.click('#startBtn'); await p.waitForTimeout(250);
   const pk = {}; let blanks = 0, dSeen = 0;
@@ -242,7 +245,7 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   const runToday = async (plan) => {
     await p.click('#todayBtn'); await p.waitForTimeout(250);
     const log = [];
-    for (let i = 0; i < 40; i++) {
+    for (let i = 0; i < 200; i++) {
       if (await p.$eval('#result', e => !e.hidden)) break;
       t((await p.textContent('#qKind')).trim() === '직접 쓰기', '  오늘 할 것은 직접 쓰기만');
       const w = findW((await p.textContent('#qBody .q-main')).trim());

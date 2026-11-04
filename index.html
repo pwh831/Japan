@@ -841,7 +841,7 @@ var cfg = {
 };
 /* 지금 진도(now) 쪽만 켜 둔다 — 1회고사 단어장은 남겨 두되 처음엔 끈다 */
 UNITS.forEach(function(u){ cfg.word.range[u.code] = u.now ? 1 : 0; });
-PUNITS.forEach(function(u){ cfg.phrase.range[u.code] = 1; });
+PUNITS.forEach(function(u){ cfg.phrase.range[u.code] = u.now ? 1 : 0; });
 function C(){ return cfg[cfg.test]; }
 
 /* ══ 저장 — 시험별로 따로 (PRD §9) ══ */
@@ -967,7 +967,7 @@ function rangeItems(){
     });
   if (cfg.test === "phrase")
     return PUNITS.map(function(u){
-      return { k:u.code, nm:u.title, note:u.pages,
+      return { k:u.code, nm:u.title, note:u.pages + (u.now ? "" : " · 1회고사"),
                n:PPOOL.filter(function(x){ return x.unit === u.code; }).length };
     });
   var out = [1, 2, 3].map(function(g){

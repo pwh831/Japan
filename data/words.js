@@ -21,7 +21,12 @@ var UNITS = [
   { code:"s3", title:"약속 · 여행",   pages:"단어장 3쪽" },
   { code:"s4", title:"이동 · 비교",   pages:"단어장 4쪽" },
   /* 2학기 2회고사 — 진도 나가는 대로 교과서 쪽을 하나씩 더한다. 1회고사(s1~s4)는 기본으로 꺼 둔다 */
-  { code:"k85", title:"5과 · 안내 로봇", pages:"교과서 85쪽", now:true }
+  { code:"k84", title:"5과 · 할 수 있어요", pages:"교과서 84쪽", now:true },
+  { code:"k85", title:"5과 · 안내 로봇", pages:"교과서 85쪽", now:true },
+  { code:"k87", title:"5과 · 해 볼래? 할 수 있어?", pages:"교과서 87쪽", now:true },
+  { code:"k88", title:"5과 · 날씨 전언", pages:"교과서 88쪽", now:true },
+  { code:"k89", title:"5과 · 캐스터 체험", pages:"교과서 89쪽", now:true },
+  { code:"k91", title:"5과 · 어땠어요? 해도 돼요?", pages:"교과서 91·92쪽", now:true }
 ];
 
 var WORDS = [
@@ -221,7 +226,7 @@ var WORDS = [
   { id:"w502", unit:"k85", pos:"동사", word:"いる", kana:"いる", meaning:["(사람·동물 등이) 있다"],
     note:"2류 · 필기: 원래는 ある 이지만 사람처럼 친근하게 느껴 いる 를 씀 · ロボットが いる (は X)" },
   { id:"w503", unit:"k85", pos:"연체사", word:"この", kana:"この", meaning:["이"] },
-  { id:"w504", unit:"k85", pos:"명사", word:"ニュース", kana:"ニュース", meaning:["뉴스"],
+  { id:"w504", unit:"k85", pos:"명사", word:"ニュース", kana:"ニュース", meaning:["뉴스"], note:"필기(87쪽): 장음 주의",
     examples:[{ ja:"ニュース スタジオは どこですか。", ko:"뉴스 스튜디오는 어디입니까?" }] },
   { id:"w505", unit:"k85", pos:"명사", word:"スタジオ", kana:"スタジオ", meaning:["스튜디오"],
     examples:[{ ja:"ニュース スタジオは どこですか。", ko:"뉴스 스튜디오는 어디입니까?" }] },
@@ -250,7 +255,70 @@ var WORDS = [
   { id:"w518", unit:"k85", pos:"표현", word:"～と おもう", kana:"と おもう", meaning:["~라고 생각하다"],
     jaAliases:["～と おもう"], note:"필기: と 빈칸 조심" },
   { id:"w519", unit:"k85", pos:"접속", word:"～けど・けれど", kana:"けど", meaning:["~(지)만", "~(인)데"],
-    jaAliases:["けれど", "～けど", "～けれど", "～けど・けれど"] }
+    jaAliases:["けれど", "～けど", "～けれど", "～けど・けれど"] },
+
+  /* ═══ 교과서 5과 84쪽 ことば (はじめる まえに 1) ═══ */
+  { id:"w520", unit:"k84", pos:"명사", word:"かんじ", kana:"かんじ", meaning:["한자"],
+    examples:[{ ja:"かんじを よむ ことが できますか。", ko:"한자를 읽을 수 있습니까?" }] },
+  { id:"w521", unit:"k84", pos:"동사", word:"よむ", kana:"よむ", meaning:["읽다"], note:"1류" },
+  { id:"w522", unit:"k84", pos:"표현", word:"～ことが できる", kana:"ことが できる", meaning:["~할 수 있다"],
+    jaAliases:["～ことが できる"], note:"필기: 동사 기본형 + ことが できる (가능형)" },
+  { id:"w523", unit:"k84", pos:"동사", word:"ひく", kana:"ひく", meaning:["(악기를) 연주하다", "치다", "켜다"],
+    note:"1류 · 필기: 악기는 ひく 씀 — ギターを ひく" },
+  { id:"w524", unit:"k84", pos:"명사", word:"カタカナ", kana:"カタカナ", meaning:["가타카나"],
+    examples:[{ ja:"カタカナを かく ことが できますか。", ko:"가타카나를 쓸 수 있습니까?" }] },
+  { id:"w525", unit:"k84", pos:"명사", word:"じてんしゃ", kana:"じてんしゃ", meaning:["자전거"],
+    note:"필기: じてんしゃに のる — に 별표 (~을 타다)" },
+
+  /* ═══ 교과서 5과 87쪽 ことば (みんなで はなそう 1) ═══ */
+  { id:"w526", unit:"k87", pos:"명사", word:"てんき", kana:"てんき", meaning:["날씨"] },
+  { id:"w527", unit:"k87", pos:"명사", word:"メニュー", kana:"メニュー", meaning:["메뉴"], note:"필기: 장음 주의" },
+  { id:"w528", unit:"k87", pos:"명사", word:"しんぶん", kana:"しんぶん", meaning:["신문"],
+    examples:[{ ja:"えいごの しんぶんを よむ ことが できますか。", ko:"영어 신문을 읽을 수 있습니까?" }] },
+  { id:"w529", unit:"k87", pos:"명사", word:"ちゅうごく", kana:"ちゅうごく", meaning:["중국"] },
+  { id:"w530", unit:"k87", pos:"명사", word:"ダンス", kana:"ダンス", meaning:["댄스", "춤"],
+    examples:[{ ja:"アイドルの ダンスを おどる ことが できますか。", ko:"아이돌 춤을 출 수 있습니까?" }] },
+  { id:"w531", unit:"k87", pos:"동사", word:"おどる", kana:"おどる", meaning:["춤추다"], note:"1류" },
+
+  /* ═══ 교과서 5과 88쪽 ことば (はじめる まえに 2) ═══ */
+  { id:"w532", unit:"k88", pos:"い형용사", word:"あつい", kana:"あつい", meaning:["덥다"], note:"명사 あつさ(더위)와 구별" },
+  { id:"w533", unit:"k88", pos:"표현", word:"～そうです", kana:"そうです", meaning:["~(라)고 합니다"],
+    jaAliases:["～そうです"], note:"필기: 기본형 + そうだ (전언) — 형용사·동사 둘 다 · そうだ 보통체 / そうです 정중형" },
+  { id:"w534", unit:"k88", pos:"い형용사", word:"あたたかい", kana:"あたたかい", meaning:["따뜻하다"] },
+  { id:"w535", unit:"k88", pos:"い형용사", word:"すずしい", kana:"すずしい", meaning:["시원하다", "선선하다"] },
+  { id:"w536", unit:"k88", pos:"い형용사", word:"さむい", kana:"さむい", meaning:["춥다"] },
+
+  /* ═══ 교과서 5과 89쪽 ことば (きいて はなそう 2 — 본문) ═══ */
+  { id:"w537", unit:"k89", pos:"명사", word:"あつさ", kana:"あつさ", meaning:["더위"], note:"필기: あつい → あつさ (い → さ 명사형)",
+    examples:[{ ja:"この あつさは はちがつまつまで つづくそうです。", ko:"이 더위는 8월 말까지 계속된다고 합니다." }] },
+  { id:"w538", unit:"k89", pos:"접미사", word:"-さ", kana:"さ", meaning:["~임, ~함 (형용사를 명사로)"], jaAliases:["-さ","ーさ"] },
+  { id:"w539", unit:"k89", pos:"접미사", word:"-まつ", kana:"まつ", meaning:["~말"], jaAliases:["-まつ","ーまつ"], note:"はちがつまつ 8월 말" },
+  { id:"w540", unit:"k89", pos:"동사", word:"つづく", kana:"つづく", meaning:["계속되다"], note:"1류 · つづく + そうです" },
+  { id:"w541", unit:"k89", pos:"명사", word:"みなさん", kana:"みなさん", meaning:["여러분"] },
+  { id:"w542", unit:"k89", pos:"표현", word:"からだに 気を つけて ください", kana:"からだに きを つけて ください", meaning:["몸조심하세요"],
+    jaAliases:["からだに 気を つけて ください"], note:"필기: に 별표 — からだに" },
+  { id:"w543", unit:"k89", pos:"표현", word:"～みたいだ", kana:"みたいだ", meaning:["~같다"], jaAliases:["～みたいだ","みたい"],
+    note:"アナウンサーみたい" },
+  { id:"w544", unit:"k89", pos:"부사", word:"すごく", kana:"すごく", meaning:["엄청", "굉장히"] },
+  { id:"w545", unit:"k89", pos:"표현", word:"～た", kana:"た", meaning:["~ㅆ다 (과거)"], jaAliases:["～た"] },
+  { id:"w546", unit:"k89", pos:"명사", word:"きんちょう", kana:"きんちょう", meaning:["긴장"], note:"きんちょうして 긴장해서" },
+  { id:"w547", unit:"k89", pos:"부사", word:"うまく", kana:"うまく", meaning:["잘"] },
+  { id:"w548", unit:"k89", pos:"표현", word:"～ことが できなかった", kana:"ことが できなかった", meaning:["~할 수 없었다"],
+    jaAliases:["～ことが できなかった"] },
+  { id:"w549", unit:"k89", pos:"な형용사", word:"有名", kana:"ゆうめい", meaning:["유명함"], note:"有名な サッカーせんしゅ" },
+  { id:"w550", unit:"k89", pos:"동사구", word:"写真を とる", kana:"しゃしんを とる", meaning:["사진을 찍다"],
+    note:"1류 · しゃしんを する (X) — 90쪽 확인" },
+  { id:"w551", unit:"k89", pos:"감동사", word:"ええ", kana:"ええ", meaning:["네"] },
+  { id:"w552", unit:"k89", pos:"명사", word:"サイン", kana:"サイン", meaning:["사인"],
+    examples:[{ ja:"ここに サインも おねがいします。", ko:"여기에 사인도 부탁합니다." }] },
+
+  /* ═══ 교과서 5과 91·92쪽 ことば (みんなで はなそう 2 · たのしく みんなで) ═══ */
+  { id:"w553", unit:"k91", pos:"표현", word:"どうでしたか", kana:"どうでしたか", meaning:["어땠습니까?"] },
+  { id:"w554", unit:"k91", pos:"명사", word:"アニメ", kana:"アニメ", meaning:["애니메이션"] },
+  { id:"w555", unit:"k91", pos:"동사", word:"かりる", kana:"かりる", meaning:["빌리다"], note:"2류 · かりても いいですか" },
+  { id:"w556", unit:"k91", pos:"동사", word:"はいる", kana:"はいる", meaning:["들어가다"], note:"★ 예외 1류 · はいっても いいですか" },
+  { id:"w557", unit:"k91", pos:"동사", word:"のむ", kana:"のむ", meaning:["마시다"], note:"1류 · のんでも いいですか (92쪽)" },
+  { id:"w558", unit:"k91", pos:"명사", word:"ジュース", kana:"ジュース", meaning:["주스"] }
 ];
 
 /* skip:true 인 항목은 출제에서 빠집니다 — 단어장에 두 번 나온 낱말(あらう·けす)의
