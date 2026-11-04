@@ -31,8 +31,9 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
 
   /* 동사 + い형용사를 모두 색인한다 — 활용 시험 범위에 둘 다 있다 */
   const byName = {};
-  E.VERBS.concat(E.ADJS).forEach(v => byName[v.kana] = v);
-  const allForms = E.FORMS.concat(E.ADJFORMS);
+  E.VERBS.concat(E.ADJS, E.ADJS2).forEach(v => byName[v.kana] = v);   // 2회고사(ADJS2)가 같은 kana 를 덮는다
+  /* 긴 이름부터 — '과거 부정 정중형' 이 '과거 부정형' 보다 먼저 걸려야 한다 */
+  const allForms = E.FORMS.concat(E.ADJFORMS2, E.ADJFORMS).sort((a, b) => b.nm.length - a.nm.length);
   const formOf = ask => (allForms.find(f => ask.indexOf(f.nm) === 0) || {}).k;
 
   /* 활용 시험은 2회고사 동사가 들어오기 전까지 닫혀 있다 — 열려 있을 때만 그 경로를 돌린다 */
@@ -56,7 +57,7 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
       } else {
         let want;
         if (ask.indexOf('기본형은') >= 0) {   // 유형 J — 활용형 → 기본형
-          const cands = E.deconj(main, E.VERBS);
+          const cands = E.deconj(main, E.VERBS.concat(E.ADJS2));
           want = cands.length ? cands[0].kana : null; checked.J++;
         } else {                              // 유형 H — 기본형 → 활용형
           want = byName[main] ? E.anyConj(byName[main], formOf(ask)) : null; checked.H++;
@@ -79,6 +80,13 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
     await p.evaluate(() => localStorage.clear());
     await p.reload(); await p.waitForTimeout(400);
     await p.click('.test >> nth=1'); await p.waitForTimeout(200);
+    /* 참고 항목(단어장 상자에만 있는 동사)은 1회고사에만 있다 — 지금 범위에 없으면 설정 줄이 숨는다 */
+    const vChips = await p.$$eval('#rangeChips .chip span:first-child', e => e.map(x => x.textContent));
+    const hasVerb2 = E.VERBS.some(v => v.now);
+    t(hasVerb2 || vChips.every(x => /형용사/.test(x)), '활용 범위 칩에 1회고사 동사가 없다: ' + vChips.join(' · '));
+    const refShownOpt = await p.$eval('#refOpt', e => !e.hidden);
+    if (!refShownOpt) t(true, '참고 항목이 없는 범위라 설정 줄이 숨어 있다');
+    if (refShownOpt) {
     const refOff = (await p.textContent('#startBtn')).match(/(\d+)항목/)[1] | 0;
     t((await p.$eval('#refSeg button[aria-pressed="true"]', e => e.textContent.trim())) === '빼기',
       '참고 항목은 기본으로 빠져 있다');
@@ -111,6 +119,7 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
     t(refOn === refOff + refKana.length,
       '켜면 ' + refKana.length + '개가 돌아온다 (' + refOff + ' → ' + refOn + ')');
     await p.click('#refSeg button >> nth=0'); await p.waitForTimeout(150);   // 다시 빼기
+    }
 
     // 오답 경로: 일부러 틀리게 (예외 동사에 규칙만 적용한 답)
     if (await p.$eval('#quiz', e => !e.hidden)) await p.click('#quitBtn');
@@ -119,8 +128,8 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
     await p.evaluate(() => localStorage.clear());
     await p.reload(); await p.waitForTimeout(400);
     await p.click('.test >> nth=1'); await p.waitForTimeout(150);
-    await p.click('#typeChips .chip >> nth=1'); // 그룹 고르기 끄기
-    await p.click('#typeChips .chip >> nth=2'); // 기본형 되찾기 끄기
+    for (const nm of ['그룹 고르기', '기본형 되찾기'])        // 활용형 쓰기만 남긴다 (형용사뿐이면 그룹 고르기는 없다)
+      if (await p.$(`#typeChips .chip:has-text("${nm}")`)) await p.click(`#typeChips .chip:has-text("${nm}")`);
     await p.click('#startBtn'); await p.waitForTimeout(250);
     const main2 = (await p.textContent('#qBody .q-main')).trim();
     const ask2  = (await p.textContent('#qBody .q-ask')).trim();

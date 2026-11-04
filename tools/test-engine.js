@@ -292,6 +292,34 @@ eq(clash.length, 0, "뜻이 겹쳐 답이 둘인 낱말: " + clash.join(", "));
 eq(E.deconj("よんで", E.VERBS).map(function(v){ return v.kana; }).sort().join(","),
    "よぶ,よむ", "よんで 의 기본형은 よむ 와 よぶ 둘 다");
 
+console.log("── 2회고사 형용사 활용 (선생님 학습지 · 단어장 2쪽) ──");
+eq(E.adjDataErrors(E.ADJS2).join(" / "), "", "2회고사 형용사 데이터 검증");
+eq(E.ADJFORMS2.reduce(function(a,f){ return a + f.weight; }, 0), 100, "2회고사 형용사 형 배분 합계 100");
+var A2 = function(k){ return E.ADJS2.filter(function(a){ return a.kana === k; })[0]; };
+var nb = function(s){ return s.replace(/\s/g, ""); };
+/* 학습지 아래 표 — 부정 · 과거(부정 과거) 칸을 그대로 */
+[["おいしい","おいしくない","おいしくなかった"], ["おもしろい","おもしろくない","おもしろくなかった"],
+ ["たのしい","たのしくない","たのしくなかった"], ["こわい","こわくない","こわくなかった"],
+ ["いい","よくない","よくなかった"], ["すきだ","すきじゃない","すきじゃなかった"],
+ ["きれいだ","きれいじゃない","きれいじゃなかった"], ["たいへんだ","たいへんじゃない","たいへんじゃなかった"],
+ ["じょうずだ","じょうずじゃない","じょうずじゃなかった"], ["しずかだ","しずかじゃない","しずかじゃなかった"]
+].forEach(function(r){
+  eq(nb(E.adjConj(A2(r[0]), "neg")), r[1], "학습지: " + r[0] + " 부정 → " + r[1]);
+  eq(nb(E.adjConj(A2(r[0]), "negpast")), r[2], "학습지: " + r[0] + " 과거 부정 → " + r[2]);
+});
+/* 단어장 2쪽 예시 — あつい · さむい · すきだ */
+eq(E.adjConj(A2("あつい"), "past"), "あつかった", "단어장: あつい → あつかった");
+eq(E.adjConj(A2("あつい"), "pastp"), "あつかったです", "단어장: あつい → あつかったです");
+eq(nb(E.adjConj(A2("さむい"), "negpastp")), "さむくなかったです", "단어장: さむい → さむくなかったです");
+eq(E.adjConj(A2("すきだ"), "past"), "すきだった", "단어장: すきだ → すきだった");
+eq(E.adjConj(A2("すきだ"), "pastp"), "すきでした", "단어장: すきだ → すきでした (だったです X)");
+eq(nb(E.adjConj(A2("すきだ"), "negpastp")), "すきじゃなかったです", "단어장: すきだ → すきじゃなかったです");
+eq(E.adjConj(A2("いい"), "past"), "よかった", "★ いい → よかった (いかった X)");
+E.ADJS2.forEach(function(a){ E.ADJFORMS2.forEach(function(f){
+  var v = E.adjConj(a, f.k);
+  eq(/かったでした|だったです/.test(v), false, "  " + a.kana + " " + f.nm + " 에 ～かったでした·～だったです 가 없다 (" + v + ")");
+}); });
+
 console.log("── 간격 반복 · 졸업 (docs/학습원리.md §2) ──");
 eq(E.dueIn(undefined, "2026-10-19"), 0, "처음 보는 단어는 오늘");
 eq(E.dueIn({ rd:["2026-10-19"] }, "2026-10-19"), 1, "배운 날 맞히면 1일 뒤");

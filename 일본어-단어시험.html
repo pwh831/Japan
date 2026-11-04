@@ -925,6 +925,41 @@ var ADJFORMS = [
 
 var GROUP_NM = { 1:"1류", 2:"2류", 3:"3류" };
 
+/* ═══ 2학기 2회고사 · 형용사 활용 (부정형·과거형) ═══
+   출처: 선생님 학습지 「형용사 활용 (부정형, 과거형)」 + 2회고사 단어장 2쪽 <형용사의 과거형>·<형용사의 과거부정>
+         + 교과서 5과 90쪽 표. 낱말은 학습지 아래 표 10개 + 단어장에서 89쪽까지 배운 い형용사.
+   1회고사 ADJS(부정·연결·과거)와 따로 둔다 — 출제실이 ADJS 를 그대로 쓰기 때문이다.
+   ★ 선생님 필기: ～かったでした · ～だったです 같은 표현은 없다.
+   ★ いい(좋다)는 よい 로 활용 — よく ない · よく なかった · よかった. */
+var ADJS2 = [
+  { id:"b01", kana:"おいしい",   word:"おいしい",   meaning:["맛있다"] },
+  { id:"b02", kana:"おもしろい", word:"おもしろい", meaning:["재미있다"] },
+  { id:"b03", kana:"たのしい",   word:"たのしい",   meaning:["즐겁다"] },
+  { id:"b04", kana:"こわい",     word:"こわい",     meaning:["무섭다"] },
+  { id:"b05", kana:"いい",       word:"いい",       meaning:["좋다", "괜찮다"], irregular:true,
+    forms:{ neg:"よく ない", past:"よかった", pastp:"よかったです", negpast:"よく なかった", negpastp:"よく なかったです" },
+    note:"★ よい 로 활용 — いく ない · いかった 가 아니다" },
+  { id:"b06", kana:"からい",     word:"辛い",       meaning:["맵다"] },
+  { id:"b07", kana:"あつい",     word:"暑い",       meaning:["덥다"] },
+  { id:"b08", kana:"あたたかい", word:"あたたかい", meaning:["따뜻하다"] },
+  { id:"b09", kana:"すずしい",   word:"すずしい",   meaning:["시원하다"] },
+  { id:"b10", kana:"さむい",     word:"さむい",     meaning:["춥다"] },
+  { id:"b11", kana:"すきだ",     word:"好きだ",     meaning:["좋아하다"], na:true },
+  { id:"b12", kana:"きれいだ",   word:"きれいだ",   meaning:["예쁘다"], na:true },
+  { id:"b13", kana:"たいへんだ", word:"たいへんだ", meaning:["힘들다"], na:true },
+  { id:"b14", kana:"じょうずだ", word:"上手だ",     meaning:["잘하다"], na:true },
+  { id:"b15", kana:"しずかだ",   word:"しずかだ",   meaning:["조용하다"], na:true }
+];
+
+/* 2회고사 형용사의 형. 과거 부정이 가장 틀리기 쉽다(부정문으로 바꾼 뒤 과거형 — 단어장 2쪽 ★). */
+var ADJFORMS2 = [
+  { k:"neg",      nm:"부정형",         ko:"~지 않다",     weight:20 },
+  { k:"past",     nm:"과거형",         ko:"~했다",        weight:20 },
+  { k:"pastp",    nm:"과거 정중형",    ko:"~했습니다",    weight:15 },
+  { k:"negpast",  nm:"과거 부정형",    ko:"~지 않았다",   weight:25 },
+  { k:"negpastp", nm:"과거 부정 정중형", ko:"~지 않았습니다", weight:20 }
+];
+
 </script>
 <script>
 /* 시험 2 · 표현 데이터
@@ -1556,27 +1591,38 @@ function conj(v, form){
   return null;
 }
 
-/* い형용사 활용 — 단어장 4쪽. いい 만 불규칙이라 데이터에 직접 적혀 있다. */
+/* い형용사 활용 — 단어장 4쪽. いい 만 불규칙이라 데이터에 직접 적혀 있다.
+   2회고사(ADJS2)는 부정·과거·과거 정중·과거 부정·과거 부정 정중, な형용사까지.
+   교과서처럼 띄어 쓴다(おもしろく ない · じょうずじゃ ない) — 채점은 띄어쓰기를 보지 않는다. */
 function isAdj(it){ return !it.group; }
+function isAdj2(it){ return isAdj(it) && ADJS2.indexOf(it) >= 0; }
 function adjConj(a, form){
   if (a.forms && a.forms[form]) return a.forms[form];
-  var base = a.kana.slice(0, -1);
-  if (form === "neg")  return base + "くない";
-  if (form === "te")   return base + "くて";
-  if (form === "past") return base + "かった";
+  if (a.na){
+    var nb = a.kana.replace(/だ$/, "");
+    return { neg:nb + "じゃ ない", past:nb + "だった", pastp:nb + "でした",
+             negpast:nb + "じゃ なかった", negpastp:nb + "じゃ なかったです" }[form] || null;
+  }
+  var base = a.kana.slice(0, -1), sp = isAdj2(a) ? " " : "";
+  if (form === "neg")      return base + "く" + sp + "ない";
+  if (form === "te")       return base + "くて";
+  if (form === "past")     return base + "かった";
+  if (form === "pastp")    return base + "かったです";
+  if (form === "negpast")  return base + "く" + sp + "なかった";
+  if (form === "negpastp") return base + "く" + sp + "なかったです";
   return null;
 }
 function anyConj(it, form){ return isAdj(it) ? adjConj(it, form) : conj(it, form); }
-function formsOf(it){ return isAdj(it) ? ADJFORMS : FORMS; }
+function formsOf(it){ return !isAdj(it) ? FORMS : isAdj2(it) ? ADJFORMS2 : ADJFORMS; }
 
 function adjDataErrors(pool){
   var bad = [], i, a, j, f;
   for (i = 0; i < pool.length; i++){
     a = pool[i];
-    if (a.kana.slice(-1) !== "い") bad.push(a.kana + ": い 로 끝나지 않음");
+    if (a.kana.slice(-1) !== (a.na ? "だ" : "い")) bad.push(a.kana + ": " + (a.na ? "だ" : "い") + " 로 끝나지 않음");
     if (a.irregular && !a.forms) bad.push(a.kana + ": 불규칙인데 forms 가 없음");
-    for (j = 0; j < ADJFORMS.length; j++){
-      f = ADJFORMS[j].k;
+    for (j = 0; j < formsOf(a).length; j++){
+      f = formsOf(a)[j].k;
       if (!adjConj(a, f)) bad.push(a.kana + ": " + f + " 를 못 만듦");
     }
   }
@@ -1714,9 +1760,19 @@ function onUnit(list, code){ return list.some(function(u){ return u.code === cod
 function taught(w){ return w.pg === undefined || (w.pg !== null && w.pg <= UPTO); }
 var POOL = WORDS.filter(function(w){ return !w.skip && onUnit(UNITS_ON, w.unit) && taught(w); });
 UNITS_ON = UNITS_ON.filter(function(u){ return POOL.some(function(w){ return w.unit === u.code; }); });
-var VPOOL = VERBS.concat(ADJS).filter(function(v){ return v.now; });
+var VPOOL = VERBS.concat(ADJS).filter(function(v){ return v.now; }).concat(ADJS2);
+var HAS_VERB = VPOOL.some(function(v){ return !isAdj(v); });
 var PPOOL = PHRASES.filter(function(x){ return onUnit(PUNITS_ON, x.unit); });
-TESTS.forEach(function(t){ if (t.k === "verb" && !VPOOL.length){ t.ready = false; t.sub = "2회고사 범위 준비 중"; } });
+TESTS.forEach(function(t){
+  if (t.k !== "verb") return;
+  if (!VPOOL.length){ t.ready = false; t.sub = "2회고사 범위 준비 중"; return; }
+  if (!HAS_VERB){
+    /* 아직 형용사뿐 — 동사 유형(그룹 고르기)은 뺀다 */
+    t.nm = "활용"; t.sub = "い·な형용사 부정형·과거형";
+    t.types = t.types.filter(function(x){ return x.k !== "I"; });
+    t.master = "형마다 연속 3회 맞히면 숙달입니다. ～かったでした · ～だったです 는 없는 말입니다 (선생님).";
+  }
+});
 /* 철자 고르기 — 바꾼 철자가 범위 안 다른 낱말·동사와 같으면 답이 둘이 된다 */
 var SPELL_AVOID = WORDS.map(function(w){ return w.kana; }).concat(VERBS.map(function(v){ return v.kana; }), ADJS.map(function(a){ return a.kana; }));
 function spellable(w){ var k = norm(w.kana); return k.length >= 2 && k.length <= 12 && spellVariants(w.kana, 4, SPELL_AVOID).length === 4; }
@@ -1724,7 +1780,7 @@ function spellable(w){ var k = norm(w.kana); return k.length >= 2 && k.length <=
 var cfg = {
   test:"word", count:20, ime:"raw", ref:false,   /* ref — 참고 상자에만 있는 항목까지 낼지 */
   word:{ range:{}, types:{ A:1, B:1, C:1, S:1 } },
-  verb:{ range:{ 1:1, 2:1, 3:1, adj:1 }, types:{ H:1, I:1, J:1 } },
+  verb:{ range:{ 1:1, 2:1, 3:1, adj:1, na:1 }, types:{ H:1, I:1, J:1 } },
   phrase:{ range:{}, types:{ D:1, E:1, F:1, G:1 } }
 };
 /* 지금 진도(now) 쪽만 켜 둔다 — 1회고사 단어장은 남겨 두되 처음엔 끈다 */
@@ -1860,13 +1916,16 @@ function rangeItems(){
                n:PPOOL.filter(function(x){ return x.unit === u.code; }).length };
     });
   var out = [1, 2, 3].map(function(g){
-    var vs = VERBS.filter(function(v){ return v.group === g && inScope(v); });
+    var vs = VPOOL.filter(function(v){ return v.group === g && inScope(v); });
     return { k:String(g), nm:GROUP_NM[g], n:vs.length,
              note: vs.some(function(v){ return v.tricky || v.teIrreg; }) ? "예외 포함" : "" };
   });
-  out.push({ k:"adj", nm:"い형용사", n:ADJS.length,
-             note: ADJS.some(function(a){ return a.irregular; }) ? "예외 포함" : "" });
-  return out;
+  var ia = VPOOL.filter(function(v){ return isAdj(v) && !v.na; }),
+      na = VPOOL.filter(function(v){ return isAdj(v) && v.na; });
+  out.push({ k:"adj", nm:"い형용사", n:ia.length,
+             note: ia.some(function(a){ return a.irregular; }) ? "예외 포함 (いい)" : "" });
+  out.push({ k:"na", nm:"な형용사", n:na.length, note:"" });
+  return out.filter(function(r){ return r.n > 0; });   /* 2회고사에 없는 갈래는 칩을 안 띄운다 */
 }
 
 function seg(box, vals, label, get, set){
@@ -1892,7 +1951,7 @@ function selected(){
     return POOL.filter(function(w){ return cfg.word.range[w.unit] && inScope(w); });
   if (cfg.test === "phrase") return PPOOL.filter(function(x){ return cfg.phrase.range[x.unit]; });
   return VPOOL.filter(function(v){
-    return (isAdj(v) ? cfg.verb.range.adj : cfg.verb.range[String(v.group)]) && inScope(v);
+    return (isAdj(v) ? (v.na ? cfg.verb.range.na : cfg.verb.range.adj) : cfg.verb.range[String(v.group)]) && inScope(v);
   });
 }
 /* 범위 칩의 개수도 같은 기준으로 센다 — 20개라 해 놓고 17개만 내면 안 된다 */
@@ -2144,13 +2203,13 @@ var firstWrong = null;   /* 처음 빗나간 답 — 오답 분류에 쓴다. �
 var conf = null;         /* 직접 쓰기를 맞힌 뒤 확신도를 기다리는 중이면 그 처리 함수 */
 function KINDNM(k){ var t = T().types.filter(function(x){ return x.k === k; })[0]; return t ? t.nm : k; }
 function formInfo(f){
-  var all = FORMS.concat(ADJFORMS), i;
+  var all = FORMS.concat(ADJFORMS, ADJFORMS2), i;
   for (i = 0; i < all.length; i++) if (all[i].k === f) return all[i];
   return null;
 }
 function formNm(f){ var x = formInfo(f); return x ? x.nm : f; }
 function formKo(f){ var x = formInfo(f); return x ? x.ko : ""; }
-function famNm(it){ return isAdj(it) ? "い형용사" : GROUP_NM[it.group]; }
+function famNm(it){ return isAdj(it) ? (it.na ? "な형용사" : "い형용사") : GROUP_NM[it.group]; }
 
 function add(box, cls, txt){
   var d = document.createElement("div");
@@ -2468,7 +2527,7 @@ function finish(good, extra, right){
 
   /* 규칙 숙달 — 서로 다른 동사로 연속해야 오른다 */
   if (cfg.test === "verb" && q.k === "H"){
-    var r = rule(isAdj(item) ? "adj" : item.group, q.form);
+    var r = rule(isAdj(item) ? (item.na ? "na" : "adj") : item.group, q.form);
     if (!good) r.n = 0;
     else if (r.last !== item.id){ r.n++; r.last = item.id; }
   }
@@ -2565,6 +2624,12 @@ function revealVerb(v, form){
     dl.appendChild(dt); dl.appendChild(dd);
   });
   d.appendChild(dl);
+  if (isAdj2(v)){
+    var w2 = document.createElement("span");
+    w2.className = "sm"; w2.style.marginTop = "3px";
+    w2.textContent = "⚠ " + (v.na ? "～だったです" : "～かったでした") + " 같은 말은 없습니다 (선생님) — 과거 부정은 부정문으로 바꾼 뒤 과거형";
+    d.appendChild(w2);
+  }
   /* 같은 활용형이 두 동사에서 나오면 짚어 준다 — よんで 는 よむ 에서도 よぶ 에서도 나온다 */
   var also = deconj(anyConj(v, form), VPOOL).filter(function(x){ return x.id !== v.id; });
   if (also.length){
