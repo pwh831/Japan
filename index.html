@@ -906,7 +906,8 @@ function onUnit(list, code){ return list.some(function(u){ return u.code === cod
 var UPTO_KEY = "jp-upto";
 var upto = UPTO;
 try { var su = parseInt(localStorage.getItem(UPTO_KEY), 10); if (su > 0) upto = su; } catch(e){}
-function taught(w){ return w.pg === undefined || (w.pg !== null && w.pg <= upto); }
+/* always — 학습지로 받은 항목은 진도와 상관없이 늘 시험범위다 */
+function taught(w){ return w.always || w.pg === undefined || (w.pg !== null && w.pg <= upto); }
 
 var UNITS_ON, PUNITS_ON, POOL, VPOOL, PPOOL, HAS_VERB;
 var VERB_TEST = TESTS.filter(function(t){ return t.k === "verb"; })[0];

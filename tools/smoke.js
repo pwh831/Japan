@@ -251,7 +251,7 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   await p.evaluate(() => localStorage.clear());
   await p.reload(); await p.waitForTimeout(400);
   /* 단어장 항목은 교과서 쪽(pg)이 진도(UPTO)까지인 것만 앱에 나온다 */
-  const taught = w => w.pg === undefined || (w.pg !== null && w.pg <= E.UPTO);
+  const taught = w => w.always || w.pg === undefined || (w.pg !== null && w.pg <= E.UPTO);
   const nowWords = E.WORDS.filter(w => E.UNITS.some(u => u.now && u.code === w.unit) && !w.skip && !w.ref && taught(w));
   const nowUnits = E.UNITS.filter(u => u.now && nowWords.some(w => w.unit === u.code)).map(u => u.code);
   const nowPhr = E.PHRASES.filter(x => E.PUNITS.some(u => u.now && u.code === x.unit) && taught(x));
@@ -352,17 +352,17 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
 
   // 진도 쪽수를 바꾸면 세 시험이 그 쪽까지로 좁혀진다 — 새로고침해도 남는다
   const upTo = n => ({ w:nowWords.filter(w => w.pg <= n).length,
-                       v:E.ADJS2.filter(a => a.pg <= n).length,
+                       v:E.ADJS2.filter(a => a.always || a.pg <= n).length,
                        p:E.PHRASES.filter(x => x.pg && x.pg <= n).length });
   await p.fill('#uptoIn', '85'); await p.click('#uptoBtn'); await p.waitForTimeout(200);
   const c85 = upTo(85), rw = await rowOf('word'), rv = await rowOf('verb');
   t(new RegExp(c85.w + '$').test(rw.trim()), '85쪽까지: 단어 ' + c85.w + '개 — ' + rw);
-  t(c85.v === 0 ? !rv : true, '85쪽까지는 활용 항목이 없어 활용 줄이 빠진다' + (rv ? ' — ' + rv : ''));
+  t(c85.v > 0 && !!rv, '학습지 형용사는 85쪽까지여도 늘 나온다 (' + c85.v + '개) — ' + rv);
   t(/85쪽까지/.test(await p.textContent('#uptoHint')), '안내에 진도가 보인다: ' + (await p.textContent('#uptoHint')));
   await p.reload(); await p.waitForTimeout(400);
   t((await p.$eval('#uptoIn', e => e.value)) === '85', '새로고침해도 진도가 남는다');
   await p.fill('#uptoIn', '90'); await p.click('#uptoBtn'); await p.waitForTimeout(200);
-  t((await p.textContent('#uptoHint')).includes('활용 ' + upTo(90).v), '90쪽까지면 학습지 형용사가 열린다: ' + (await p.textContent('#uptoHint')));
+  t((await p.textContent('#uptoHint')).includes('활용 ' + upTo(90).v), '90쪽까지면 활용이 진도 쪽 형용사까지 늘어난다: ' + (await p.textContent('#uptoHint')));
   await p.fill('#uptoIn', ''); await p.click('#uptoBtn'); await p.waitForTimeout(150);
   t(/숫자로/.test(await p.textContent('#uptoHint')), '빈칸으로 적용하면 안내한다');
   await p.fill('#uptoIn', String(E.UPTO)); await p.click('#uptoBtn'); await p.waitForTimeout(150);

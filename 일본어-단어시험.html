@@ -991,13 +991,14 @@ var GROUP_NM = { 1:"1류", 2:"2류", 3:"3류" };
    ★ 선생님 필기: ～かったでした · ～だったです 같은 표현은 없다.
    ★ いい(좋다)는 よい 로 활용 — よく ない · よく なかった · よかった.
    pg 는 교과서 쪽: 본문에 나온 쪽(からい 87 · あつい 등 88 · おもしろかった·じょうずだった 89 ·
-   たのしい·こわい 91), 학습지에만 있는 것은 형용사 과거 표현 표가 있는 90쪽. */
+   たのしい·こわい 91), 학습지에만 있는 것은 형용사 과거 표현 표가 있는 90쪽.
+   ★ always:true — 학습지로 받은 항목. 선생님이 준 학습지는 진도와 상관없이 늘 시험범위다(사용자 원칙). */
 var ADJS2 = [
-  { id:"b01", pg:90, kana:"おいしい",   word:"おいしい",   meaning:["맛있다"] },
-  { id:"b02", pg:89, kana:"おもしろい", word:"おもしろい", meaning:["재미있다"] },
-  { id:"b03", pg:91, kana:"たのしい",   word:"たのしい",   meaning:["즐겁다"] },
-  { id:"b04", pg:91, kana:"こわい",     word:"こわい",     meaning:["무섭다"] },
-  { id:"b05", pg:90, kana:"いい",       word:"いい",       meaning:["좋다", "괜찮다"], irregular:true,
+  { id:"b01", always:true, pg:90, kana:"おいしい",   word:"おいしい",   meaning:["맛있다"] },
+  { id:"b02", always:true, pg:89, kana:"おもしろい", word:"おもしろい", meaning:["재미있다"] },
+  { id:"b03", always:true, pg:91, kana:"たのしい",   word:"たのしい",   meaning:["즐겁다"] },
+  { id:"b04", always:true, pg:91, kana:"こわい",     word:"こわい",     meaning:["무섭다"] },
+  { id:"b05", always:true, pg:90, kana:"いい",       word:"いい",       meaning:["좋다", "괜찮다"], irregular:true,
     forms:{ neg:"よく ない", past:"よかった", pastp:"よかったです", negpast:"よく なかった", negpastp:"よく なかったです" },
     note:"★ よい 로 활용 — いく ない · いかった 가 아니다" },
   { id:"b06", pg:87, kana:"からい",     word:"辛い",       meaning:["맵다"] },
@@ -1005,11 +1006,11 @@ var ADJS2 = [
   { id:"b08", pg:88, kana:"あたたかい", word:"あたたかい", meaning:["따뜻하다"] },
   { id:"b09", pg:88, kana:"すずしい",   word:"すずしい",   meaning:["시원하다"] },
   { id:"b10", pg:88, kana:"さむい",     word:"さむい",     meaning:["춥다"] },
-  { id:"b11", pg:90, kana:"すきだ",     word:"好きだ",     meaning:["좋아하다"], na:true },
-  { id:"b12", pg:90, kana:"きれいだ",   word:"きれいだ",   meaning:["예쁘다"], na:true },
-  { id:"b13", pg:90, kana:"たいへんだ", word:"たいへんだ", meaning:["힘들다"], na:true },
-  { id:"b14", pg:89, kana:"じょうずだ", word:"上手だ",     meaning:["잘하다"], na:true },
-  { id:"b15", pg:90, kana:"しずかだ",   word:"しずかだ",   meaning:["조용하다"], na:true }
+  { id:"b11", always:true, pg:90, kana:"すきだ",     word:"好きだ",     meaning:["좋아하다"], na:true },
+  { id:"b12", always:true, pg:90, kana:"きれいだ",   word:"きれいだ",   meaning:["예쁘다"], na:true },
+  { id:"b13", always:true, pg:90, kana:"たいへんだ", word:"たいへんだ", meaning:["힘들다"], na:true },
+  { id:"b14", always:true, pg:89, kana:"じょうずだ", word:"上手だ",     meaning:["잘하다"], na:true },
+  { id:"b15", always:true, pg:90, kana:"しずかだ",   word:"しずかだ",   meaning:["조용하다"], na:true }
 ];
 
 /* 2회고사 형용사의 형. 과거 부정이 가장 틀리기 쉽다(부정문으로 바꾼 뒤 과거형 — 단어장 2쪽 ★). */
@@ -1822,7 +1823,8 @@ function onUnit(list, code){ return list.some(function(u){ return u.code === cod
 var UPTO_KEY = "jp-upto";
 var upto = UPTO;
 try { var su = parseInt(localStorage.getItem(UPTO_KEY), 10); if (su > 0) upto = su; } catch(e){}
-function taught(w){ return w.pg === undefined || (w.pg !== null && w.pg <= upto); }
+/* always — 학습지로 받은 항목은 진도와 상관없이 늘 시험범위다 */
+function taught(w){ return w.always || w.pg === undefined || (w.pg !== null && w.pg <= upto); }
 
 var UNITS_ON, PUNITS_ON, POOL, VPOOL, PPOOL, HAS_VERB;
 var VERB_TEST = TESTS.filter(function(t){ return t.k === "verb"; })[0];
