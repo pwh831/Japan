@@ -31,6 +31,8 @@
 }
 
 *{box-sizing:border-box}
+/* 숨김은 언제나 숨김 — .fb·.ask 처럼 display 를 정한 요소에서도 (게시 껍데기에도 같은 규칙이 있다) */
+[hidden]{display:none!important}
 body{
   background:var(--paper); color:var(--ink);
   font-family:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
@@ -123,6 +125,22 @@ p{margin:0}
 .plan-foot .row .pri{flex:1 1 220px}
 .today-sub{font-size:12px;color:var(--ink-faint);text-wrap:pretty}
 .done-msg{font-size:14px;color:var(--rule);font-weight:600}
+
+/* ── 학습 카드 — 처음 보는 항목은 시험 전에 한 번 본다 ── */
+.learn.reveal{background:var(--rule-soft);border:1px solid var(--rule-line)}
+.copy-of{font-size:13px;color:var(--ink-soft)}
+.copy-of b{font-family:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;font-size:17px;color:var(--rule);
+           letter-spacing:.04em;font-weight:600}
+.rule-wrap{overflow-x:auto;border:1px solid var(--rule-line);border-radius:4px;background:var(--card)}
+table.rule{border-collapse:collapse;width:100%;font-size:14px}
+table.rule th, table.rule td{padding:8px 8px;border-bottom:1px solid var(--edge-soft);text-align:left}
+table.rule th{white-space:nowrap}
+table.rule thead th{font-size:12px;color:var(--ink-faint);font-weight:600;background:var(--edge-soft)}
+table.rule tbody th{font-size:12px;color:var(--ink-soft);font-weight:600}
+table.rule td{font-family:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;font-size:15px}
+table.rule tr.grp th[scope="rowgroup"]{color:var(--rule)}
+.rule-notes{display:flex;flex-direction:column;gap:5px;font-size:13.5px;color:var(--ink-soft);margin-top:10px}
+.rule-notes .x{color:var(--shu)}
 
 details.free{border-top:1px solid var(--edge)}
 details.free > summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:baseline;
@@ -281,7 +299,8 @@ footer b{color:var(--ink-soft);font-weight:600}
         <button class="btn pri big" id="todayBtn" type="button">오늘 공부 시작</button>
         <button class="btn" id="slipBtn" type="button">실수 모음</button>
       </div>
-      <p class="today-sub">단어 → 활용 → 표현 순서로 이어서 풉니다. 직접 써서 맞히면 1일 → 3일 → 7일 → 14일 뒤에
+      <p class="today-sub">처음 보는 항목은 학습 카드로 먼저 읽고 따라 쓴 뒤, 몇 문제 뒤에 보지 않고 씁니다.
+        단어 → 활용 → 표현 순서로 이어서 풉니다. 직접 써서 맞히면 1일 → 3일 → 7일 → 14일 뒤에
         다시 나오고, 틀리거나 애매한 것은 맞힐 때까지 오늘 남습니다. 서로 다른 날 3번, 첫날로부터 7일이 지나면 숙달입니다.</p>
     </div>
   </section>
@@ -2117,11 +2136,12 @@ $("uptoForm").addEventListener("submit", function(e){
 function drawToday(){
   if (document.activeElement !== $("uptoIn")) $("uptoIn").value = upto;
   uptoHint();
-  var rows = $("planRows"), total = 0, slips = 0;
+  var rows = $("planRows"), total = 0, slips = 0, fresh = 0;
   rows.innerHTML = "";
   TEST_ORDER.forEach(function(k){
     if (!readyTest(k)) return;
     var list = todayList(k), nw = 0, mi = 0;
+    fresh += list.filter(function(x){ return isNew(k, x); }).length;
     list.forEach(function(x){
       var st = store[k][x.id];
       if (!st || !(st.rd && st.rd.length) && !st.miss) nw++;
@@ -2142,8 +2162,9 @@ function drawToday(){
     if (!list.length) pc.className += " zero";
     rows.appendChild(row);
   });
-  /* 한 문항 15초쯤 — 하루 10~15분이 목표다 (docs/학습원리.md §3) */
-  $("todayNote").textContent = total ? total + "문항 · 약 " + Math.max(1, Math.round(total * 15 / 60)) + "분" : "오늘 할 것은 끝났습니다";
+  /* 한 문항 15초쯤, 새 항목은 학습 카드 20초 더 — 하루 10~15분이 목표다 (docs/학습원리.md §3) */
+  $("todayNote").textContent = total ? total + "문항" + (fresh ? " · 새로 배우기 " + fresh : "") + " · 약 " +
+    Math.max(1, Math.round((total * 15 + fresh * 20) / 60)) + "분" : "오늘 할 것은 끝났습니다";
   $("todayBtn").disabled = !total;
   $("todayBtn").textContent = total ? "오늘 공부 시작 · " + total + "문항" : "오늘 공부 끝";
   $("slipBtn").disabled = !slips;
@@ -2232,8 +2253,29 @@ function schedQ(it){
   if (it.vs) return { k:"D", p:it, side:Math.random() < .5 ? 0 : 1 };
   return { k:"E", p:it, side:0 };
 }
+/* ══ 학습 과정 — 처음 보는 항목은 카드로 먼저 배우고, 몇 문제 뒤에 보지 않고 쓴다 ══
+   카드 4장 → (복습 문항 몇 개) → 그 4개의 시험. 바로 뒤에 내면 방금 본 것을 베끼는 것이 된다.
+   활용에 처음 보는 학습지 형용사가 있으면 맨 앞에 규칙 카드 한 장. */
+function itemOf(q){ return q.w || q.v || q.p; }
+function isNew(k, it){ var st = store[k][it.id]; return !st || (!st.ok && !st.ng && !st.seen); }
+function withCards(tests){
+  var fresh = tests.filter(function(q){ return isNew(cfg.test, itemOf(q)); }),
+      old = tests.filter(function(q){ return !isNew(cfg.test, itemOf(q)); });
+  if (!fresh.length) return tests;
+  var out = [], oi = 0, i, j;
+  if (cfg.test === "verb" && fresh.some(function(q){ return isAdj2(q.v); })) out.push({ k:"R" });
+  for (i = 0; i < fresh.length; i += 4){
+    var chunk = fresh.slice(i, i + 4);
+    chunk.forEach(function(q){ out.push({ k:"L", t:q }); });
+    for (j = 0; j < 4 && oi < old.length; j++) out.push(old[oi++]);
+    shuffle(chunk.slice()).forEach(function(q){ out.push(q); });
+  }
+  while (oi < old.length) out.push(old[oi++]);
+  return out;
+}
+function isCard(q){ return q.k === "L" || q.k === "R"; }
 function buildSession(pool, writeOnly){
-  if (writeOnly) return shuffle(pool.map(schedQ));
+  if (writeOnly) return withCards(shuffle(pool.map(schedQ)));
   var kinds = T().types.filter(function(t){ return C().types[t.k]; });
   if (!kinds.length || !pool.length) return [];
   var withEx = cfg.test === "word" ? pool.filter(function(w){ return blankable(w).length; }) : [];
@@ -2375,6 +2417,90 @@ function answerOf(q){
   return null;
 }
 
+function unitOf(q){
+  return cfg.test === "word"   ? ((UNITS.filter(function(u){ return u.code === q.w.unit; })[0] || {}).title || "") :
+         cfg.test === "phrase" ? ((PUNITS.filter(function(u){ return u.code === q.p.unit; })[0] || {}).pages || "") :
+                                 famNm(q.v) + ((q.v.tricky || q.v.teIrreg || q.v.irregular) ? " · 예외" : "");
+}
+/* 카드에서 따라 쓸 것 — 시험에서 쓸 바로 그 답 */
+function copyWant(t){
+  if (cfg.test === "word") return t.w.kana;
+  if (cfg.test === "verb") return anyConj(t.v, t.form);
+  return (t.k === "G" || t.k === "D") ? sideOf(t.p, t.side).key : sideOf(t.p, t.side || 0).ja;
+}
+function ruleTable(){
+  var d = document.createElement("div");
+  d.innerHTML =
+    '<div class="rule-wrap"><table class="rule"><thead><tr><th scope="col"></th><th scope="col">긍정</th><th scope="col">부정</th></tr></thead><tbody>' +
+    '<tr class="grp"><th scope="rowgroup">い형 현재</th><td>～い</td><td>～く ない</td></tr>' +
+    '<tr><th scope="row">과거</th><td>～かった</td><td>～く なかった</td></tr>' +
+    '<tr><th scope="row">과거 정중</th><td>～かったです</td><td>～く なかったです</td></tr>' +
+    '<tr class="grp"><th scope="rowgroup">な형 현재</th><td>～だ</td><td>～じゃ ない</td></tr>' +
+    '<tr><th scope="row">과거</th><td>～だった</td><td>～じゃ なかった</td></tr>' +
+    '<tr><th scope="row">과거 정중</th><td>～でした</td><td>～じゃ なかったです</td></tr>' +
+    '</tbody></table></div>' +
+    '<div class="rule-notes">' +
+      '<span>★ 과거 부정은 <b>부정문으로 바꾼 뒤</b> 과거형 — さむい → さむく ない → さむく なかった</span>' +
+      '<span>★ いい(좋다)는 よい 로 활용 — よく ない · よかった · よく なかった</span>' +
+      '<span class="x">✕ ～かったでした · ～だったです 는 없는 말 (선생님)</span>' +
+    '</div>';
+  return d;
+}
+function renderCard(q){
+  var body = $("qBody");
+  $("fb").hidden = true; $("askBox").hidden = true;
+  $("choices").hidden = true; $("choices").innerHTML = "";
+  $("inputArea").hidden = true;
+  body.innerHTML = "";
+  if (q.k === "R"){
+    $("qKind").textContent = "규칙 익히기";
+    $("qUnit").textContent = "형용사 활용 학습지";
+    add(body, "q-ask", "표를 소리 내어 한 번 읽어 보세요. 다음부터 낱말마다 활용표가 나옵니다.");
+    body.appendChild(ruleTable());
+    answered = true;
+    var fb = $("fb");
+    fb.hidden = false; fb.className = "fb"; fb.innerHTML = "";
+    var go = document.createElement("button");
+    go.className = "btn pri"; go.type = "button"; go.textContent = "규칙 확인 · 다음 →";
+    go.addEventListener("click", next);
+    fb.appendChild(go);
+    setTimeout(function(){ go.focus(); }, 30);
+    return;
+  }
+  var t = q.t, it = itemOf(t);
+  $("qKind").textContent = "새로 배우기";
+  $("qUnit").textContent = unitOf(t);
+  add(body, "q-ask", "처음 보는 " + (cfg.test === "word" ? "단어" : cfg.test === "verb" ? "활용" : "표현") +
+    "입니다. 소리 내어 읽고, 아래 칸에 따라 써 보세요.");
+  var card = document.createElement("div");
+  card.className = "learn reveal";
+  card.appendChild(cfg.test === "word" ? revealWord(it) : cfg.test === "verb" ? revealVerb(it, t.form) : revealPhrase(it, t.side || 0));
+  body.appendChild(card);
+  var c = document.createElement("div");
+  c.className = "copy-of";
+  c.innerHTML = '따라 쓸 것: <b></b>' + (cfg.test === "verb" ? ' <span></span>' : "");
+  c.querySelector("b").textContent = copyWant(t);
+  if (cfg.test === "verb") c.querySelector("span").textContent = "(" + formNm(t.form) + ")";
+  body.appendChild(c);
+  openInput();
+  $("ans").placeholder = "따라 쓰기";
+  $("hintBtn").disabled = true;
+  $("skipBtn").textContent = "넘어가기";
+}
+/* 카드를 다 봤다 — 오늘 본 날을 적고, 몇 문제 뒤의 시험에서 보지 않고 쓴다 */
+function learnDone(q, copied){
+  var st = stat(itemOf(q.t).id);
+  st.seen = dayKey(Date.now()); save();
+  answered = true;
+  var fb = $("fb");
+  fb.hidden = false; fb.className = "fb ok";
+  fb.innerHTML = '<div class="fb-line"><span class="dot"></span><b></b></div>';
+  fb.querySelector("b").textContent = copied ? "따라 썼습니다 — 몇 문제 뒤에 보지 않고 써서 확인합니다"
+                                             : "넘어갔습니다 — 몇 문제 뒤에 보지 않고 써서 확인합니다";
+  $("submitBtn").textContent = "다음 →";
+  $("ans").blur();
+}
+
 function render(){
   var q = sess.qs[sess.at];
   answered = false; hinted = 0; penalised = false; firstWrong = null; conf = null;
@@ -2382,11 +2508,10 @@ function render(){
   $("qNo").textContent = (sess.at + 1) + " / " + sess.qs.length;
   $("qFill").style.width = (sess.at / sess.qs.length * 100) + "%";
   $("qScore").textContent = sess.score + "점";
+  $("skipBtn").textContent = "모르겠어요"; $("ans").placeholder = "여기에 쓰세요";
+  if (isCard(q)){ renderCard(q); return; }
   $("qKind").textContent = KINDNM(q.k);
-  $("qUnit").textContent =
-    cfg.test === "word"   ? ((UNITS.filter(function(u){ return u.code === q.w.unit; })[0] || {}).title || "") :
-    cfg.test === "phrase" ? ((PUNITS.filter(function(u){ return u.code === q.p.unit; })[0] || {}).pages || "") :
-                            famNm(q.v) + ((q.v.tricky || q.v.teIrreg || q.v.irregular) ? " · 예외" : "");
+  $("qUnit").textContent = unitOf(q);
 
   $("fb").hidden = true; $("askBox").hidden = true;
   $("choices").hidden = true; $("choices").innerHTML = "";
@@ -2560,7 +2685,16 @@ $("ans").addEventListener("keydown", function(e){
 });
 
 function submit(){
-  var q = sess.qs[sess.at], want = answerOf(q);
+  var q = sess.qs[sess.at], want;
+  if (q.k === "L"){
+    var cw = copyWant(q.t),
+        cj = judge($("ans").value, cfg.test === "word" ? q.t.w : { kana:cw, word:cw, jaAliases:[] });
+    if (cj.code === "empty"){ $("ans").focus(); return; }
+    if (cj.code === "ok"){ learnDone(q, true); return; }
+    retry("<b>카드와 글자가 다릅니다</b> — 카드를 보고");
+    return;
+  }
+  want = answerOf(q);
   if (cfg.ime !== "raw"){
     var fin = toKana($("ans").value, cfg.ime === "kata", true);
     if (fin !== $("ans").value) $("ans").value = fin;
@@ -2629,7 +2763,10 @@ function askConfuse(pair, typed){
 }
 
 $("submitBtn").addEventListener("click", function(){ if (!answered) submit(); else next(); });
-$("skipBtn").addEventListener("click", function(){ if (!answered) finish(false, ""); });
+$("skipBtn").addEventListener("click", function(){
+  if (answered) return;
+  if (sess.qs[sess.at].k === "L") learnDone(sess.qs[sess.at], false); else finish(false, "");
+});
 $("hintBtn").addEventListener("click", function(){
   var want = answerOf(sess.qs[sess.at]);
   if (!want) return;
@@ -2826,7 +2963,7 @@ function next(){
 function showResult(){
   show("result");
   $("rScore").textContent = sess.score;
-  $("rOf").textContent = "/ " + sess.qs.length;
+  $("rOf").textContent = "/ " + sess.qs.filter(function(q){ return !isCard(q); }).length;
   $("rBreak").textContent = T().types.filter(function(t){ return sess.by[t.k][1]; })
     .map(function(t){ return t.nm + " " + sess.by[t.k][0] + "/" + sess.by[t.k][1]; }).join("  ·  ");
 

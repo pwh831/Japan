@@ -271,14 +271,31 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   const rowOf = async k => { const el = await p.$(`#planRows .plan-row[data-test="${k}"]`); return el ? (await el.textContent()) || '' : ''; };
 
   const findW = m => nowWords.find(w => w.meaning.join(', ') === m);
+  /* 학습 카드 — 규칙 카드는 넘기고, 새로 배우기는 '따라 쓸 것' 을 그대로 써서 넘긴다 */
+  let cardsSeen = 0, cardOrderOk = true;
+  const learned = new Set();
+  const doCard = async () => {
+    const kind = (await p.textContent('#qKind')).trim();
+    if (kind === '규칙 익히기') { await p.click('#fb .btn'); await p.waitForTimeout(100); cardsSeen++; return true; }
+    if (kind !== '새로 배우기') return false;
+    const want = (await p.textContent('#qBody .copy-of b')).trim();
+    await p.fill('#ans', want + 'ぬ'); await p.click('#submitBtn'); await p.waitForTimeout(100);   // 틀리게 베끼면 다시
+    if (await p.$eval('#fb', e => /카드와 글자가 다릅니다/.test(e.textContent)) === false) cardOrderOk = false;
+    await p.fill('#ans', want); await p.click('#submitBtn'); await p.waitForTimeout(110);
+    learned.add(want);
+    await p.click('#submitBtn'); await p.waitForTimeout(100);
+    cardsSeen++; return true;
+  };
   /* 오늘 공부를 시작해 단어 차례만 푼다 — 결과 화면에서 '이어서' 를 확인하고 처음으로 */
   const runWords = async (plan) => {
     await p.click('#todayBtn'); await p.waitForTimeout(250);
     const log = [];
     for (let i = 0; i < 200; i++) {
       if (await p.$eval('#result', e => !e.hidden)) break;
+      if (await doCard()) continue;
       if ((await p.textContent('#qKind')).trim() !== '직접 쓰기') { t(false, '  단어 차례에 다른 유형이 나왔다'); break; }
       const w = findW((await p.textContent('#qBody .q-main')).trim());
+      if (w && cardsSeen && !learned.has(w.kana) && log.length < 5) cardOrderOk = false;   // 카드보다 시험이 먼저
       if (!w) { t(false, '  뜻으로 낱말을 못 찾음'); break; }
       const how = plan(w, i);
       if (how === 'kana') {                       // 가나 종류를 틀렸다가 고쳐 쓴다
@@ -296,6 +313,9 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   let unsureW = null;
   const log1 = await runWords((w, i) => w === kataW ? 'kana' : (!unsureW && w !== kataW ? (unsureW = w, 'unsure') : 'sure'));
   t(log1.length === nowWords.length, '단어 차례를 끝까지 풀었다 (' + log1.length + '문항)');
+  t(cardsSeen === nowWords.length, '처음 보는 단어마다 학습 카드가 먼저 나왔다 (' + cardsSeen + '장)');
+  t(cardOrderOk, '카드를 틀리게 베끼면 다시 쓰게 하고, 시험은 카드 뒤에 나온다');
+  t((await p.textContent('#rOf')).trim() === '/ ' + nowWords.length, '점수는 카드를 빼고 센다: ' + (await p.textContent('#rOf')));
   const kRow = log1.find(r => r[1] === 'kana');
   t(kRow && kRow[2] === '맞게 썼습니다' && kRow[3].includes('가나 종류 실수'),
     '가나 종류를 틀렸다 고치면 맞게 썼다고 하고 실수로 분류한다: ' + (kRow ? kRow[3] : ''));
@@ -313,17 +333,21 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   t(st1[sureW.id].rd && st1[sureW.id].rd.length === 1 && !st1[unsureW.id].rd,
     '확실은 그날을 적고, 애매는 적지 않는다');
 
+  cardsSeen = 0;
   await runWords(() => 'sure');
+  t(cardsSeen === 0, '한 번 배운 단어는 다시 카드가 나오지 않는다');
   await p.click('#homeBtn'); await p.waitForTimeout(200);
   t(/다음 복습 1일 뒤 · \d+개/.test(await rowOf('word')) && /끝/.test(await rowOf('word')),
     '단어를 다 맞히면 다음 복습일을 알려 준다: ' + (await rowOf('word')));
 
   /* 활용 → 표현 으로 이어지는지 — 활용형은 엔진이 낸 답으로 */
   await p.click('#todayBtn'); await p.waitForTimeout(250);
-  t((await p.textContent('#qKind')).trim() === '활용형 쓰기', '단어가 끝났으면 오늘 공부는 활용부터');
+  t((await p.textContent('#qKind')).trim() === '규칙 익히기', '단어가 끝났으면 활용부터 — 학습지 규칙 카드가 맨 앞');
+  t(/～かったでした/.test(await p.textContent('#qBody')), '규칙 카드에 선생님 필기(～かったでした X)');
   let vOk = 0, vN = 0;
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 90; i++) {
     if (await p.$eval('#result', e => !e.hidden)) break;
+    if (await doCard()) continue;
     const main = (await p.textContent('#qBody .q-main')).trim(), ask = (await p.textContent('#qBody .q-ask')).trim();
     const want = byName[main] ? E.anyConj(byName[main], formOf(ask)) : null;
     if (!want) { await p.click('#skipBtn'); await p.waitForTimeout(100); await p.click('#submitBtn'); continue; }
@@ -334,8 +358,8 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   t(vN === nowAdj.length && vOk === vN, '활용 차례: 진도 안 형용사마다 한 문항, 엔진 답이 정답 ' + vOk + '/' + vN);
   t(await p.$eval('#nextBtn', e => !e.hidden && /이어서 · 표현/.test(e.textContent)), '활용이 끝나면 표현으로 이어서');
   await p.click('#nextBtn'); await p.waitForTimeout(250);
-  t(['핵심어 쓰기', '대비 고르기', '뜻 고르기'].includes((await p.textContent('#qKind')).trim()),
-    '표현 차례는 핵심어 쓰기 위주: ' + (await p.textContent('#qKind')));
+  t(['새로 배우기', '핵심어 쓰기', '대비 고르기', '뜻 고르기'].includes((await p.textContent('#qKind')).trim()),
+    '표현 차례도 새 문형은 카드부터: ' + (await p.textContent('#qKind')));
   await p.click('#quitBtn'); await p.waitForTimeout(200);
 
   // 하루가 지났다고 치고(기록을 하루 앞당긴다) 다시 열면 단어가 전부 복습할 날이 된다
