@@ -22,9 +22,26 @@ from reportlab.pdfbase.ttfonts import TTFont
 from pypdf import PdfReader, PdfWriter
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#   python3 tools/annotate-pdf.py [원본.pdf [결과.pdf]]   — 인자가 없으면 1회고사 단어장
 SRC  = os.path.join(ROOT, "docs", "2026-일본어회화-2학기1회고사-단어장.pdf")
 OUT  = os.path.join(ROOT, "docs", "2026-일본어회화-2학기1회고사-단어장-발음.pdf")
-FONT = "/usr/local/lib/python3.11/dist-packages/koreanize_matplotlib/fonts/NanumGothic.ttf"
+if len(sys.argv) > 1:
+    SRC = os.path.abspath(sys.argv[1])
+    OUT = os.path.abspath(sys.argv[2]) if len(sys.argv) > 2 else SRC[:-4] + "-발음.pdf"
+# 가나가 들어 있는 원본 나눔고딕(tools/fonts) — Google Fonts 판은 한글뿐이라 쓸 수 없다
+FONT = next(f for f in (os.path.join(ROOT, "tools", "fonts", "NanumGothic.ttf"),
+                        "/usr/local/lib/python3.11/dist-packages/koreanize_matplotlib/fonts/NanumGothic.ttf")
+            if os.path.exists(f))
+
+# 원문 오류 바로잡기 — (쪽 0부터, 원문 낱말, x0, top, 고친 낱말). 위치까지 맞아야 고친다:
+# 다른 원본이 들어오면 조용히 엉뚱한 곳을 지우지 않고 멈춘다. 흰 칸으로 덮고 같은 크기로 다시 쓴다.
+FIXES = {
+    "2026-일본어회화-2학기2회고사-단어장.pdf": [
+        (3, "(1류)",  251.5, 421.4, "(2류)"),       # 見る 는 2류 — 같은 단어장 5쪽 みる 도 2류
+        (3, "괜챃다", 492.4, 419.7, "괜찮다"),      # 오타
+        (0, "(2류)",  499.4, 294.8, "(みる 2류)"),  # 聞いて みる — 활용은 みる(2류) 를 따른다
+    ],
+}.get(os.path.basename(SRC), [])
 
 KANA  = re.compile(r"[ぁ-ゖァ-ヺー]")
 HAN   = re.compile(r"[가-힣]")
@@ -33,6 +50,8 @@ FURI  = re.compile(r"[㐀-鿿々]+[(（]([ぁ-ゖァ-ヺー]+)[)）]")
 
 SIZE = 6.2      # 발음 글자 크기 — 원문 10.4pt 아래 줄 간격에 들어가야 한다
 MIN  = 4.3      # 이보다 작으면 읽히지 않으니 차라리 안 적는다
+TIGHT = 3.9     # 루비(한자 위 후리가나)가 있는 칸은 글자가 아래로 내려앉아 선까지 5pt 쯤 남는다 —
+                # 선에 바짝 붙여(DROP·PAD 를 줄여) 이 크기까지는 아래에 적는다. 이보다 작으면 비운다
 DROP = 1.0      # 원문 아래로 얼마나 띄울지
 PAD  = 0.6      # 표 선에서 떨어뜨릴 여백
 ROW  = 5.0      # 이 안에 들어오면 같은 줄로 본다
@@ -105,10 +124,37 @@ def runs(row):
     if cur: out.append(cur)
     return out
 
-def below(edges, x0, x1, bottom):
-    """이 항목 바로 아래를 가로지르는 표 선까지 남은 높이."""
+def split_plus(pg, words):
+    """「기본형+ことが」 처럼 한글 뒤에 +로 붙은 일본어 꼬리를 따로 떼어 낸다.
+
+    문형 칸(기본형+ことが できる · 숫자+回 · 명사+だから)은 한글과 일본어가 한 낱말로 붙어 있어
+    통째로 건너뛰면 일본어 부분에 발음이 안 달린다. 꼬리의 첫 글자 x 를 글자 위치에서 찾는다."""
+    out = []
+    for w in words:
+        t = w["text"]
+        if HAN.search(t) and "+" in t:
+            tail = t.split("+")[-1]
+            if tail and KANA.search(tail) and not HAN.search(tail):
+                cs = sorted([c for c in pg.chars
+                             if w["x0"] - .5 <= (c["x0"] + c["x1"]) / 2 <= w["x1"] + .5
+                             and w["top"] - .5 <= (c["top"] + c["bottom"]) / 2 <= w["bottom"] + .5],
+                            key=lambda c: c["x0"])
+                if len(cs) >= len(tail):
+                    nw = dict(w); nw["text"] = tail; nw["x0"] = cs[len(cs) - len(tail)]["x0"]
+                    hd = dict(w); hd["text"] = t[:len(t) - len(tail)]; hd["x1"] = nw["x0"] - 1.0   # 앞의 한글은 장애물로 남긴다 (left_of 는 x0 - 0.5 보다 왼쪽만 본다)
+                    out.append(hd); out.append(nw); continue
+        out.append(w)
+    return out
+
+def below(edges, x0, x1, bottom, others=()):
+    """이 항목 바로 아래를 가로지르는 표 선까지 남은 높이.
+
+    일본어 바로 밑에 한글 풀이가 붙은 칸(형용사 활용표)은 선보다 풀이가 먼저 온다 —
+    위아래로 겹치는 다른 낱말이 있으면 그 위까지만 쓴다."""
     ys = [e["top"] for e in edges
           if e["top"] > bottom + 0.5 and e["x0"] <= x1 + 1 and e["x1"] >= x0 - 1]
+    ys += [w["top"] for w in others
+           if w["top"] > bottom - 0.5 and w["x0"] < x1 and w["x1"] > x0]
     return (min(ys) - bottom) if ys else None
 
 def right_of(vedges, row, x1, top, bottom):
@@ -151,7 +197,9 @@ def main():
         vedges = [e for e in pg.edges if e["orientation"] == "v"]
         items = []
         ws = pg.extract_words(use_text_flow=False, keep_blank_chars=False)
-        for row in rows(unruby(pg, ws)):
+        rws = rows(split_plus(pg, unruby(pg, ws)))
+        every = [w for r in rws for w in r]
+        for row in rws:
             for run in runs(row):
                 ja = run[0]["text"]
                 for a, b in zip(run, run[1:]):
@@ -162,9 +210,11 @@ def main():
                 x0, x1 = run[0]["x0"], run[-1]["x1"]
                 top    = min(w["top"] for w in run)
                 bottom = max(w["bottom"] for w in run)
+                av = below(hedges, x0, x1, bottom, [w for w in every if w not in run])
                 items.append({
                     "x0": x0, "x1": x1, "top": top, "bottom": bottom, "ja": ja,
-                    "size":  fit(below(hedges, x0, x1, bottom)),
+                    "size":  fit(av),
+                    "avail": av,
                     "right": right_of(vedges, row, x1, top, bottom),
                     "left":  left_of(vedges, row, x0, top, bottom)
                 })
@@ -176,11 +226,36 @@ def main():
         for it in items:
             it["ko"] = ko.pop(0)
 
+    fixes = {}
+    for pi, pg in enumerate(src.pages):
+        ws = pg.extract_words(use_text_flow=False, keep_blank_chars=False)
+        for (fp, old, fx, fy, new) in FIXES:
+            if fp != pi:
+                continue
+            hit = [w for w in ws if w["text"] == old and abs(w["x0"] - fx) < 1.5 and abs(w["top"] - fy) < 1.5]
+            if len(hit) != 1:
+                sys.exit("고칠 자리를 못 찾았습니다: 쪽 %d '%s' (%.1f, %.1f) — 원본이 바뀐 것 같습니다" % (pi + 1, old, fx, fy))
+            w = hit[0]
+            cs = [c for c in pg.chars if w["x0"] - .5 <= (c["x0"] + c["x1"]) / 2 <= w["x1"] + .5
+                  and w["top"] - .5 <= (c["top"] + c["bottom"]) / 2 <= w["bottom"] + .5]
+            fixes.setdefault(pi, []).append((w, new, min(c["size"] for c in cs),
+                                             cs[0].get("non_stroking_color") or (0,)))
+
     buf = io.BytesIO()
     c = canvas.Canvas(buf)
     laid, missed = dict(아래=0, 옆=0, 못=0), []
-    for w, h, items in plan:
+    for pi, (w, h, items) in enumerate(plan):
         c.setPageSize((w, h))
+        for (fw, new, fsz, col) in fixes.get(pi, []):
+            c.setFillGray(1)
+            c.rect(fw["x0"] - 0.8, h - fw["bottom"] - 0.8, pdfmetrics.stringWidth(new, "Nanum", fsz) + 1.6 +
+                   max(0, (fw["x1"] - fw["x0"]) - pdfmetrics.stringWidth(new, "Nanum", fsz)),
+                   (fw["bottom"] - fw["top"]) + 1.6, stroke=0, fill=1)
+            if len(col) == 1: c.setFillGray(col[0])
+            elif len(col) == 3: c.setFillColorRGB(*col)
+            else: c.setFillGray(0)
+            c.setFont("Nanum", fsz)
+            c.drawString(fw["x0"], h - fw["bottom"] + 0.22 * fsz, new)
         c.setFillGray(GRAY)
         for it in items:
             if not it["ko"]:
@@ -188,6 +263,13 @@ def main():
             if it["size"] >= MIN:                                   # ① 아래
                 c.setFont("Nanum", it["size"])
                 c.drawString(it["x0"], h - it["bottom"] - DROP - 0.75 * it["size"], it["ko"])
+                laid["아래"] += 1
+                continue
+            av = it["avail"]
+            s2 = (av - 0.3 - 0.25) / 0.95 if av is not None else None
+            if s2 is not None and s2 >= TIGHT:                       # ①' 선에 바짝 붙여 아래
+                c.setFont("Nanum", s2)
+                c.drawString(it["x0"], h - it["bottom"] - 0.3 - 0.75 * s2, it["ko"])
                 laid["아래"] += 1
                 continue
             need = pdfmetrics.stringWidth(it["ko"], "Nanum", SIZE)
@@ -215,6 +297,8 @@ def main():
         out.add_page(page)
     with open(OUT, "wb") as f:
         out.write(f)
+    for (fp, old, fx, fy, new) in FIXES:
+        print("고침: %d쪽 %s → %s" % (fp + 1, old, new))
     print("발음 %d개 (아래 %d · 옆 %d) → %s"
           % (laid["아래"] + laid["옆"], laid["아래"], laid["옆"], os.path.relpath(OUT, ROOT)))
     if missed:
