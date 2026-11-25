@@ -30,7 +30,8 @@ var UNITS = [
   { code:"t2", title:"전언 · 과거 · 허가", pages:"단어장 2쪽", now:true },
   { code:"t3", title:"허가 · 병원 · 조언", pages:"단어장 3쪽", now:true },
   { code:"t4", title:"부정 · 경험 · 일본 문화", pages:"단어장 4쪽", now:true },
-  { code:"t5", title:"목적 · 경험 · 좋아하는 것", pages:"단어장 5쪽", now:true }
+  { code:"t5", title:"목적 · 경험 · 좋아하는 것", pages:"단어장 5쪽", now:true },
+  { code:"t6", title:"PPT 참고 어휘", pages:"선생님 PPT 5·6과", now:true }
 ];
 
 var WORDS = [
@@ -435,7 +436,53 @@ var WORDS = [
   { id:"w766", unit:"t5", pg:105, pos:"명사", word:"ひるごはん", kana:"ひるごはん", meaning:["점심"] },
   { id:"w767", unit:"t5", pg:105, pos:"명사", word:"べんきょう", kana:"べんきょう", meaning:["공부"] },
   { id:"w768", unit:"t5", pg:105, pos:"명사", word:"ともだち", kana:"ともだち", meaning:["친구"] },
-  { id:"w769", unit:"t5", pg:105, pos:"동사구", word:"～と 話す", kana:"と はなす", meaning:["~와 이야기하다"], jaAliases:["～と 話す", "～と はなす"], note:"1류" }
+  { id:"w769", unit:"t5", pg:105, pos:"동사구", word:"～と 話す", kana:"と はなす", meaning:["~와 이야기하다"], jaAliases:["～と 話す", "～と はなす"], note:"1류" },
+  /* t6 — 선생님 PPT(5과 10.27 · 6과 11.17)에만 있는 어휘: 날씨·감기 증상·직업·밥 참고, 본문 해설, 듣기 대본.
+     단어장에 이미 있는 낱말은 넣지 않았다. 風(かぜ, 바람)은 감기 かぜ 와 가나가 같아 note 로만 남겼다. */
+  { id:"w770", unit:"t6", pg:87, pos:"명사", word:"電気", kana:"でんき", meaning:["전기"], note:"PPT ★ 天気(てんき 날씨)와 탁점 하나 차이" },
+  { id:"w771", unit:"t6", pg:88, pos:"명사", word:"雪", kana:"ゆき", meaning:["눈 (날씨)"], note:"PPT 날씨 참고" },
+  { id:"w772", unit:"t6", pg:88, pos:"명사", word:"曇り", kana:"くもり", meaning:["흐림"], note:"PPT 날씨 참고" },
+  { id:"w773", unit:"t6", pg:88, pos:"명사", word:"晴れ", kana:"はれ", meaning:["맑음"], note:"PPT 날씨 참고" },
+  { id:"w774", unit:"t6", pg:88, pos:"명사", word:"台風", kana:"たいふう", meaning:["태풍"], note:"PPT 날씨 참고 · ふう 장음" },
+  { id:"w775", unit:"t6", pg:88, pos:"명사", word:"大雨", kana:"おおあめ", meaning:["폭우, 큰비"], note:"PPT 날씨 참고 · 風(かぜ)는 '바람' — 감기 かぜ 와 소리가 같다" },
+  { id:"w776", unit:"t6", pg:89, pos:"명사", word:"みなさん", kana:"みなさん", meaning:["여러분"], note:"89쪽 ② みなさん、からだに 気を つけて ください" },
+  { id:"w777", unit:"t6", pg:89, pos:"표현", word:"ええ", kana:"ええ", meaning:["네 (대답)"], note:"89쪽 ⑪ ええ、いいですよ" },
+  { id:"w778", unit:"t6", pg:89, pos:"명사", word:"ここ", kana:"ここ", meaning:["여기"], note:"89쪽 ⑫ ここに サインも おねがいします" },
+  { id:"w779", unit:"t6", pg:89, pos:"동사구", word:"きんちょうする", kana:"きんちょうする", meaning:["긴장하다"], note:"3류 · きんちょうして = 긴장해서" },
+  { id:"w780", unit:"t6", pg:91, pos:"부사", word:"あまり", kana:"あまり", meaning:["그다지, 별로 (부정과 함께)"], note:"あまり おもしろく なかったです" },
+  { id:"w781", unit:"t6", pg:92, pos:"명사", word:"ジュース", kana:"ジュース", meaning:["주스"], note:"92쪽 ジュースを のんでも いいですか" },
+  { id:"w782", unit:"t6", pg:92, pos:"동사구", word:"ジュースを 飲む", kana:"ジュースを のむ", meaning:["주스를 마시다"], jaAliases:["ジュースを 飲む"], note:"1류 · のんでも いいですか" },
+  { id:"w783", unit:"t6", pg:92, pos:"동사구", word:"おかしを 食べる", kana:"おかしを たべる", meaning:["과자를 먹다"], jaAliases:["おかしを 食べる"], note:"2류 · PPT 허가 표현 예 · たべても いいですか" },
+  { id:"w784", unit:"t6", pg:92, pos:"동사구", word:"カートを 借りる", kana:"カートを かりる", meaning:["카트를 빌리다"], jaAliases:["カートを 借りる"], note:"2류 · PPT 허가 표현 예 · かりても いいですか" },
+  { id:"w785", unit:"t6", pg:98, pos:"표현", word:"はなが つまって います", kana:"はなが つまって います", meaning:["코가 막혀요"], jaAliases:["鼻が つまって います"], note:"PPT 감기 증상 참고 · 鼻(はな)" },
+  { id:"w786", unit:"t6", pg:98, pos:"표현", word:"はなみずが でます", kana:"はなみずが でます", meaning:["콧물이 나요"], jaAliases:["鼻水が 出ます"], note:"PPT 감기 증상 참고 · 鼻水(はなみず)" },
+  { id:"w787", unit:"t6", pg:98, pos:"표현", word:"ねつが あります", kana:"ねつが あります", meaning:["열이 있어요"], jaAliases:["熱が あります"], note:"PPT 감기 증상 참고 · 熱(ねつ)" },
+  { id:"w788", unit:"t6", pg:98, pos:"표현", word:"ずつうが します", kana:"ずつうが します", meaning:["두통이 있어요"], jaAliases:["頭痛が します"], note:"PPT 감기 증상 참고 · 頭痛(ずつう)" },
+  { id:"w789", unit:"t6", pg:98, pos:"표현", word:"おかんが します", kana:"おかんが します", meaning:["오한이 나요"], jaAliases:["悪寒が します"], note:"PPT 감기 증상 참고 · 悪寒(おかん)" },
+  { id:"w790", unit:"t6", pg:99, pos:"명사", word:"あそこ", kana:"あそこ", meaning:["저기, 저곳"], note:"99쪽 ③ あそこで ちょっと くすり かって くるね" },
+  { id:"w791", unit:"t6", pg:99, pos:"부사", word:"ちょっと", kana:"ちょっと", meaning:["조금, 잠깐"], note:"99쪽 ③" },
+  { id:"w792", unit:"t6", pg:100, pos:"부사", word:"はやく", kana:"はやく", meaning:["빨리"], note:"100쪽 はやく うちに かえった ほうが いい" },
+  { id:"w793", unit:"t6", pg:100, pos:"명사", word:"うち", kana:"うち", meaning:["집"], note:"100쪽" },
+  { id:"w794", unit:"t6", pg:100, pos:"동사", word:"帰る", kana:"かえる", meaning:["돌아가다, 돌아오다"], jaAliases:["帰る"], note:"예외 1류 · かえって · かえった · かえらない" },
+  { id:"w795", unit:"t6", pg:103, pos:"명사", word:"大凶", kana:"だいきょう", meaning:["대흉 (운이 아주 나쁨)"], note:"PPT 참고 · 반대말 大吉(だいきち)" },
+  { id:"w796", unit:"t6", pg:105, pos:"명사", word:"あさごはん", kana:"あさごはん", meaning:["아침밥"], note:"PPT 참고 · = あさめし" },
+  { id:"w797", unit:"t6", pg:105, pos:"명사", word:"ばんごはん", kana:"ばんごはん", meaning:["저녁밥"], note:"PPT 참고 · = ばんめし" },
+  { id:"w798", unit:"t6", pg:105, pos:"명사", word:"めし", kana:"めし", meaning:["밥 (비격식)"], note:"PPT 참고 · 주로 남성이 친한 사이·아랫사람에게. めし 食いに 行こう(밥 먹으러 가자)" },
+  { id:"w799", unit:"t6", pg:106, pos:"명사", word:"せんせい", kana:"せんせい", meaning:["선생님"], note:"106쪽 직업 올림픽" },
+  { id:"w800", unit:"t6", pg:106, pos:"명사", word:"かんごし", kana:"かんごし", meaning:["간호사"], note:"106쪽 직업 올림픽" },
+  { id:"w801", unit:"t6", pg:106, pos:"명사", word:"こうむいん", kana:"こうむいん", meaning:["공무원"], note:"PPT 직업 참고" },
+  { id:"w802", unit:"t6", pg:106, pos:"명사", word:"けんきゅういん", kana:"けんきゅういん", meaning:["연구원"], note:"PPT 직업 참고" },
+  { id:"w803", unit:"t6", pg:106, pos:"명사", word:"べんごし", kana:"べんごし", meaning:["변호사"], note:"PPT 직업 참고" },
+  { id:"w804", unit:"t6", pg:106, pos:"명사", word:"いしゃ", kana:"いしゃ", meaning:["의사"], note:"PPT 직업 참고" },
+  { id:"w805", unit:"t6", pg:106, pos:"명사", word:"デザイナー", kana:"デザイナー", meaning:["디자이너"], note:"PPT 직업 참고" },
+  { id:"w806", unit:"t6", pg:106, pos:"명사", word:"かんこうガイド", kana:"かんこうガイド", meaning:["관광 가이드"], note:"PPT 직업 참고" },
+  { id:"w807", unit:"t6", pg:106, pos:"명사", word:"じょうむいん", kana:"じょうむいん", meaning:["승무원"], note:"PPT 직업 참고" },
+  { id:"w808", unit:"t6", pg:106, pos:"표현", word:"～に なりたい", kana:"に なりたい", meaning:["~이/가 되고 싶다"], jaAliases:["～に なりたい"], note:"せんせいに なりたいです · なる 1류 → なりたい" },
+  { id:"w809", unit:"t6", pg:106, pos:"표현", word:"どちらが いいですか", kana:"どちらが いいですか", meaning:["어느 쪽이 좋아요? (둘 중)"], note:"A と B と どちらが いいですか" },
+  { id:"w810", unit:"t6", pg:108, pos:"명사", word:"しんかんせん", kana:"しんかんせん", meaning:["신칸센"], note:"108쪽 듣기 대본" },
+  { id:"w811", unit:"t6", pg:108, pos:"동사구", word:"しんかんせんに 乗る", kana:"しんかんせんに のる", meaning:["신칸센을 타다"], jaAliases:["しんかんせんに 乗る"], note:"1류 · ～に のる(を ×) · のった ことが あります" },
+  { id:"w812", unit:"t6", pg:109, pos:"な형용사", word:"だいすきだ", kana:"だいすきだ", meaning:["매우 좋아하다"], jaAliases:["大好きだ"], note:"109쪽 듣기 대본 · はい、だいすきです" },
+  { id:"w813", unit:"t6", pg:109, pos:"표현", word:"Aより Bの ほうが すきです", kana:"より の ほうが すきです", meaning:["A보다 B 쪽을 좋아합니다"], jaAliases:["～より ～の ほうが すきです"], note:"109쪽 듣기 대본 · サッカーより やきゅうの ほうが すきです" }
 ];
 
 /* skip:true 인 항목은 출제에서 빠집니다 — 단어장에 두 번 나온 낱말(あらう·けす)의

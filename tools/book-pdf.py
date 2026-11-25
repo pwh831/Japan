@@ -155,7 +155,10 @@ def load(upto, frm):
         a["pron"] = ko_punct(a["pron"])
         for f in a["forms"]: f["pron"] = ko_punct(f["pron"])
     new = lambda x: (x["pg"] or 0) > frm
-    d["words"] = [w for w in d["words"] if new(w)]
+    d["words"] = [w for w in d["words"] if new(w) and (not UNIT or w["unit"] == UNIT)]
+    if UNIT:      # 한 묶음만 (예: --unit t6 선생님 PPT 참고 어휘) — 표현·형용사·본문은 앞 권에 있다
+        d["phrases"], d["adjs"], d["dialogues"] = [], [], []
+        return d
     d["phrases"] = [p for p in d["phrases"] if new(p)]
     d["adjs"] = [a for a in d["adjs"] if (a["pg"] or 0) > frm and (frm == 0 or not a["always"])]
     # 본문 대화 — 5과 85·89쪽, 6과 99·103쪽의 줄마다 해석. 서답형이 몰려 있다(선생님 안내)
@@ -682,7 +685,7 @@ def build(upto, frm, start, out):
     cal = []                       # 달력 행 (이름, 설명, key)
 
     nsess = len(sessions)
-    info = dict(range=("교과서 5과 %d~%d쪽" % (frm + 1, upto)) if frm else ("교과서 5과 · 진도 %d쪽까지" % upto),
+    info = dict(range=UNIT_TITLE if UNIT else ("교과서 5과 %d~%d쪽" % (frm + 1, upto)) if frm else ("교과서 5과 · 진도 %d쪽까지" % upto),
                 count="단어 %d · 형용사 활용 %d · 표현 %d · 본문 %d쪽" % (len(words), len(adjs), len(phrases), len(dlgs)))
     BOOK.add("cover", "표지 · 사용법", A4, lambda c, W, H, i: d_cover(c, W, H, i, info), sec=("표지 · 사용법", "cover"))
     BOOK.add("cal", "복습 달력", A4, None, sec=("복습 달력", "cal"))
@@ -767,9 +770,14 @@ def build(upto, frm, start, out):
     cv.save()
     print("%s — %d쪽 (단어 %d · 세션 %d · 활용 %d · 표현 %d · 본문 %d쪽)" % (os.path.relpath(out, ROOT), len(BOOK.pages), len(words), nsess, len(adjs), len(phrases), len(dlgs)))
 
+UNIT, UNIT_TITLE = None, ""
+
 def main():
+    global UNIT, UNIT_TITLE
     a = sys.argv[1:]
     frm, start = 0, 1
+    if "--unit" in a:     # --unit t6 "제목" — 단어 한 묶음만 담은 권
+        k = a.index("--unit"); UNIT, UNIT_TITLE = a[k + 1], a[k + 2]; del a[k:k + 3]
     if "--from" in a:
         k = a.index("--from"); frm = int(a[k + 1]); del a[k:k + 2]
     if "--start" in a:
