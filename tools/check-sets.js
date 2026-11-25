@@ -39,7 +39,11 @@ function conjX(v, form) {
     if (v.group === 2) return k.slice(0, -1) + "ない";
     return k.slice(0, -1) + A_ROW[k.slice(-1)] + "ない";
   }
-  return E.anyConj(v, form);
+  const r = E.anyConj(v, form);
+  if (r || v.group) return r;
+  // 1회고사 형용사(ADJS)에 없는 형(과거 정중 등)은 같은 낱말의 2회고사 형용사(ADJS2)에서
+  const a2 = E.ADJS2.find(x => E.norm(x.kana) === E.norm(v.kana));
+  return a2 ? E.anyConj(a2, form) : r;
 }
 const round1 = x => Math.round(x * 10) / 10;
 

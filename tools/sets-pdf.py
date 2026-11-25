@@ -194,7 +194,10 @@ if __name__ == "__main__":
     d = os.path.join(ROOT, "docs", "sets")
     for f in sorted(os.listdir(d)):
         m = re.match(r"set(\d+)\.json$", f)
-        if m: build(os.path.join(d, f), os.path.join(d, "변형문제-%s회.pdf" % m.group(1)))
+        if m:   # set9~ 는 2회고사 — 파일 이름을 문제지 제목(2회고사 변형문제 1회~)과 맞춘다
+            k = int(m.group(1))
+            name = "변형문제-%d회.pdf" % k if k < 9 else "2회고사-변형문제-%d회.pdf" % (k - 8)
+            build(os.path.join(d, f), os.path.join(d, name))
         if f == "drill-te.json": build(os.path.join(d, f), os.path.join(d, "음편-て형-10문항.pdf"))
         if f == "drill-te2.json": build(os.path.join(d, f), os.path.join(d, "음편-て형-10문항-2회.pdf"))
         if f == "drill-weak.json": build(os.path.join(d, f), os.path.join(ROOT, "docs", "study", "4-자주틀리는유형-보충10문항.pdf"))
