@@ -17,8 +17,30 @@ const E = (() => {
 let pass = 0, fail = 0;
 const t = (ok, label) => { ok ? pass++ : fail++; if (!ok || process.env.VERBOSE) console.log((ok ? "  ✓ " : "  ✗ ") + label); };
 const CIRC = "①②③④⑤";
-const POOL = E.VERBS.concat(E.ADJS);
+// 2회고사(회화 5·6과) 동사 중 앱 활용표(VERBS)에 없는 것 — 종류는 단어장·교과서 표기 그대로.
+// 활용은 이 종류를 넣어 앱 엔진(conj)이 만든다.
+const EXTRA2 = [["ひく", 1], ["あう", 1], ["とる", 1], ["なる", 1], ["つづく", 1], ["かりる", 2], ["おしえる", 2]]
+  .map(([k, g]) => ({ kana: k, word: k, group: g }));
+const VPOOL = E.VERBS.concat(EXTRA2);
+const POOL = VPOOL.concat(E.ADJS, E.ADJS2);
 const find = base => POOL.find(v => E.norm(v.kana) === E.norm(base));
+// 앱 엔진에 없는 형(6과)은 엔진이 만든 형에서 교과서 규칙대로 잇는다.
+//  ta : た형은 て형과 같은 모양(100쪽) — 엔진의 て형에서 て→た, で→だ
+//  ni : 목적 「ます형＋に」(104쪽) — 엔진의 ます형에서 ます 를 떼고 に
+//  nai: ない형(100쪽 표) — 1류 う단→あ단(う→わ)＋ない · 2류 る 떼고 ない · する→しない · くる→こない · ある→ない
+const A_ROW = { う: "わ", く: "か", ぐ: "が", す: "さ", つ: "た", ぬ: "な", ぶ: "ば", む: "ま", る: "ら" };
+function conjX(v, form) {
+  if (v.group && form === "ta") { const te = E.anyConj(v, "te"); return te && te.replace(/て$/, "た").replace(/で$/, "だ"); }
+  if (v.group && form === "ni") { const m = E.anyConj(v, "masu"); return m && m.replace(/ます$/, "に"); }
+  if (v.group && form === "nai") {
+    const k = v.kana;
+    if (k === "ある") return "ない";
+    if (v.group === 3) return k.endsWith("くる") ? k.slice(0, -2) + "こない" : k.slice(0, -2) + "しない";
+    if (v.group === 2) return k.slice(0, -1) + "ない";
+    return k.slice(0, -1) + A_ROW[k.slice(-1)] + "ない";
+  }
+  return E.anyConj(v, form);
+}
 const round1 = x => Math.round(x * 10) / 10;
 
 for (const f of fs.readdirSync(path.join(ROOT, "docs", "sets")).filter(f => /^(set\d+|drill-[\w-]+)\.json$/.test(f)).sort()) {
@@ -48,12 +70,12 @@ for (const f of fs.readdirSync(path.join(ROOT, "docs", "sets")).filter(f => /^(s
     for (const c of q.conj) {
       const v = find(c.base);
       if (!v) { t(false, `${tag} ${c.base} 는 활용표에 없음`); continue; }
-      const exp = E.anyConj(v, c.form);
+      const exp = conjX(v, c.form);
       t((E.norm(exp) === E.norm(c.shown)) === c.ok, `${tag} ${CIRC[c.i - 1]} ${c.base} ${c.form}: 엔진 ${exp} / 선지 ${c.shown} → ${c.ok ? "옳음" : "틀림"}`);
       if (!c.hidden) t(E.norm(q.choices[c.i - 1]).includes(E.norm(c.shown)), `${tag} ${CIRC[c.i - 1]} 선지에 ${c.shown} 가 있다`);  // hidden: 선지에 기본형만 있거나 한자로 적힌 경우
     }
     for (const g of q.group) {
-      const v = E.VERBS.find(x => E.norm(x.kana) === E.norm(g.base));
+      const v = VPOOL.find(x => E.norm(x.kana) === E.norm(g.base));
       t(!!v && v.group === g.group, `${tag} ${CIRC[g.i - 1]} ${g.base} ${g.group}류 (엔진 ${v ? v.group + "류" : "없음"})`);
       t(E.norm(q.choices[g.i - 1]).includes(E.norm(g.base)), `${tag} ${CIRC[g.i - 1]} 선지에 ${g.base} 가 있다`);
     }
@@ -73,7 +95,7 @@ for (const f of fs.readdirSync(path.join(ROOT, "docs", "sets")).filter(f => /^(s
     t(q.parts.reduce((a, p) => a + p[1], 0) === q.pts, `${tag} 채점 요소 합 ${q.pts}점`);
     if (q.kind === "서술형" && !q.ko) t(!E.hasKanji(q.answer), `${tag} 모범 답안은 가나로`);   // ko: 해석·이유처럼 우리말로 답하는 문항
     if (q.conj) {
-      const v = find(q.conj.base), exp = v && E.anyConj(v, q.conj.form);
+      const v = find(q.conj.base), exp = v && conjX(v, q.conj.form);
       t(!!v && E.norm(exp) === E.norm(q.conj.shown), `${tag} ${q.conj.base} ${q.conj.form} = ${exp}`);
       t(!!v && v.group === q.group.group, `${tag} ${q.conj.base} ${q.group.group}류 (엔진 ${v && v.group}류)`);
       t(q.answer.includes(q.conj.shown) && q.answer.startsWith(q.group.group + "류"), `${tag} 모범 답안 「${q.answer}」`);

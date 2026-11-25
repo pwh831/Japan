@@ -18,6 +18,9 @@ from reportlab.platypus import (BaseDocTemplate, Frame, PageTemplate, Paragraph,
                                 TableStyle, KeepTogether, PageBreak)
 from reportlab.lib.styles import ParagraphStyle
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import footans
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FONTS = os.environ.get("FONT_DIR", os.path.join(ROOT, "tools", "fonts"))
 INK, SOFT, FAINT, RULE, SHU = (colors.HexColor(c) for c in ("#1B2021", "#4A524F", "#8A918D", "#4F8378", "#C8452B"))
@@ -57,7 +60,7 @@ def st(name, size, lead, color=INK, **kw):
 S = {"title": st("title", 17, 23), "meta": st("meta", 8.5, 12.5, SOFT), "sec": st("sec", 11, 15, RULE),
      "stem": st("stem", 10.5, 15.5), "box": st("box", 11, 17.5), "ch": st("ch", 11, 16.5),
      "tag": st("tag", 7.5, 10, FAINT), "exp": st("exp", 9.5, 14, SOFT), "ans": st("ans", 10, 14.5),
-     "foot": st("foot", 8, 11, FAINT)}
+     "foot": st("foot", 8, 11, FAINT), "fans": st("fans", 7, 9.6, SOFT)}
 
 W, H = A4
 M = 17 * mm
@@ -66,6 +69,18 @@ BODY = W - 2 * M
 def on_page(c, doc):
     c.saveState(); c.setFont("KO", 7.5); c.setFillColor(FAINT)
     c.drawString(M, 10 * mm, doc.footer); c.drawRightString(W - M, 10 * mm, "%d" % doc.page); c.restoreState()
+
+def end_page(c, doc):
+    """answers: "foot" — 이 쪽 문제들의 정답·해설을 쪽 아래 띠에 작게."""
+    if doc.sink is not None:
+        footans.paint(c, doc.sink, doc.page, M, M + 3 * mm + doc.band - 1 * mm, BODY, S["fans"])
+
+def foot_answer(q):
+    if "choices" in q:
+        return '<font name="KOB">%d번 %s</font>&nbsp; %s' % (q["no"], CIRC[q["answer"] - 1], mix(q["exp"]))
+    parts = " · ".join("%s %s" % (p[0], pts(p[1])) for p in q["parts"])
+    return '<font name="KOB">%d번</font>&nbsp; %s<br/>%s' % (q["no"], mix(q["answer"], bold=True),
+                                                         mix("채점: " + parts + (" — " + q["exp"] if q.get("exp") else "")))
 
 def boxed(text):
     t = Table([[Paragraph(mix(text), S["box"])]], colWidths=[BODY - 8 * mm])
@@ -78,7 +93,7 @@ def boxed(text):
 def pts(p):
     return ("%.1f" % p).rstrip("0").rstrip(".")
 
-def question(q):
+def question(q, sink=None):
     b = [Paragraph(mix(q["tag"]), S["tag"]),
          Paragraph('<font name="KOB">%d.</font> %s <font color="#8A918D">[%s점]</font>'
                    % (q["no"], mix(q["stem"]), pts(q["pts"])) if "choices" in q else
@@ -96,11 +111,14 @@ def question(q):
         t.setStyle(TableStyle([("LINEBELOW", (0, 0), (-1, -1), 0.6, LINE)]))
         t.hAlign = "RIGHT"
         b += [Spacer(1, 1 * mm), t]
+    if sink is not None: b.append(footans.Mark(sink, foot_answer(q)))
     b.append(Spacer(1, 5 * mm))
     return KeepTogether(b)
 
-def answers(d):
+def answers(d, foot=False):
     out = [PageBreak(), Paragraph(mix(d["title"] + " · 정답 및 해설", bold=True), S["title"]), Spacer(1, 4 * mm)]
+    if foot:     # 해설은 쪽마다 아래에 있으니 채점용 정답표만
+        out = [Spacer(1, 6 * mm), Paragraph(mix("정답표 (객관식)", bold=True), S["sec"]), Spacer(1, 2 * mm)]
     mc = [q for q in d["questions"] if "choices" in q]
     head = [Paragraph('<font name="KOB">%d</font>' % q["no"], S["ans"]) for q in mc]
     ans = [Paragraph('<font name="KO">%s</font>' % CIRC[q["answer"] - 1], S["ans"]) for q in mc]
@@ -111,6 +129,8 @@ def answers(d):
     t.setStyle(TableStyle([("GRID", (0, 0), (-1, -1), 0.5, LINE), ("ALIGN", (0, 0), (-1, -1), "CENTER"),
                            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#EEF3F1")),
                            ("BACKGROUND", (0, 2), (-1, 2), colors.HexColor("#EEF3F1"))]))
+    if foot:
+        return out + [t]
     out += [t, Spacer(1, 6 * mm), Paragraph(mix("객관식 해설", bold=True), S["sec"]), Spacer(1, 2 * mm)]
     for q in mc:
         out.append(Paragraph('<font name="KOB">%d. %s</font>&nbsp; %s' % (q["no"], CIRC[q["answer"] - 1], mix(q["exp"])), S["exp"]))
@@ -130,34 +150,44 @@ def answers(d):
 
 def build(src, out):
     d = json.load(open(src, encoding="utf-8"))
-    story = [Paragraph(mix(d["title"], bold=True), S["title"]),
-             Paragraph(mix("범위: " + d["range"]), S["meta"]),
-             Paragraph(mix(d["rule"]), S["meta"]), Spacer(1, 2 * mm)]
-    name = Table([[Paragraph(mix("학번"), S["meta"]), "", Paragraph(mix("이름"), S["meta"]), "",
-                   Paragraph(mix("점수"), S["meta"]), ""]],
-                 colWidths=[12 * mm, 30 * mm, 12 * mm, 40 * mm, 12 * mm, 25 * mm], hAlign="LEFT")
-    name.setStyle(TableStyle([("LINEBELOW", (1, 0), (1, 0), 0.6, LINE), ("LINEBELOW", (3, 0), (3, 0), 0.6, LINE),
-                              ("LINEBELOW", (5, 0), (5, 0), 0.6, LINE)]))
-    nmc = sum(1 for q in d["questions"] if "choices" in q)
-    head1 = "Ⅰ. 선택형 (1~%d번%s)" % (nmc, "" if d.get("drill") else ", 50점")
-    story += [name, Spacer(1, 6 * mm), Paragraph(mix(head1, bold=True), S["sec"]), Spacer(1, 3 * mm)]
-    for q in d["questions"]:
-        if d.get("drill") and q["no"] == nmc + 1:
-            story += [Spacer(1, 2 * mm), Paragraph(mix("Ⅱ. 서답형 (%d~%d번)" % (nmc + 1, len(d["questions"])), bold=True), S["sec"]), Spacer(1, 3 * mm)]
-        if not d.get("drill") and q["no"] == 22:
-            story += [Spacer(1, 2 * mm), Paragraph(mix("Ⅱ. 서답형 (22~30번, 50점) — 단답형 22~26번 20점 · 서술형 27~30번 30점", bold=True), S["sec"]),
-                      Paragraph(mix("부분 점수가 있습니다. 아는 어휘·조사는 최대한 쓰세요. 서술형은 교과서 본문 표현으로 씁니다."), S["meta"]),
-                      Spacer(1, 3 * mm)]
-        story.append(question(q))
-    story += answers(d)
-    story += [Spacer(1, 4 * mm), Paragraph(mix("문항은 교과서 본문·듣기 지문과 선생님 시험 안내를 바탕으로 만든 연습용 변형 문제입니다. "
-                                               "활용형·동사 종류·가나 답은 일본어 시험 앱의 활용·채점 규칙으로 다시 계산해 확인했습니다(tools/check-sets.js)."), S["foot"])]
-    doc = BaseDocTemplate(out, pagesize=A4, leftMargin=M, rightMargin=M, topMargin=M, bottomMargin=M + 3 * mm,
-                          title=d["title"], author="일본어 시험 대비")
-    doc.footer = d["title"]
-    fr = Frame(M, M + 3 * mm, BODY, H - 2 * M - 3 * mm, id="f", leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0)
-    doc.addPageTemplates([PageTemplate(id="p", frames=[fr], onPage=on_page)])
-    doc.build(story)
+    foot = d.get("answers") == "foot"
+    sink = footans.Sink() if foot else None
+
+    def make_story():
+        story = [Paragraph(mix(d["title"], bold=True), S["title"]),
+                 Paragraph(mix("범위: " + d["range"]), S["meta"]),
+                 Paragraph(mix(d["rule"]), S["meta"]), Spacer(1, 2 * mm)]
+        name = Table([[Paragraph(mix("학번"), S["meta"]), "", Paragraph(mix("이름"), S["meta"]), "",
+                       Paragraph(mix("점수"), S["meta"]), ""]],
+                     colWidths=[12 * mm, 30 * mm, 12 * mm, 40 * mm, 12 * mm, 25 * mm], hAlign="LEFT")
+        name.setStyle(TableStyle([("LINEBELOW", (1, 0), (1, 0), 0.6, LINE), ("LINEBELOW", (3, 0), (3, 0), 0.6, LINE),
+                                  ("LINEBELOW", (5, 0), (5, 0), 0.6, LINE)]))
+        nmc = sum(1 for q in d["questions"] if "choices" in q)
+        head1 = "Ⅰ. 선택형 (1~%d번%s)" % (nmc, "" if d.get("drill") else ", 50점")
+        story += [name, Spacer(1, 6 * mm), Paragraph(mix(head1, bold=True), S["sec"]), Spacer(1, 3 * mm)]
+        for q in d["questions"]:
+            if d.get("drill") and q["no"] == nmc + 1:
+                story += [Spacer(1, 2 * mm), Paragraph(mix("Ⅱ. 서답형 (%d~%d번)" % (nmc + 1, len(d["questions"])), bold=True), S["sec"]), Spacer(1, 3 * mm)]
+            if not d.get("drill") and q["no"] == 22:
+                story += [Spacer(1, 2 * mm), Paragraph(mix("Ⅱ. 서답형 (22~30번, 50점) — 단답형 22~26번 20점 · 서술형 27~30번 30점", bold=True), S["sec"]),
+                          Paragraph(mix("부분 점수가 있습니다. 아는 어휘·조사는 최대한 쓰세요. 서술형은 교과서 본문 표현으로 씁니다."), S["meta"]),
+                          Spacer(1, 3 * mm)]
+            story.append(question(q, sink))
+        story += answers(d, foot)
+        story += [Spacer(1, 4 * mm), Paragraph(mix("문항은 교과서 본문·듣기 지문과 선생님 시험 안내를 바탕으로 만든 연습용 변형 문제입니다. "
+                                                   "활용형·동사 종류·가나 답은 일본어 시험 앱의 활용·채점 규칙으로 다시 계산해 확인했습니다(tools/check-sets.js)."), S["foot"])]
+        return story
+
+    def make(band):
+        doc = BaseDocTemplate(out, pagesize=A4, leftMargin=M, rightMargin=M, topMargin=M, bottomMargin=M + 3 * mm + band,
+                              title=d["title"], author="일본어 시험 대비")
+        doc.footer, doc.band, doc.sink = d["title"], band, sink
+        fr = Frame(M, M + 3 * mm + band, BODY, H - 2 * M - 3 * mm - band, id="f", leftPadding=0, rightPadding=0,
+                   topPadding=0, bottomPadding=0)
+        doc.addPageTemplates([PageTemplate(id="p", frames=[fr], onPage=on_page, onPageEnd=end_page)])
+        doc.build(make_story())
+    if foot: footans.build_fitting(make, sink)
+    else: make(0)
     print(os.path.relpath(out, ROOT))
 
 if __name__ == "__main__":

@@ -18,6 +18,9 @@ from reportlab.platypus import (BaseDocTemplate, Frame, PageTemplate, Paragraph,
                                 Spacer, Table, TableStyle, KeepTogether, PageBreak)
 from reportlab.lib.styles import ParagraphStyle
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import footans
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FONTS = os.environ.get("FONT_DIR", os.path.join(ROOT, "tools", "fonts"))
 
@@ -45,6 +48,21 @@ def esc(s):
 
 # 후리가나 — 원고에 「日本{にほん}」처럼 적는다. 한자(앞 숫자 포함) 바로 뒤의 {읽기}.
 RUBY = re.compile(r"([0-9]*[\u3400-\u9fff\u3005]+)\{([^}]+)\}")
+
+JA_RE = re.compile(r"[\u3040-\u30ff\u3400-\u9fff\u3005\u3000-\u3003\u300c-\u300f\u3012\u301c\uff01-\uff0f\uff1a-\uff20]")
+
+def mix(text, bold=False):
+    """정답 줄 — 한 줄에 한글과 가나·한자가 섞이므로 글자마다 글꼴을 고른다 (sets-pdf.py 와 같은 규칙)."""
+    ja, ko = ("JAB", "KOB") if bold else ("JA", "KO")
+    out, cur, buf = [], None, []
+    for ch in text:
+        f = ja if (JA_RE.match(ch) and ch != "\uff5e") else ko
+        if f != cur:
+            if buf: out.append('<font name="%s">%s</font>' % (cur, esc("".join(buf))))
+            buf, cur = [], f
+        buf.append(ch)
+    if buf: out.append('<font name="%s">%s</font>' % (cur, esc("".join(buf))))
+    return "".join(out)
 
 def kana(s):
     """발음용 — 한자를 읽기로 바꾼다(pron 은 한자가 남으면 비운다)."""
@@ -80,6 +98,7 @@ S = {
     "word":  ParagraphStyle("word", fontName="JA", fontSize=11.5, textColor=INK, leading=16),
     "wko":   ParagraphStyle("wko", fontName="KO", fontSize=9, textColor=SOFT, leading=13),
     "foot":  ParagraphStyle("foot", fontName="KO", fontSize=8, textColor=FAINT, leading=12),
+    "fans":  ParagraphStyle("fans", fontName="KO", fontSize=7, textColor=SOFT, leading=9.6),
 }
 
 W, H = A4
@@ -90,7 +109,7 @@ def on_page(c, doc):
     c.saveState()
     c.setStrokeColor(colors.HexColor("#E3E6E4")); c.setLineWidth(0.6)
     x = W - M - NOTE + 6 * mm
-    c.line(x, M, x, H - M)                                   # 필기 칸 경계
+    c.line(x, M + 4 * mm + doc.band, x, H - M)               # 필기 칸 경계 (정답 띠 위까지)
     c.setFont("KO", 7.5); c.setFillColor(FAINT)
     c.drawString(x + 3 * mm, H - M - 3 * mm, "메모")
     c.drawRightString(W - M, 10 * mm, "%d" % doc.page)
@@ -131,6 +150,11 @@ def page_tag(sec):
                            ("TOPPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 0)]))
     return t
 
+def end_page(c, doc):
+    """쪽 아래 띠에 이 쪽의 정답을 작게 찍는다 (answers: "foot")."""
+    if doc.sink is not None:
+        footans.paint(c, doc.sink, doc.page, M, M + 4 * mm + doc.band - 1 * mm, W - 2 * M, S["fans"])
+
 def build(src, out):
     fonts()
     data = json.load(open(src, encoding="utf-8"))
@@ -149,78 +173,90 @@ def build(src, out):
         for it in sec.get("items", []):
             for ln in it["lines"]: flat.append(kana(ln[1]))
         for w in sec.get("words", []): flat.append(kana(NUM.sub("", w[0])))
-    prs = iter(pronounce(flat))
+    PRS = pronounce(flat)
+    # answers: "foot" — 정답을 문제 밑이 아니라 그 쪽 맨 아래에 작게 (먼저 풀고 확인하도록)
+    sink = footans.Sink() if data.get("answers") == "foot" else None
 
-    story = [Paragraph(esc(data["unit"]), S["unit"]),
-             Paragraph('%s <font name="KOB" size="15" color="#4A524F">%s</font>'
-                       % (esc(data["title_ja"]), esc(data["title_ko"])), S["h1"]),
-             Spacer(1, 2 * mm),
-             Paragraph(esc(data["lead"]), S["lead"]),
-             Spacer(1, 7 * mm)]
+    def make_story(sink):
+        """쪽 아래 정답 띠 높이를 바꿔 다시 만들 때마다 새로 짠다 — 한 번 쓴 flowable 은 쪼개진 상태가 남는다."""
+        prs = iter(PRS)
 
-    first_heading = True
-    for sec in data["sections"]:
-        if sec.get("heading"):
-            if not first_heading: story.append(PageBreak())
-            first_heading = False
-            story += [Paragraph(esc(sec["heading_unit"]), S["unit"]),
-                      Paragraph('%s <font name="KOB" size="13" color="#4A524F">%s</font>'
-                                % (esc(sec["heading"]), esc(sec["heading_ko"])), S["h2"]),
-                      Spacer(1, 5 * mm)]
-            continue
-        head = [page_tag(sec), Spacer(1, 2 * mm), Paragraph(esc(sec["task"]), S["task"])]
-        if sec.get("sub"): head.append(Paragraph(esc(sec["sub"]), S["sub"]))
-        head.append(Spacer(1, 3 * mm))
-        blocks = []
-        for it in sec.get("items", []):
-            b = []
-            if it.get("no"): b.append(Paragraph(mark(it["no"]), S["no"]))
-            for spk, ja, ko in it["lines"]:
-                pr = next(prs)
-                # line_pron:false — 본문 바로 밑에 해석이 오게 한다(발음은 어휘 표에만)
-                b.append(line_block(spk, ja, pr if data.get("line_pron", True) else None, ko))
-            if it.get("answer"): b.append(Paragraph(esc(it["answer"]), S["ans"]))
-            b.append(Spacer(1, 2.5 * mm))
-            blocks.append(b)                     # 날것의 목록 — KeepTogether 를 겹치면 쪽이 통째로 넘어간다
-        if sec.get("words"):
-            rows = []
-            for ja, ko in sec["words"]:
-                pr = next(prs)
-                rows.append([Paragraph(mark(ja), S["word"]),
-                             Paragraph(esc(ko_punct(pr)), S["pr"]), Paragraph(esc(ko), S["wko"])])
-            # 어휘 표는 쪽을 넘어가도 된다 — 통째로 넘기면 앞 쪽이 반쯤 빈다.
-            # 제목은 표의 첫 줄로 넣고 repeatRows 로 다음 쪽에서도 다시 찍는다.
-            head_row = 1 if sec.get("words_title") else 0
-            if head_row:
-                rows.insert(0, [Paragraph(esc(sec["words_title"]), S["no"]), "", ""])
-            wt = Table(rows, colWidths=[46 * mm, 34 * mm, W - 2 * M - NOTE - 80 * mm],
-                       repeatRows=head_row)
-            st = [("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                  ("LINEBELOW", (0, head_row), (-1, -1), 0.3, colors.HexColor("#E3E6E4")),
-                  ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                  ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3)]
-            if head_row: st.append(("SPAN", (0, 0), (-1, 0)))
-            wt.setStyle(TableStyle(st))
-            blocks.append(("split", [Spacer(1, 1 * mm), wt]))
-        # 제목이 쪽 끝에 홀로 남지 않게 첫 덩어리와 묶는다. 어휘 표("split")는 묶지 않는다.
-        def put(b, first):
-            if isinstance(b, tuple):
-                return (head if first else []) + b[1]
-            return [KeepTogether((head if first else []) + b)]
-        for i, b in enumerate(blocks or [[]]):
-            story += put(b, i == 0)
-        story.append(Spacer(1, 8 * mm))
+        story = [Paragraph(esc(data["unit"]), S["unit"]),
+                 Paragraph('%s <font name="KOB" size="15" color="#4A524F">%s</font>'
+                           % (esc(data["title_ja"]), esc(data["title_ko"])), S["h1"]),
+                 Spacer(1, 2 * mm),
+                 Paragraph(esc(data["lead"]), S["lead"]),
+                 Spacer(1, 7 * mm)]
 
-    story.append(Paragraph(esc(data["source"]), S["foot"]))
+        first_heading = True
+        for sec in data["sections"]:
+            if sec.get("heading"):
+                if not first_heading: story.append(PageBreak())
+                first_heading = False
+                story += [Paragraph(esc(sec["heading_unit"]), S["unit"]),
+                          Paragraph('%s <font name="KOB" size="13" color="#4A524F">%s</font>'
+                                    % (esc(sec["heading"]), esc(sec["heading_ko"])), S["h2"]),
+                          Spacer(1, 5 * mm)]
+                continue
+            head = [page_tag(sec), Spacer(1, 2 * mm), Paragraph(esc(sec["task"]), S["task"])]
+            if sec.get("sub"): head.append(Paragraph(esc(sec["sub"]), S["sub"]))
+            head.append(Spacer(1, 3 * mm))
+            blocks = []
+            for it in sec.get("items", []):
+                b = []
+                if it.get("no"): b.append(Paragraph(mark(it["no"]), S["no"]))
+                for spk, ja, ko in it["lines"]:
+                    pr = next(prs)
+                    # line_pron:false — 본문 바로 밑에 해석이 오게 한다(발음은 어휘 표에만)
+                    b.append(line_block(spk, ja, pr if data.get("line_pron", True) else None, ko))
+                if it.get("answer"):
+                    if sink is not None: b.append(footans.Mark(sink, mix(it["answer"])))
+                    else: b.append(Paragraph(esc(it["answer"]), S["ans"]))
+                b.append(Spacer(1, 2.5 * mm))
+                blocks.append(b)                     # 날것의 목록 — KeepTogether 를 겹치면 쪽이 통째로 넘어간다
+            if sec.get("words"):
+                rows = []
+                for ja, ko in sec["words"]:
+                    pr = next(prs)
+                    rows.append([Paragraph(mark(ja), S["word"]),
+                                 Paragraph(esc(ko_punct(pr)), S["pr"]), Paragraph(esc(ko), S["wko"])])
+                # 어휘 표는 쪽을 넘어가도 된다 — 통째로 넘기면 앞 쪽이 반쯤 빈다.
+                # 제목은 표의 첫 줄로 넣고 repeatRows 로 다음 쪽에서도 다시 찍는다.
+                head_row = 1 if sec.get("words_title") else 0
+                if head_row:
+                    rows.insert(0, [Paragraph(esc(sec["words_title"]), S["no"]), "", ""])
+                wt = Table(rows, colWidths=[46 * mm, 34 * mm, W - 2 * M - NOTE - 80 * mm],
+                           repeatRows=head_row)
+                st = [("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                      ("LINEBELOW", (0, head_row), (-1, -1), 0.3, colors.HexColor("#E3E6E4")),
+                      ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                      ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3)]
+                if head_row: st.append(("SPAN", (0, 0), (-1, 0)))
+                wt.setStyle(TableStyle(st))
+                blocks.append(("split", [Spacer(1, 1 * mm), wt]))
+            # 제목이 쪽 끝에 홀로 남지 않게 첫 덩어리와 묶는다. 어휘 표("split")는 묶지 않는다.
+            def put(b, first):
+                if isinstance(b, tuple):
+                    return (head if first else []) + b[1]
+                return [KeepTogether((head if first else []) + b)]
+            for i, b in enumerate(blocks or [[]]):
+                story += put(b, i == 0)
+            story.append(Spacer(1, 8 * mm))
 
-    doc = BaseDocTemplate(out, pagesize=A4, leftMargin=M, rightMargin=M + NOTE,
-                          topMargin=M, bottomMargin=M + 4 * mm,
-                          title=data["title_ja"] + " " + data["title_ko"], author="일본어 시험 대비")
-    doc.footer = data["footer"]
-    fr = Frame(M, M + 4 * mm, W - 2 * M - NOTE, H - 2 * M - 4 * mm, id="f", leftPadding=0,
-               rightPadding=0, topPadding=0, bottomPadding=0)
-    doc.addPageTemplates([PageTemplate(id="p", frames=[fr], onPage=on_page)])
-    doc.build(story)
+        story.append(Paragraph(esc(data["source"]), S["foot"]))
+        return story
+
+    def make(band):
+        doc = BaseDocTemplate(out, pagesize=A4, leftMargin=M, rightMargin=M + NOTE,
+                              topMargin=M, bottomMargin=M + 4 * mm + band,
+                              title=data["title_ja"] + " " + data["title_ko"], author="일본어 시험 대비")
+        doc.footer, doc.band, doc.sink = data["footer"], band, sink
+        fr = Frame(M, M + 4 * mm + band, W - 2 * M - NOTE, H - 2 * M - 4 * mm - band, id="f", leftPadding=0,
+                   rightPadding=0, topPadding=0, bottomPadding=0)
+        doc.addPageTemplates([PageTemplate(id="p", frames=[fr], onPage=on_page, onPageEnd=end_page)])
+        doc.build(make_story(sink))
+    if sink is None: make(0)
+    else: footans.build_fitting(make, sink)
     print(os.path.relpath(out, ROOT))
 
 # 원고 → PDF. 인자가 없으면 둘 다 만든다.
@@ -228,7 +264,9 @@ JOBS = [("unit6.json", "6과-듣기대본.pdf"), ("unit6-honmun.json", "6과-본
         ("unit6-all.json", "6과-전체지문.pdf"), ("unit3-all.json", "3과-전체지문.pdf"),
         ("unit4-all.json", "4과-전체지문.pdf"),
         ("unit5-all.json", "5과-전체지문.pdf"),
-        ("kaiwa-all.json", "회화-3·4과-전체지문.pdf")]
+        ("kaiwa-all.json", "회화-3·4과-전체지문.pdf"),
+        ("unit6c-all.json", "6과(천재)-전체지문.pdf"),
+        ("kaiwa2-all.json", "회화-5·6과-전체지문.pdf")]
 
 if __name__ == "__main__":
     d = os.path.join(ROOT, "docs", "scripts")

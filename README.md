@@ -12,9 +12,10 @@
 > **2학기 2회고사**: 시험범위는 선생님이 주신 **「2026 일본어 회화 (2학기 2회고사 단어)」** 5쪽
 > (`docs/2026-일본어회화-2학기2회고사-단어장.pdf`). 단어 시험은 이 단어장 205항목(`t1`~`t5`)이고,
 > 항목마다 교과서 쪽(`pg`)을 달아 **진도까지만** 앱에 냅니다. 진도는 홈의 **진도 ○쪽까지** 칸에 넣으면
-> 단어·활용·표현 세 시험에 함께 걸리고 이 기기에 남습니다(기본값은 `data/words.js` 의 `UPTO`, 89쪽).
+> 단어·활용·표현 세 시험에 함께 걸리고 이 기기에 남습니다(기본값은 `data/words.js` 의 `UPTO`, 109쪽 — 5·6과 전체).
 > **학습지로 받은 항목은 진도와 상관없이 늘 시험범위입니다**(`always:true`) — 학습지를 받으면 항상 이렇게 넣습니다.
-> 표현 문형(`q6`·`q7`)과 2회고사 형용사(`ADJS2`)에도 `pg` 가 있습니다. 쪽을 아직 모르는(`pg:null`) 단어장 항목은 쪽을 채워야 열립니다.
+> 표현 문형(`q6`·`q7`)과 2회고사 형용사(`ADJS2`)에도 `pg` 가 있습니다. 단어장 3~5쪽(6과)은 교과서 첫 등장 쪽(98~105)을 달았습니다.
+> 표현 시험에는 아직 5과 89쪽까지의 문형만 있습니다 — 5과 90~92쪽·6과 문형은 `docs/scripts/회화-5·6과-전체지문.pdf` 와 변형문제 9회로 공부합니다.
 > 표현 시험은 교과서 5과 문형 16개(`q6` 제안·가능 · `q7` 전언·과거·허가).
 > 활용 시험은 선생님 학습지 「형용사 활용 (부정형, 과거형)」(`docs/2회고사-형용사활용-학습지.pdf`)과 단어장 2쪽 표로
 > い형용사 10 · な형용사 5개(`data/verbs.js` 의 `ADJS2`)를 부정·과거·과거 정중·과거 부정·과거 부정 정중으로 냅니다.
@@ -36,7 +37,11 @@
 ```bash
 python3 tools/book-pdf.py 89                                  # 진도 89쪽까지 전부 (npm run book -- 89)
 python3 tools/book-pdf.py 95 --from 89 --start 10 다음권.pdf  # 89쪽 뒤에 새로 배운 것만 — 앞 권의 손글씨를 덮어쓰지 않는다
+python3 tools/book-pdf.py 109 docs/2026-일본어회화-2학기2회고사-학습장-2권.pdf --from 89 --start 10   # 2권 (아래)
 ```
+
+- `docs/2026-일본어회화-2학기2회고사-학습장-2권.pdf` — 90~109쪽에 새로 나온 단어 122개(5과 91쪽 + 6과 98~105쪽),
+  세션 S10~S22, 본문 99·103쪽 서술형. 1권을 덮어쓰지 않으려고 따로 만든 권이다
 
 발음·활용형·진도 규칙은 앱과 같은 엔진(`tools/book-data.js`)에서 뽑는다. 글꼴은 `tools/fonts/`(가나가 들어 있는 원본 나눔고딕).
 
@@ -209,12 +214,18 @@ docs/scripts/unit3-all.json           3과 58~61쪽 전체 지문 (본문 59쪽)
 docs/scripts/3과-전체지문.pdf           ↑ 을 같은 모양으로
 docs/scripts/unit4-all.json           4과 72~75쪽 전체 지문 (본문 73쪽, 74쪽 て형 표)
 docs/scripts/4과-전체지문.pdf           ↑ 을 같은 모양으로
-docs/scripts/unit5-all.json           5과 82~89쪽 전체 지문 (본문 85·89쪽, 선생님 필기 포함)
+docs/scripts/unit5-all.json           5과 82~95쪽 전체 지문 (본문 85·89쪽, 선생님 필기 · 91·94·95쪽 손글씨 답 포함)
 docs/scripts/5과-전체지문.pdf           ↑ 을 같은 모양으로
 docs/scripts/kaiwa-all.json           회화 3·4과 합본 원고 (include 로 unit3·unit4 를 묶음)
 docs/scripts/회화-3·4과-전체지문.pdf     ↑ 굿노트용 — 6과-전체지문.pdf 와 같은 모양
+docs/scripts/unit6c-all.json          회화 6과(おみくじ) 96~109쪽 전체 지문 (본문 99·103쪽, 필기 포함) — unit6-all.json(1회고사 6과)과 다른 교과서
+docs/scripts/6과(천재)-전체지문.pdf       ↑ 을 같은 모양으로
+docs/scripts/kaiwa2-all.json          2회고사 합본 원고 (unit5 + unit6c) · "answers": "foot"
+docs/scripts/회화-5·6과-전체지문.pdf     ↑ 2회고사 범위 지문 한 권 — 정답은 문제 밑이 아니라 그 쪽 맨 아래에 작게(문제 옆 '정답 n ↓')
 docs/sets/set4~8.json                  변형문제 4~8회 (7·8회는 학교 기출 형식) (객관식 21·서답형 9, 선생님 배점 안내대로)
 docs/sets/변형문제-4~8회.pdf             ↑ 문제지 + 정답·해설 (npm run sets — 점검 후 PDF)
+docs/sets/set9.json                    2회고사 변형문제 1회 (기출 형식 · 5과 85·89쪽 · 6과 99·103쪽 · 단어장 · 형용사 학습지) · "answers": "foot"
+docs/sets/변형문제-9회.pdf               ↑ 정답·해설을 쪽마다 아래에 작게 + 끝에 객관식 정답표
 docs/sets/drill-te.json · drill-te2.json   유형 집중 연습 — て형(음편)만 10문항 1·2회 (음편-て형-10문항*.pdf)
 docs/study/1~5-*.pdf                    시험 직전 자료: 본문 서술형 쓰기, 동사 활용표, 함정 체크, 자주 틀리는 유형 10문항, 회화 3과 54~56쪽 요약 (python3 tools/study-pdf.py)
 docs/study/0·6·7-*.pdf                  최종 복습: 계획표(쪽별 체크리스트), 범위 전체 요점정리, 단어 셀프테스트 (python3 tools/review-pdf.py)
@@ -230,8 +241,19 @@ npm run build     # → 일본어-단어시험.html
 npm test          # 엔진 397항목 + 변형문제 점검
 npm run smoke     # 실제 브라우저로 앱을 열어 세션을 끝까지 풀어 본다
 npm run pdf       # → docs/…-단어장-발음.pdf
-npm run script-pdf  # → docs/scripts/6과-듣기대본.pdf · 6과-본문.pdf · 6과-전체지문.pdf · 3과-전체지문.pdf · 4과-전체지문.pdf · 5과-전체지문.pdf  (글꼴: tools/fonts/ 에 ZenKakuGothicNew·NanumGothic)
+npm run script-pdf  # → docs/scripts/6과-듣기대본.pdf · 6과-본문.pdf · 6과-전체지문.pdf · 3과-전체지문.pdf · 4과-전체지문.pdf · 5과-전체지문.pdf · 6과(천재)-전체지문.pdf · 회화-5·6과-전체지문.pdf  (글꼴: tools/fonts/ 에 ZenKakuGothicNew·NanumGothic)
 ```
+
+원고나 세트에 `"answers": "foot"` 을 두면 정답이 그 쪽 맨 아래 띠에 작게 모인다(`tools/footans.py` — 전체 지문·변형문제가 같이 쓴다).
+문제 자리의 표시가 실제로 그려지는 쪽에서 번호를 받으므로 문제가 다음 쪽으로 밀려도 번호와 답이 어긋나지 않는다.
+띠 높이는 답이 가장 많은 쪽에 맞춰 몇 번 다시 만들어 정한다.
+
+`tools/check-sets.js` 는 앱 엔진에 없는 6과 형을 엔진이 만든 형에서 교과서 규칙대로 잇는다 —
+た형 = て형의 て→た(100쪽), 목적 ～に = ます형에서 ます→に(104쪽), ない형 = 100쪽 표. 활용표에 없는 2회고사 동사
+(ひく·あう·とる·なる·つづく·かりる·おしえる)는 종류만 적어 두고 활용은 엔진이 만든다.
+
+글꼴은 저장소에 없다(.gitignore). 새 컨테이너에서는 `tools/fonts/` 에 Zen Kaku Gothic New(Google Fonts 저장소의
+`ofl/zenkakugothicnew`)와 Debian `fonts-nanum_20200506-1_all.deb` 의 NanumGothic·NanumGothicBold 를 넣는다.
 
 나눔고딕은 **가나가 들어 있는 원본(KS X 1001판, Debian `fonts-nanum`)** 을 씁니다. Google Fonts 판은 한글만
 있어서 한국어 문장 속 `ことば`·`は` 같은 일본어가 PDF 에서 빈칸이 됩니다.

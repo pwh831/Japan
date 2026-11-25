@@ -258,7 +258,7 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   const nowAdj = E.ADJS2.filter(taught);
   const total0 = nowWords.length + nowAdj.length + nowPhr.length;
   t((await p.$eval('#uptoIn', e => e.value)) === String(E.UPTO), '진도 입력칸에 기본 진도 ' + E.UPTO + '쪽');
-  t(E.WORDS.some(w => w.pg === null || w.pg > E.UPTO), '아직 안 배운 단어장 항목은 데이터에만 있다');
+  t(E.WORDS.filter(w => /^t/.test(w.unit)).every(w => w.pg !== null), '단어장 항목마다 교과서 쪽이 있다 (pg:null 없음)');
   t(!(await p.$eval('#todaySec', e => e.hidden)), '홈 맨 위에 오늘 공부가 있다');
   t(await p.$eval('#free', e => !e.open), '범위·유형 설정은 자유 연습 안에 접혀 있다');
   const rowsTxt = await p.$$eval('#planRows .plan-row', e => e.map(x => x.textContent));
@@ -290,7 +290,7 @@ const E = require(process.env.ENGINE || '/tmp/engine.js');
   const runWords = async (plan) => {
     await p.click('#todayBtn'); await p.waitForTimeout(250);
     const log = [];
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < 3 * nowWords.length + 20; i++) {   // 단어마다 카드 + 시험 — 6과까지 205개
       if (await p.$eval('#result', e => !e.hidden)) break;
       if (await doCard()) continue;
       if ((await p.textContent('#qKind')).trim() !== '직접 쓰기') { t(false, '  단어 차례에 다른 유형이 나왔다'); break; }

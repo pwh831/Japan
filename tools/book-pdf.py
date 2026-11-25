@@ -158,10 +158,12 @@ def load(upto, frm):
     d["words"] = [w for w in d["words"] if new(w)]
     d["phrases"] = [p for p in d["phrases"] if new(p)]
     d["adjs"] = [a for a in d["adjs"] if (a["pg"] or 0) > frm and (frm == 0 or not a["always"])]
-    # 본문 대화 — 85·89쪽의 줄마다 해석. 서답형이 몰려 있다(선생님 안내)
+    # 본문 대화 — 5과 85·89쪽, 6과 99·103쪽의 줄마다 해석. 서답형이 몰려 있다(선생님 안내)
     dl = []
-    tr = json.load(open(os.path.join(ROOT, "docs", "scripts", "unit5-all.json"), encoding="utf-8"))
-    for sec in tr["sections"]:
+    secs = []
+    for fn in ("unit5-all.json", "unit6c-all.json"):
+        secs += json.load(open(os.path.join(ROOT, "docs", "scripts", fn), encoding="utf-8"))["sections"]
+    for sec in secs:
         pg = int(sec["page"])
         if not (sec["task"].startswith("きいて") and frm < pg <= upto):
             continue
@@ -173,8 +175,10 @@ def load(upto, frm):
                 m = re.match(r"^([①-⑳])\s*", ja)
                 n = ord(m.group(1)) - 0x2460 + 1 if m else len(lines) + 1
                 ja = ja[m.end():] if m else ja
+                starred = ja.startswith("★")          # 교과서에 별표 필기가 있는 줄
+                ja = ja.lstrip("★")
                 lines.append(dict(n=n, spk=spk, kana=RUBY.sub(r"\2", ja), disp=RUBY.sub(r"\1", ja), ko=ko,
-                                  star=(pg == 85 and n == 8)))
+                                  star=(pg == 85 and n == 8) or starred))
         dl.append(dict(pg=pg, lines=lines, sub=sec.get("sub", "")))
     prons = json.loads(node(bd, ep, "--pron", stdin=json.dumps([l["kana"] for x in dl for l in x["lines"]]).encode("utf-8")))
     for x in dl:
@@ -563,7 +567,7 @@ def d_phr_retr(c, W, H, idx, S, att, tkey):
 
 # ── 본문 서술형 ─────────────────────────────────────────────────────────
 def d_dlg_read(c, W, H, idx, D):
-    top = chrome(c, W, H, idx, "본문", "본문 %d쪽 읽기" % D["pg"], D["sub"] + " · ★ 선생님이 서답형으로 짚은 문장" if any(l["star"] for l in D["lines"]) else D["sub"],
+    top = chrome(c, W, H, idx, "본문", "본문 %d쪽 읽기" % D["pg"], D["sub"] + (" · ★ 선생님이 서답형으로 짚은 문장" if D["pg"] == 85 else " · ★ 교과서에 별표 필기") if any(l["star"] for l in D["lines"]) else D["sub"],
                  "소리 내어 읽고 해석을 입으로 말해 보세요. 다음 쪽부터 해석만 보고 일본어로 씁니다.", date=False)
     n = len(D["lines"]); rh = min(24 * mm, (top - 12 * mm) / n)
     for k, l in enumerate(D["lines"]):
@@ -574,9 +578,9 @@ def d_dlg_read(c, W, H, idx, D):
         x = M + 27 * mm; w = W - M - x
         s = put(c, x, yt - 6.4 * mm, ("★ " if l["star"] else "") + l["kana"], 13, SHU if l["star"] else INK, False, maxw=w, minsize=7.5)
         y2 = yt - 10.6 * mm
-        if l["disp"] != l["kana"]:
-            put(c, x, y2, "교과서 표기 " + l["disp"], 7.4, FAINT, False, maxw=w); y2 -= 3.5 * mm
-        put(c, x, y2, l["pron"], 7.4, FAINT, False, maxw=w); y2 -= 3.9 * mm
+        # 교과서 표기(한자)는 발음과 한 줄에 — 6과 99쪽처럼 14줄인 쪽에서 해석이 줄 밖으로 넘치지 않게
+        pron = l["pron"] + ("   · 교과서 표기 " + l["disp"] if l["disp"] != l["kana"] else "")
+        put(c, x, y2, pron, 7.4, FAINT, False, maxw=w); y2 -= 3.9 * mm
         put(c, x, y2, l["ko"], 8.8, SOFT, False, maxw=w)
 
 def d_dlg_retr(c, W, H, idx, D, lines, att, part, parts, tkey):
